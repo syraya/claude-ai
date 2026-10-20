@@ -188,7 +188,7 @@ struct LifetimeView: View {
                         Text(step.motto).font(.caption).foregroundStyle(.secondary)
                         HStack(spacing: 5) {
                             ForEach(step.companions) { companion in
-                                OmoFigure(companion: companion, size: 20, locked: !reached)
+                                OmoFigure(companion: companion, size: 24, locked: !reached, backdrop: true)
                             }
                             let names = step.companions.map(\.name).joined(separator: " & ")
                             Text(step.hours == 0 ? "\(names), from the start" : (reached ? "\(names) joined you" : "\(names) joins you"))
@@ -224,7 +224,7 @@ struct RankUpView: View {
                 Text("\(rank.hours.formatted()) hours of focus").font(.subheadline).foregroundStyle(.secondary)
             }
 
-            OmoFigure(companion: companion, size: 170)
+            OmoFigure(companion: companion, size: 190, backdrop: true)
                 .shadow(color: Color.omoInk.opacity(0.25), radius: 18, y: 12)
                 .hovering(6)
                 .padding(.vertical, 8)

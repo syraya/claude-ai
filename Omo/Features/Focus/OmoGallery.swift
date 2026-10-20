@@ -25,19 +25,30 @@ extension View {
     }
 }
 
-/// One OMO's figure. Locked ones show as a dark silhouette.
+/// One OMO's figure. Locked ones show as a dark silhouette. With `backdrop`, the figure
+/// sits on a circle of its own theme colour, so pale figures (like Selene) stay visible
+/// on any theme.
 struct OmoFigure: View {
     var companion: OmoCompanion
     var size: CGFloat
     var locked = false
+    var backdrop = false
 
     var body: some View {
         Image(companion.imageName)
             .resizable()
             .scaledToFit()
-            .frame(width: size, height: size)
+            .padding(backdrop ? size * 0.1 : 0)
             .colorMultiply(locked ? Color(white: 0.15) : .white)
-            .opacity(locked ? 0.45 : 1)
+            .opacity(locked ? 0.5 : 1)
+            .frame(width: size, height: size)
+            .background {
+                if backdrop {
+                    Circle()
+                        .fill(locked ? Color.omoInk.opacity(0.07) : Color(companion.palette.paper))
+                        .overlay(Circle().stroke(Color.omoInk.opacity(0.12), lineWidth: 1))
+                }
+            }
             .accessibilityLabel(locked ? "\(companion.name), locked" : companion.name)
     }
 }
@@ -98,7 +109,7 @@ struct OmoHeader: View {
                         } label: {
                             VStack(spacing: 4) {
                                 ZStack(alignment: .bottomTrailing) {
-                                    OmoFigure(companion: companion, size: 58, locked: locked)
+                                    OmoFigure(companion: companion, size: 62, locked: locked, backdrop: true)
                                         .overlay(
                                             Circle().stroke(Color.omoPrimary, lineWidth: companion == selected ? 3 : 0)
                                                 .padding(-3)
@@ -137,7 +148,7 @@ struct OmoHeader: View {
         let left = max(0, companion.requiredHours * 60 - totalMinutes)
         let leftText = left < 60 ? "\(left) minutes" : "\(LifetimeFormat.hours(left)) hours"
         return HStack(alignment: .top, spacing: 14) {
-            OmoFigure(companion: companion, size: 54, locked: true)
+            OmoFigure(companion: companion, size: 58, locked: true, backdrop: true)
             VStack(alignment: .leading, spacing: 4) {
                 Text("\(companion.name), \(companion.epithet.lowercased())").font(.headline)
                 Text(companion.story).font(.subheadline).foregroundStyle(.secondary)
