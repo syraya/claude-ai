@@ -37,9 +37,9 @@ struct RootView: View {
                 OnboardingView()
             }
         }
-        // Colours are read from the current theme, so rebuild everything when it changes.
-        .id(settings.settings.theme)
-        .preferredColorScheme(settings.settings.theme.isDark ? .dark : .light)
+        // Colours come from your OMO, so rebuild everything when you pick a different one.
+        .id(settings.settings.companion)
+        .preferredColorScheme(settings.settings.companion.isDark ? .dark : .light)
         .task { startServices() }
         .onChange(of: scenePhase) { _, phase in
             switch phase {

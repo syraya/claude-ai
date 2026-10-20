@@ -23,7 +23,7 @@ struct SignInCard: View {
                 } onCompletion: { result in
                     Task { await auth.completeSignIn(result) }
                 }
-                .signInWithAppleButtonStyle(OmoTheme.current.isDark ? .white : .black)
+                .signInWithAppleButtonStyle(OmoCompanion.current.isDark ? .white : .black)
                 .frame(height: 52)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .disabled(auth.isWorking)

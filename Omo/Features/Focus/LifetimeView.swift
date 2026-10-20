@@ -113,7 +113,7 @@ struct LifetimeView: View {
                 ProgressView(value: FocusRank.progress(minutes: lifetime.totalFocusMinutes, from: rank))
                     .tint(.omoGold)
                 let left = max(0, next.hours * 60 - lifetime.totalFocusMinutes)
-                Text("\(left < 60 ? "\(left) minutes" : "\(LifetimeFormat.hours(left)) hours") to \(next.title), which unlocks the \(next.theme.name) theme")
+                Text("\(left < 60 ? "\(left) minutes" : "\(LifetimeFormat.hours(left)) hours") to \(next.title), when \(next.companions.map(\.name).joined(separator: " and ")) joins you")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
@@ -187,8 +187,11 @@ struct LifetimeView: View {
                         Text(step.title).fontWeight(step == rank ? .bold : .regular)
                         Text(step.motto).font(.caption).foregroundStyle(.secondary)
                         HStack(spacing: 5) {
-                            ThemeDots(theme: step.theme)
-                            Text(step.hours == 0 ? "\(step.theme.name) theme" : (reached ? "Unlocked \(step.theme.name) theme" : "Unlocks \(step.theme.name) theme"))
+                            ForEach(step.companions) { companion in
+                                OmoFigure(companion: companion, size: 20, locked: !reached)
+                            }
+                            let names = step.companions.map(\.name).joined(separator: " & ")
+                            Text(step.hours == 0 ? "\(names), from the start" : (reached ? "\(names) joined you" : "\(names) joins you"))
                                 .font(.caption2.weight(.semibold))
                                 .foregroundStyle(reached ? Color.omoGold : .secondary)
                         }
@@ -205,70 +208,45 @@ struct LifetimeView: View {
     }
 }
 
-/// Three dots showing a theme's main colours.
-struct ThemeDots: View {
-    var theme: OmoTheme
-
-    var body: some View {
-        let p = theme.palette
-        HStack(spacing: 2) {
-            Circle().fill(Color(p.paper)).overlay(Circle().stroke(Color.omoInk.opacity(0.2), lineWidth: 0.5))
-            Circle().fill(Color(p.primary))
-            Circle().fill(Color(p.gold))
-        }
-        .frame(width: 30, height: 9)
-    }
-}
-
-/// Shown once when you reach a new title, offering the theme it unlocked.
+/// Shown once when you reach a new title: meet the OMO who joins you.
 struct RankUpView: View {
     var rank: FocusRank
-    var onUseTheme: () -> Void
+    var onUse: (OmoCompanion) -> Void
     var onClose: () -> Void
 
     var body: some View {
-        let p = rank.theme.palette
-        VStack(spacing: 22) {
+        let companion = rank.companions.first ?? .glaux
+        VStack(spacing: 20) {
             Spacer()
-            Image(systemName: "laurel.leading")
-                .font(.system(size: 44))
-                .foregroundStyle(Color.omoGold)
             VStack(spacing: 6) {
                 Text("You're now a").font(.system(.title3, design: .serif).italic()).foregroundStyle(.secondary)
                 Text(rank.title).font(.omoSerif(.largeTitle, weight: .bold)).foregroundStyle(Color.omoPrimary)
                 Text("\(rank.hours.formatted()) hours of focus").font(.subheadline).foregroundStyle(.secondary)
             }
-            Text(rank.motto)
-                .font(.system(.body, design: .serif).italic())
-                .multilineTextAlignment(.center)
 
-            VStack(spacing: 10) {
-                // A preview of the unlocked theme in its own colours.
-                VStack(alignment: .leading, spacing: 8) {
-                    RoundedRectangle(cornerRadius: 3).fill(Color(p.ink)).frame(width: 90, height: 7)
-                    RoundedRectangle(cornerRadius: 3).fill(Color(p.ink).opacity(0.35)).frame(width: 140, height: 6)
-                    HStack(spacing: 6) {
-                        Circle().fill(Color(p.primary)).frame(width: 18, height: 18)
-                        Circle().fill(Color(p.gold)).frame(width: 18, height: 18)
-                        Circle().fill(Color(p.success)).frame(width: 18, height: 18)
-                    }
-                    RoundedRectangle(cornerRadius: 8).fill(Color(p.primary)).frame(height: 26)
-                }
-                .padding(14)
-                .background(Color(p.card), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .padding(14)
-                .frame(width: 220)
-                .background(Color(p.paper), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Color.omoInk.opacity(0.1)))
-                Text("New theme unlocked: \(rank.theme.name)").font(.headline)
-                Text(rank.theme.blurb).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            OmoFigure(companion: companion, size: 170)
+                .shadow(color: Color.omoInk.opacity(0.25), radius: 18, y: 12)
+                .hovering(6)
+                .padding(.vertical, 8)
+
+            VStack(spacing: 6) {
+                Text("\(companion.name) joins you")
+                    .font(.omoSerif(.title3))
+                    .multilineTextAlignment(.center)
+                Text(companion.story)
+                    .font(.system(.body, design: .serif).italic())
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Text("Brings: \(companion.themeDescription)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
             VStack(spacing: 10) {
-                Button("Use \(rank.theme.name)", action: onUseTheme)
+                Button("Study with \(companion.name)") { onUse(companion) }
                     .buttonStyle(PrimaryButtonStyle())
-                Button("Keep my current theme", action: onClose)
+                Button("Not now", action: onClose)
                     .buttonStyle(SecondaryButtonStyle())
             }
         }

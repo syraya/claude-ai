@@ -57,8 +57,8 @@ final class SettingsStore {
     var settings: AppSettings {
         didSet {
             SharedStore.settings = settings
-            if settings.theme != oldValue.theme {
-                OmoTheme.current = settings.theme
+            if settings.companion != oldValue.companion {
+                OmoCompanion.current = settings.companion
                 ThemeAppearance.apply()
             }
         }

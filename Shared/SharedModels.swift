@@ -94,7 +94,8 @@ struct AppSettings: Codable, Equatable {
     var preventAppDeletionWhenLocked: Bool = true
     var shareScreenTimeWithFriends: Bool = true
     var hasCompletedOnboarding: Bool = false
-    var theme: OmoTheme = .fresco
+    /// Your OMO, which also sets the colour theme.
+    var companion: OmoCompanion = .glaux
 
     init() {}
 
@@ -112,7 +113,7 @@ struct AppSettings: Codable, Equatable {
         shareScreenTimeWithFriends = try c.decodeIfPresent(Bool.self, forKey: .shareScreenTimeWithFriends)
             ?? d.shareScreenTimeWithFriends
         hasCompletedOnboarding = try c.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding) ?? d.hasCompletedOnboarding
-        theme = (try? c.decodeIfPresent(OmoTheme.self, forKey: .theme)) ?? d.theme
+        companion = (try? c.decodeIfPresent(OmoCompanion.self, forKey: .companion)) ?? d.companion
     }
 
     static let reflectionOptions = [5, 10, 15, 30, 60]

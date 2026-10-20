@@ -7,36 +7,72 @@ struct FocusHomeView: View {
     @Environment(AuthService.self) private var auth
     @Environment(SettingsStore.self) private var settings
 
+    /// How far the OMO header has scrolled away (0 = fully shown, 1 = minimised).
+    @State private var collapse: CGFloat = 0
+
     var body: some View {
         @Bindable var focus = focus
 
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 18) {
-                    todayCard
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 18) {
+                        OmoHeader(selected: settings.settings.companion,
+                                  totalMinutes: focus.lifetime.totalFocusMinutes,
+                                  collapse: collapse) { companion in
+                            settings.settings.companion = companion
+                        }
+                        .id("top")
+                        .background(GeometryReader { geo in
+                            Color.clear.preference(key: HeaderOffsetKey.self,
+                                                   value: geo.frame(in: .named("focusScroll")).minY)
+                        })
 
-                    NavigationLink {
-                        LifetimeView()
+                        todayCard
+
+                        NavigationLink {
+                            LifetimeView()
+                        } label: {
+                            LifetimeCard(lifetime: focus.lifetime)
+                        }
+                        .buttonStyle(.plain)
+
+                        if !screenTime.isApproved {
+                            permissionCard
+                        }
+
+                        if let lock = focus.friendLock {
+                            friendLockCard(lock)
+                        }
+
+                        if focus.session != nil {
+                            ActiveSessionView()
+                        } else {
+                            StartSessionView()
+                        }
+                    }
+                    .padding()
+                }
+                .coordinateSpace(name: "focusScroll")
+                .onPreferenceChange(HeaderOffsetKey.self) { minY in
+                    // The figure has fully shrunk away after about 180 points of scrolling.
+                    collapse = min(1, max(0, (16 - minY) / 180))
+                }
+                .overlay(alignment: .topTrailing) {
+                    // Your OMO, minimised, keeps you company while you scroll.
+                    Button {
+                        withAnimation { proxy.scrollTo("top", anchor: .top) }
                     } label: {
-                        LifetimeCard(lifetime: focus.lifetime)
+                        MiniOmo(companion: settings.settings.companion)
                     }
                     .buttonStyle(.plain)
-
-                    if !screenTime.isApproved {
-                        permissionCard
-                    }
-
-                    if let lock = focus.friendLock {
-                        friendLockCard(lock)
-                    }
-
-                    if focus.session != nil {
-                        ActiveSessionView()
-                    } else {
-                        StartSessionView()
-                    }
+                    .padding(.trailing, 16)
+                    .padding(.top, 6)
+                    .scaleEffect(0.4 + 0.6 * collapse, anchor: .topTrailing)
+                    .opacity(collapse)
+                    .allowsHitTesting(collapse > 0.6)
+                    .accessibilityHidden(collapse < 0.6)
                 }
-                .padding()
             }
             .background(OmoBackground())
             .navigationTitle(greeting)
@@ -46,9 +82,9 @@ struct FocusHomeView: View {
                 set: { if $0 == nil, let rank = focus.uncelebratedRank { focus.markCelebrated(rank) } }
             )) { rank in
                 RankUpView(rank: rank,
-                           onUseTheme: {
+                           onUse: { companion in
                                focus.markCelebrated(rank)
-                               settings.settings.theme = rank.theme
+                               settings.settings.companion = companion
                            },
                            onClose: { focus.markCelebrated(rank) })
             }

@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// OMO's colours, by role. They come from the theme picked in Settings (see
-/// Shared/Themes.swift); RootView rebuilds the screen when the theme changes.
+/// OMO's colours, by role. They come from the OMO you've picked (see
+/// Shared/Companions.swift); RootView rebuilds the screen when it changes.
 extension Color {
     init(_ rgb: RGB) { self.init(red: rgb.r, green: rgb.g, blue: rgb.b) }
 
-    private static var palette: ThemePalette { OmoTheme.current.palette }
+    private static var palette: ThemePalette { OmoCompanion.current.palette }
     static var omoPaper: Color { Color(palette.paper) }
     static var omoCard: Color { Color(palette.card) }
     static var omoInk: Color { Color(palette.ink) }

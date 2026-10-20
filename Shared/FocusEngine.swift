@@ -127,8 +127,9 @@ enum FocusEngine {
             $0.record(minutes: minutes, completedSession: completedSession, friendSession: friendSession)
         }
         for rank in FocusRank.reached(from: before, to: SharedStore.lifetime.totalFocusMinutes) {
+            let names = rank.companions.map(\.name).joined(separator: " and ")
             LocalNotifier.post(title: "You're now a \(rank.title) 🏛",
-                               body: "\(rank.hours.formatted()) hours of focus. You unlocked the \(rank.theme.name) theme.",
+                               body: "\(rank.hours.formatted()) hours of focus. \(names) has joined you.",
                                route: .focus,
                                delay: 2)
         }

@@ -22,14 +22,14 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     private func makeConfiguration(appName: String?) -> ShieldConfiguration {
         let name = appName ?? "This app"
-        // Use the theme picked in OMO's settings.
-        let theme = SharedStore.settings.theme
-        let palette = theme.palette
+        // Use the colours (and figure) of the OMO you've picked.
+        let companion = SharedStore.settings.companion
+        let palette = companion.palette
         let paper = UIColor(palette.paper)
         let ink = UIColor(palette.ink)
         let subtle = ink.withAlphaComponent(0.7)
         let lapis = UIColor(palette.primary)
-        let blur: UIBlurEffect.Style = theme.isDark ? .systemUltraThinMaterialDark : .systemUltraThinMaterialLight
+        let blur: UIBlurEffect.Style = companion.isDark ? .systemUltraThinMaterialDark : .systemUltraThinMaterialLight
 
         if let lock = SharedStore.friendLock, !lock.isOnBreak {
             return ShieldConfiguration(
@@ -53,7 +53,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
             return ShieldConfiguration(
                 backgroundBlurStyle: blur,
                 backgroundColor: paper,
-                icon: icon("building.columns.fill", lapis),
+                icon: UIImage(named: companion.imageName) ?? icon("building.columns.fill", lapis),
                 title: .init(text: "Stay with your thoughts", color: ink),
                 subtitle: .init(text: subtitle, color: subtle),
                 primaryButtonLabel: .init(text: "Back to focus", color: .white),

@@ -11,7 +11,7 @@ A Screen Time blocker for iPhone that you can use with friends.
 - **Intentions.** Write what each session is for ("Finish chapter 4"). It appears as a small inscribed slip of paper, like the *cartellino* in Renaissance paintings, on the timer and on the block screen when you try to open a blocked app.
 - **Breaks with a reflection wait.** Before a break starts you sit through a short countdown (5–60 seconds, your choice) with a breathing circle and a question like *"Will this make the next hour better or worse?"*. Then you pick a break length and the apps re-lock on their own when it's over.
 - **Lifetime focus.** A running total of every minute you've focused since installing OMO, with titles to earn along the way (Novice, Apprentice, Scholar, Journeyman, Master, Maestro, Sage, and Polymath at 10,000 hours), a chart of your total over time, streaks, and your longest session.
-- **Themes you unlock.** Every title unlocks a theme: Fresco from the start, then Marble (10 h), Night Study (50 h, dark), Venus (100 h), Tuscany (500 h), Gold Leaf (1,000 h), Sistine (5,000 h) and Codex (10,000 h). Reaching one sends a notification and shows a celebration screen with a button to switch. Locked themes show a padlock and the hours left in Settings. Themes recolor the whole app and the blocked-app screen; the logo stays the same.
+- **Your OMOs.** Companions from classical mythology, drawn as faceless silhouettes on dark astrolabe medallions. Each brings its own color theme, and they hover at the top of the Focus tab; as you scroll, your OMO shrinks into a small figure hovering in the corner. Glaux (Athena's owl) and Selene (the moon, a dark theme) are free. The rest join you as you earn titles: Sphinx (10 h), Nyx (50 h, black and violet), Hippocampus (100 h), Phoenix (500 h), Pegasus (1,000 h), Apollo (5,000 h) and Athena herself (10,000 h). Locked OMOs show as silhouettes with the hours they need. Figures live in `Shared/Figures.xcassets` (SVG), so the blocked-app screen shows your OMO too.
 - **Friends.** Add each other with a 6-character friend code. See each other's focus time and roughly how long you spent on distracting apps, plus a daily leaderboard and a 7-day chart.
 - **Study Circle.** Everyone joins a session with a 6-digit code (or an invite), the host starts it, and every phone locks. Each person's key is held by a friend, so with two people you hold each other's. **Only your keyholder can unlock you.** You can ask them for a break, and they can allow it, deny it, or unlock you for good.
 - **Emergency exit.** If your keyholder's phone dies or they leave, you can unlock yourself after a 60-second wait. Your keyholder gets notified and everyone in the session sees it. iOS always leaves you some way out, so it's better to have an honest one.
@@ -41,6 +41,7 @@ firebase/
   rules-tests/                   Tests for the security rules
 docs/APP_STORE.md                Checklist for getting it on the App Store
 docs/brand/omo-logo.svg          The logo, also used for the app icon
+Shared/Figures.xcassets          The OMO figures (SVG)
 ```
 
 ---

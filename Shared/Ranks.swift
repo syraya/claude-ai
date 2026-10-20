@@ -9,8 +9,8 @@ struct FocusRank: Identifiable, Equatable {
 
     var id: String { title }
 
-    /// The theme this title unlocks.
-    var theme: OmoTheme { OmoTheme.allCases.first { $0.requiredHours == hours } ?? .fresco }
+    /// The OMOs this title unlocks (Novice starts you with two).
+    var companions: [OmoCompanion] { OmoCompanion.allCases.filter { $0.requiredHours == hours } }
 
     static let all = [
         FocusRank(title: "Novice", hours: 0, motto: "Every master was once a beginner."),
