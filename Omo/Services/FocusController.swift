@@ -71,6 +71,17 @@ final class FocusController {
         refresh()
     }
 
+    /// A title reached since the app last celebrated one, if any.
+    var uncelebratedRank: FocusRank? {
+        let rank = FocusRank.current(forMinutes: lifetime.totalFocusMinutes)
+        return rank.hours > lifetime.celebratedHours ? rank : nil
+    }
+
+    func markCelebrated(_ rank: FocusRank) {
+        SharedStore.updateLifetime { $0.celebratedHours = max($0.celebratedHours, rank.hours) }
+        refresh()
+    }
+
     /// Called every second while a session is on screen.
     func tick() {
         guard let session else { return }

@@ -72,7 +72,7 @@ enum FocusEngine {
             $0.focusMinutes += minutes
             if completed { $0.sessionsCompleted += 1 }
         }
-        SharedStore.updateLifetime { $0.record(minutes: minutes, completedSession: completed, friendSession: false) }
+        recordLifetime(minutes: minutes, completedSession: completed, friendSession: false)
         SharedStore.focusSession = nil
         ShieldManager.clear(.focus)
         ActivityScheduler.cancelTimer(named: TimerName.focusEnd(session.id))
@@ -112,10 +112,26 @@ enum FocusEngine {
             $0.focusMinutes += minutes
             $0.friendSessions += 1
         }
-        SharedStore.updateLifetime { $0.record(minutes: minutes, completedSession: false, friendSession: true) }
+        recordLifetime(minutes: minutes, completedSession: false, friendSession: true)
         SharedStore.friendLock = nil
         ShieldManager.clear(.friendLock)
         ActivityScheduler.cancelTimer(named: TimerName.friendBreak(state.sessionID))
+    }
+
+    // MARK: Lifetime
+
+    /// Adds to the lifetime totals and announces any title (and theme) just reached.
+    private static func recordLifetime(minutes: Int, completedSession: Bool, friendSession: Bool) {
+        let before = SharedStore.lifetime.totalFocusMinutes
+        SharedStore.updateLifetime {
+            $0.record(minutes: minutes, completedSession: completedSession, friendSession: friendSession)
+        }
+        for rank in FocusRank.reached(from: before, to: SharedStore.lifetime.totalFocusMinutes) {
+            LocalNotifier.post(title: "You're now a \(rank.title) 🏛",
+                               body: "\(rank.hours.formatted()) hours of focus. You unlocked the \(rank.theme.name) theme.",
+                               route: .focus,
+                               delay: 2)
+        }
     }
 
     // MARK: Timers

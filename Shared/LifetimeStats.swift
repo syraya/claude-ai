@@ -14,6 +14,8 @@ struct LifetimeStats: Codable, Equatable {
     var lastFocusDay: String?
     /// Minutes per month ("2026-10"), for the "over time" chart.
     var monthlyMinutes: [String: Int] = [:]
+    /// The highest title (in hours) the app has already celebrated with you.
+    var celebratedHours = 0
 
     init() {}
 
@@ -28,6 +30,7 @@ struct LifetimeStats: Codable, Equatable {
         longestStreak = try c.decodeIfPresent(Int.self, forKey: .longestStreak) ?? 0
         lastFocusDay = try c.decodeIfPresent(String.self, forKey: .lastFocusDay)
         monthlyMinutes = try c.decodeIfPresent([String: Int].self, forKey: .monthlyMinutes) ?? [:]
+        celebratedHours = try c.decodeIfPresent(Int.self, forKey: .celebratedHours) ?? 0
     }
 
     static let monthFormatter: DateFormatter = {

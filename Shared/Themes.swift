@@ -28,7 +28,8 @@ struct ThemePalette: Equatable {
 
 /// The themes you can pick in Settings, each from the world of Renaissance art.
 enum OmoTheme: String, Codable, CaseIterable, Identifiable {
-    case fresco, marble, venus, tuscany, nightStudy
+    // Listed in unlock order.
+    case fresco, marble, nightStudy, venus, tuscany, goldLeaf, sistine, codex
 
     var id: String { rawValue }
 
@@ -39,6 +40,9 @@ enum OmoTheme: String, Codable, CaseIterable, Identifiable {
         case .venus: return "Venus"
         case .tuscany: return "Tuscany"
         case .nightStudy: return "Night Study"
+        case .goldLeaf: return "Gold Leaf"
+        case .sistine: return "Sistine"
+        case .codex: return "Codex"
         }
     }
 
@@ -49,8 +53,27 @@ enum OmoTheme: String, Codable, CaseIterable, Identifiable {
         case .venus: return "Sea-foam and shell pink, from Botticelli's Birth of Venus."
         case .tuscany: return "Terracotta roofs, olive groves and cypress hills."
         case .nightStudy: return "Deep ultramarine and candlelight gold, for late nights."
+        case .goldLeaf: return "Gilded ivory and burnished gold, like an illuminated manuscript."
+        case .sistine: return "Ceiling-sky blue and warm fresco tones, painted high above."
+        case .codex: return "Sepia ink and red chalk on aged paper, from Leonardo's notebooks."
         }
     }
+
+    /// Lifetime focus hours needed to unlock this theme, one per title.
+    var requiredHours: Int {
+        switch self {
+        case .fresco: return 0
+        case .marble: return 10
+        case .nightStudy: return 50
+        case .venus: return 100
+        case .tuscany: return 500
+        case .goldLeaf: return 1_000
+        case .sistine: return 5_000
+        case .codex: return 10_000
+        }
+    }
+
+    func isUnlocked(totalMinutes: Int) -> Bool { totalMinutes >= requiredHours * 60 }
 
     var isDark: Bool { self == .nightStudy }
 
@@ -76,6 +99,18 @@ enum OmoTheme: String, Codable, CaseIterable, Identifiable {
             return ThemePalette(paper: RGB(0.07, 0.09, 0.17), card: RGB(0.11, 0.14, 0.25), ink: RGB(0.95, 0.92, 0.86),
                                 primary: RGB(0.38, 0.50, 0.90), gold: RGB(0.86, 0.67, 0.29), clay: RGB(0.85, 0.52, 0.38),
                                 success: RGB(0.45, 0.75, 0.65), blush: RGB(0.55, 0.40, 0.62))
+        case .goldLeaf:
+            return ThemePalette(paper: RGB(0.98, 0.955, 0.875), card: RGB(1, 0.995, 0.97), ink: RGB(0.20, 0.16, 0.10),
+                                primary: RGB(0.55, 0.39, 0.08), gold: RGB(0.85, 0.66, 0.20), clay: RGB(0.55, 0.20, 0.17),
+                                success: RGB(0.36, 0.50, 0.32), blush: RGB(0.93, 0.80, 0.52))
+        case .sistine:
+            return ThemePalette(paper: RGB(0.93, 0.95, 0.98), card: RGB(1, 1, 1), ink: RGB(0.15, 0.20, 0.30),
+                                primary: RGB(0.24, 0.42, 0.71), gold: RGB(0.88, 0.65, 0.31), clay: RGB(0.79, 0.50, 0.48),
+                                success: RGB(0.38, 0.62, 0.55), blush: RGB(0.95, 0.80, 0.70))
+        case .codex:
+            return ThemePalette(paper: RGB(0.95, 0.90, 0.80), card: RGB(0.985, 0.955, 0.895), ink: RGB(0.23, 0.16, 0.10),
+                                primary: RGB(0.48, 0.29, 0.14), gold: RGB(0.72, 0.53, 0.18), clay: RGB(0.55, 0.23, 0.17),
+                                success: RGB(0.43, 0.48, 0.27), blush: RGB(0.80, 0.55, 0.42))
         }
     }
 

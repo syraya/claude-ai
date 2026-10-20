@@ -5,6 +5,7 @@ struct FocusHomeView: View {
     @Environment(FocusController.self) private var focus
     @Environment(ScreenTimeAuthorizer.self) private var screenTime
     @Environment(AuthService.self) private var auth
+    @Environment(SettingsStore.self) private var settings
 
     var body: some View {
         @Bindable var focus = focus
@@ -40,6 +41,17 @@ struct FocusHomeView: View {
             .background(OmoBackground())
             .navigationTitle(greeting)
             .errorAlert($focus.errorMessage)
+            .sheet(item: Binding(
+                get: { focus.uncelebratedRank },
+                set: { if $0 == nil, let rank = focus.uncelebratedRank { focus.markCelebrated(rank) } }
+            )) { rank in
+                RankUpView(rank: rank,
+                           onUseTheme: {
+                               focus.markCelebrated(rank)
+                               settings.settings.theme = rank.theme
+                           },
+                           onClose: { focus.markCelebrated(rank) })
+            }
         }
     }
 

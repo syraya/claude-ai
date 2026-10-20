@@ -6,10 +6,12 @@ struct SettingsView: View {
     @Environment(SettingsStore.self) private var settings
     @Environment(AuthService.self) private var auth
     @Environment(ScreenTimeAuthorizer.self) private var screenTime
+    @Environment(FocusController.self) private var focus
 
     @State private var showTrackedPicker = false
     @State private var editingName = ""
     @State private var showDeleteAccount = false
+    @State private var lockedNote: String?
 
     var body: some View {
         @Bindable var settings = settings
@@ -21,8 +23,14 @@ struct SettingsView: View {
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
                             ForEach(OmoTheme.allCases) { theme in
-                                ThemeSwatch(theme: theme, isSelected: settings.settings.theme == theme) {
-                                    settings.settings.theme = theme
+                                let unlocked = theme.isUnlocked(totalMinutes: focus.lifetime.totalFocusMinutes)
+                                ThemeSwatch(theme: theme, isSelected: settings.settings.theme == theme, isLocked: !unlocked) {
+                                    if unlocked {
+                                        lockedNote = nil
+                                        settings.settings.theme = theme
+                                    } else {
+                                        lockedNote = lockedMessage(for: theme)
+                                    }
                                 }
                             }
                         }
@@ -32,7 +40,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Theme")
                 } footer: {
-                    Text(settings.settings.theme.blurb)
+                    Text(lockedNote ?? settings.settings.theme.blurb)
                 }
 
                 Section {
@@ -133,6 +141,13 @@ struct SettingsView: View {
         }
     }
 
+    private func lockedMessage(for theme: OmoTheme) -> String {
+        let title = FocusRank.all.first { $0.hours == theme.requiredHours }?.title ?? "a new title"
+        let left = max(0, theme.requiredHours * 60 - focus.lifetime.totalFocusMinutes)
+        let leftText = left < 60 ? "\(left) minutes" : "\(LifetimeFormat.hours(left)) hours"
+        return "\(theme.name) unlocks when you become a \(title) at \(theme.requiredHours.formatted()) hours of focus. \(leftText) to go."
+    }
+
     private var trackedSummary: String {
         let selection = settings.trackedSelection
         let count = selection.applicationTokens.count + selection.categoryTokens.count + selection.webDomainTokens.count
@@ -182,6 +197,7 @@ private struct DeleteAccountView: View {
 private struct ThemeSwatch: View {
     var theme: OmoTheme
     var isSelected: Bool
+    var isLocked: Bool
     var onSelect: () -> Void
 
     var body: some View {
@@ -205,6 +221,18 @@ private struct ThemeSwatch: View {
                     .padding(8)
                 }
                 .frame(width: 92, height: 104)
+                .overlay {
+                    if isLocked {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 14, style: .continuous).fill(.black.opacity(0.45))
+                            VStack(spacing: 4) {
+                                Image(systemName: "lock.fill").font(.title3)
+                                Text("\(theme.requiredHours.formatted()) h").font(.caption2.weight(.bold))
+                            }
+                            .foregroundStyle(.white)
+                        }
+                    }
+                }
                 .overlay(
                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                         .stroke(isSelected ? Color.omoPrimary : Color.omoInk.opacity(0.12), lineWidth: isSelected ? 3 : 1)
@@ -215,7 +243,7 @@ private struct ThemeSwatch: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(theme.name) theme")
+        .accessibilityLabel(isLocked ? "\(theme.name) theme, locked until \(theme.requiredHours) hours" : "\(theme.name) theme")
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 }
