@@ -13,6 +13,8 @@ final class FriendsService {
     @ObservationIgnored private var listener: ListenerRegistration?
     @ObservationIgnored private(set) var uid: String?
     @ObservationIgnored private var myName = ""
+    /// Called when your friend count changes, so new OMOs can be celebrated.
+    @ObservationIgnored var onFriendCountChanged: (() -> Void)?
 
     private var db: Firestore { Firestore.firestore() }
 
@@ -46,9 +48,20 @@ final class FriendsService {
                 Task { @MainActor in
                     guard let self, let snapshot else { return }
                     self.friendships = snapshot.documents.compactMap { try? $0.data(as: Friendship.self) }
+                    self.recordFriendCount()
                     await self.refreshTodayStats()
                 }
             }
+    }
+
+    /// Friend milestones unlock OMOs, so keep the highest count you've reached.
+    private func recordFriendCount() {
+        let count = friendships.filter(\.isAccepted).count
+        let before = SharedStore.lifetime
+        guard count > before.maxFriends else { return }
+        SharedStore.updateLifetime { $0.maxFriends = count }
+        FocusEngine.announceNewCompanions(before: before, after: SharedStore.lifetime)
+        onFriendCountChanged?()
     }
 
     func name(for friendUID: String) -> String {

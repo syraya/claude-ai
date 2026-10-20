@@ -12,6 +12,9 @@ struct FocusRank: Identifiable, Equatable {
     /// The OMOs this title unlocks (Novice starts you with two).
     var companions: [OmoCompanion] { OmoCompanion.allCases.filter { $0.requiredHours == hours } }
 
+    /// The title earned at exactly `hours`, if any.
+    static func at(hours: Int) -> FocusRank? { all.first { $0.hours == hours } }
+
     static let all = [
         FocusRank(title: "Novice", hours: 0, motto: "Every master was once a beginner."),
         FocusRank(title: "Apprentice", hours: 10, motto: "You've started learning the craft."),

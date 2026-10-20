@@ -61,6 +61,7 @@ struct RootView: View {
             Task { await StatsSyncService.upload() }
         }
         together.onLocalStateChanged = { focus.refresh() }
+        friends.onFriendCountChanged = { focus.refresh() }
         auth.start()
         settings.restartUsageTracking()
         becameActive()

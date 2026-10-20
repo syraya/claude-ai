@@ -120,18 +120,27 @@ enum FocusEngine {
 
     // MARK: Lifetime
 
-    /// Adds to the lifetime totals and announces any title (and theme) just reached.
+    /// Adds to the lifetime totals and announces any OMO that just joined you.
     private static func recordLifetime(minutes: Int, completedSession: Bool, friendSession: Bool) {
-        let before = SharedStore.lifetime.totalFocusMinutes
+        let before = SharedStore.lifetime
         SharedStore.updateLifetime {
             $0.record(minutes: minutes, completedSession: completedSession, friendSession: friendSession)
         }
-        for rank in FocusRank.reached(from: before, to: SharedStore.lifetime.totalFocusMinutes) {
-            let names = rank.companions.map(\.name).joined(separator: " and ")
-            LocalNotifier.post(title: "You're now a \(rank.title) 🏛",
-                               body: "\(rank.hours.formatted()) hours of focus. \(names) has joined you.",
-                               route: .focus,
-                               delay: 2)
+        announceNewCompanions(before: before, after: SharedStore.lifetime)
+    }
+
+    /// One notification per newly unlocked OMO, so you hear about it even if OMO is closed.
+    static func announceNewCompanions(before: LifetimeStats, after: LifetimeStats) {
+        for companion in OmoCompanion.allCases where !companion.isUnlocked(before) && companion.isUnlocked(after) {
+            if let hours = companion.requiredHours, let rank = FocusRank.at(hours: hours) {
+                LocalNotifier.post(title: "You're now a \(rank.title) 🏛",
+                                   body: "\(hours.formatted()) hours of focus. \(companion.name) has joined you.",
+                                   route: .focus, delay: 2)
+            } else {
+                LocalNotifier.post(title: "\(companion.name) has joined you",
+                                   body: "\(companion.achievement). Open OMO to meet your new companion.",
+                                   route: .focus, delay: 2)
+            }
         }
     }
 

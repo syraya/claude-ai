@@ -16,6 +16,12 @@ struct LifetimeStats: Codable, Equatable {
     var monthlyMinutes: [String: Int] = [:]
     /// The highest title (in hours) the app has already celebrated with you.
     var celebratedHours = 0
+    /// The most friends you've had at once (unfriending doesn't take an OMO away).
+    var maxFriends = 0
+    /// Holidays you've focused on (OmoHoliday raw values).
+    var earnedHolidays: [String] = []
+    /// OMOs whose arrival the app has already celebrated with you.
+    var celebratedCompanions: [String] = []
 
     init() {}
 
@@ -31,6 +37,9 @@ struct LifetimeStats: Codable, Equatable {
         lastFocusDay = try c.decodeIfPresent(String.self, forKey: .lastFocusDay)
         monthlyMinutes = try c.decodeIfPresent([String: Int].self, forKey: .monthlyMinutes) ?? [:]
         celebratedHours = try c.decodeIfPresent(Int.self, forKey: .celebratedHours) ?? 0
+        maxFriends = try c.decodeIfPresent(Int.self, forKey: .maxFriends) ?? 0
+        earnedHolidays = try c.decodeIfPresent([String].self, forKey: .earnedHolidays) ?? []
+        celebratedCompanions = try c.decodeIfPresent([String].self, forKey: .celebratedCompanions) ?? []
     }
 
     static let monthFormatter: DateFormatter = {
@@ -48,6 +57,11 @@ struct LifetimeStats: Codable, Equatable {
         if friendSession { friendSessions += 1 }
         longestSessionMinutes = max(longestSessionMinutes, minutes)
         monthlyMinutes[Self.monthFormatter.string(from: date), default: 0] += max(0, minutes)
+        if minutes >= OmoHoliday.requiredMinutes {
+            for holiday in OmoHoliday.active(on: date) where !earnedHolidays.contains(holiday.rawValue) {
+                earnedHolidays.append(holiday.rawValue)
+            }
+        }
 
         guard minutes > 0 else { return }
         let today = DailyStats.key(for: date)
@@ -70,6 +84,13 @@ struct LifetimeStats: Codable, Equatable {
               let gap = Calendar.current.dateComponents([.day], from: last, to: today).day,
               gap <= 1 else { return 0 }
         return currentStreak
+    }
+
+    func hasCelebrated(_ companion: OmoCompanion) -> Bool {
+        if celebratedCompanions.contains(companion.rawValue) { return true }
+        // Titles celebrated before OMOs had their own record.
+        if case .hours(let hours) = companion.unlock, hours > 0, hours <= celebratedHours { return true }
+        return false
     }
 
     var daysSinceStart: Int {

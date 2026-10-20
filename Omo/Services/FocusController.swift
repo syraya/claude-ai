@@ -71,15 +71,29 @@ final class FocusController {
         refresh()
     }
 
-    /// A title reached since the app last celebrated one, if any.
-    var uncelebratedRank: FocusRank? {
-        let rank = FocusRank.current(forMinutes: lifetime.totalFocusMinutes)
-        return rank.hours > lifetime.celebratedHours ? rank : nil
+    /// An OMO that has joined you since the app last celebrated one, if any.
+    var uncelebratedCompanion: OmoCompanion? {
+        OmoCompanion.allCases.first {
+            $0.unlock != .free && $0.isUnlocked(lifetime) && !lifetime.hasCelebrated($0)
+        }
     }
 
-    func markCelebrated(_ rank: FocusRank) {
-        SharedStore.updateLifetime { $0.celebratedHours = max($0.celebratedHours, rank.hours) }
+    func markCelebrated(_ companion: OmoCompanion) {
+        SharedStore.updateLifetime {
+            if !$0.celebratedCompanions.contains(companion.rawValue) { $0.celebratedCompanions.append(companion.rawValue) }
+            if let hours = companion.requiredHours { $0.celebratedHours = max($0.celebratedHours, hours) }
+        }
         refresh()
+    }
+
+    /// Holidays happening today whose OMO you haven't earned yet.
+    var holidayToEarn: (holiday: OmoHoliday, companion: OmoCompanion)? {
+        for holiday in OmoHoliday.active() where !lifetime.earnedHolidays.contains(holiday.rawValue) {
+            if let companion = OmoCompanion.allCases.first(where: { $0.unlock == .holiday(holiday) }) {
+                return (holiday, companion)
+            }
+        }
+        return nil
     }
 
     /// Called every second while a session is on screen.

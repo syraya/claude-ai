@@ -208,20 +208,25 @@ struct LifetimeView: View {
     }
 }
 
-/// Shown once when you reach a new title: meet the OMO who joins you.
-struct RankUpView: View {
-    var rank: FocusRank
-    var onUse: (OmoCompanion) -> Void
+/// Shown once when an OMO joins you, whether through hours, friends, streaks or a holiday.
+struct OmoJoinsView: View {
+    var companion: OmoCompanion
+    var onUse: () -> Void
     var onClose: () -> Void
 
+    private var rank: FocusRank? { companion.requiredHours.flatMap { FocusRank.at(hours: $0) } }
+
     var body: some View {
-        let companion = rank.companions.first ?? .glaux
         VStack(spacing: 20) {
             Spacer()
             VStack(spacing: 6) {
-                Text("You're now a").font(.system(.title3, design: .serif).italic()).foregroundStyle(.secondary)
-                Text(rank.title).font(.omoSerif(.largeTitle, weight: .bold)).foregroundStyle(Color.omoPrimary)
-                Text("\(rank.hours.formatted()) hours of focus").font(.subheadline).foregroundStyle(.secondary)
+                if let rank {
+                    Text("You're now a").font(.system(.title3, design: .serif).italic()).foregroundStyle(.secondary)
+                    Text(rank.title).font(.omoSerif(.largeTitle, weight: .bold)).foregroundStyle(Color.omoPrimary)
+                } else {
+                    Text("A new OMO").font(.system(.title3, design: .serif).italic()).foregroundStyle(.secondary)
+                }
+                Text(companion.achievement).font(.subheadline).foregroundStyle(.secondary)
             }
 
             OmoFigure(companion: companion, size: 190, backdrop: true)
@@ -244,7 +249,7 @@ struct RankUpView: View {
 
             Spacer()
             VStack(spacing: 10) {
-                Button("Study with \(companion.name)") { onUse(companion) }
+                Button("Study with \(companion.name)", action: onUse)
                     .buttonStyle(PrimaryButtonStyle())
                 Button("Not now", action: onClose)
                     .buttonStyle(SecondaryButtonStyle())

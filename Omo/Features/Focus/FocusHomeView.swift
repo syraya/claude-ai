@@ -18,7 +18,7 @@ struct FocusHomeView: View {
                 ScrollView {
                     VStack(spacing: 18) {
                         OmoHeader(selected: settings.settings.companion,
-                                  totalMinutes: focus.lifetime.totalFocusMinutes,
+                                  stats: focus.lifetime,
                                   collapse: collapse) { companion in
                             settings.settings.companion = companion
                         }
@@ -27,6 +27,10 @@ struct FocusHomeView: View {
                             Color.clear.preference(key: HeaderOffsetKey.self,
                                                    value: geo.frame(in: .named("focusScroll")).minY)
                         })
+
+                        if let event = focus.holidayToEarn {
+                            HolidayCard(holiday: event.holiday, companion: event.companion)
+                        }
 
                         todayCard
 
@@ -78,15 +82,15 @@ struct FocusHomeView: View {
             .navigationTitle(greeting)
             .errorAlert($focus.errorMessage)
             .sheet(item: Binding(
-                get: { focus.uncelebratedRank },
-                set: { if $0 == nil, let rank = focus.uncelebratedRank { focus.markCelebrated(rank) } }
-            )) { rank in
-                RankUpView(rank: rank,
-                           onUse: { companion in
-                               focus.markCelebrated(rank)
-                               settings.settings.companion = companion
-                           },
-                           onClose: { focus.markCelebrated(rank) })
+                get: { focus.uncelebratedCompanion },
+                set: { if $0 == nil, let companion = focus.uncelebratedCompanion { focus.markCelebrated(companion) } }
+            )) { companion in
+                OmoJoinsView(companion: companion,
+                             onUse: {
+                                 focus.markCelebrated(companion)
+                                 settings.settings.companion = companion
+                             },
+                             onClose: { focus.markCelebrated(companion) })
             }
         }
     }
