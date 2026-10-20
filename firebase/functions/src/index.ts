@@ -1,9 +1,9 @@
 /**
- * Push notifications for Lockstep.
+ * Push notifications for OMO.
  *
  * The app watches Firestore live while it's open. These functions cover the times
  * it isn't: they send a visible notification plus a background wake-up, so a
- * friend's phone unlocks (or locks) even if Lockstep is closed.
+ * friend's phone unlocks (or locks) even if OMO is closed.
  */
 import { initializeApp } from "firebase-admin/app";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
@@ -76,7 +76,7 @@ export const onFriendshipCreated = onDocumentCreated("friendships/{pairId}", asy
   const name = data.names?.[requester] ?? "Someone";
   await notify([target], {
     title: "New friend request",
-    body: `${name} wants to be friends on Lockstep.`,
+    body: `${name} wants to be friends on OMO.`,
     route: "friends",
   });
 });
@@ -105,7 +105,7 @@ export const onGroupSessionCreated = onDocumentCreated("groupSessions/{sessionId
   if (invited.length === 0) return;
   await notify(invited, {
     title: `${data.hostName} invited you to study`,
-    body: "Join the session in Lockstep before it starts.",
+    body: "Join the session in OMO before it starts.",
     route: "together",
   });
 });
@@ -156,7 +156,7 @@ export const onLockUpdated = onDocumentUpdated("groupSessions/{sessionId}/locks/
   if (after.breakRequestMinutes != null && before.breakRequestMinutes == null) {
     await notify([after.keyholderUID], {
       title: `${after.lockedName} is asking for a break`,
-      body: `${after.breakRequestMinutes} minutes. Open Lockstep to allow or deny.`,
+      body: `${after.breakRequestMinutes} minutes. Open OMO to allow or deny.`,
       route: "together",
     });
     return;

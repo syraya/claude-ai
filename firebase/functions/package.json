@@ -1,5 +1,5 @@
 {
-  "name": "lockstep-functions",
+  "name": "omo-functions",
   "private": true,
   "main": "lib/index.js",
   "engines": {

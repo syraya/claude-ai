@@ -2,7 +2,7 @@ import Foundation
 import FamilyControls
 
 /// All the rules for solo focus sessions and friend locks. The app and the monitor
-/// extension both call into this, so a session behaves the same whether Lockstep
+/// extension both call into this, so a session behaves the same whether OMO
 /// is open or not.
 enum FocusEngine {
     /// Timers can fire a little early or late; this much slack counts as "on time".

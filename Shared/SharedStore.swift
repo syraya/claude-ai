@@ -5,7 +5,7 @@ import FamilyControls
 /// The extensions run in separate processes, so everything they need lives here.
 enum SharedStore {
     static let appGroupID: String =
-        Bundle.main.object(forInfoDictionaryKey: "AppGroupID") as? String ?? "group.com.example.lockstep"
+        Bundle.main.object(forInfoDictionaryKey: "AppGroupID") as? String ?? "group.com.example.omo"
 
     private static var defaults: UserDefaults { UserDefaults(suiteName: appGroupID) ?? .standard }
 

@@ -1,9 +1,9 @@
 {
-  "name": "lockstep-rules-tests",
+  "name": "omo-rules-tests",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore --project demo-lockstep --config ../firebase.json \"node --test rules.test.js\""
+    "test": "firebase emulators:exec --only firestore --project demo-omo --config ../firebase.json \"node --test rules.test.js\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.0",

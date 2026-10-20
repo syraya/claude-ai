@@ -3,16 +3,16 @@ import DeviceActivity
 import FamilyControls
 
 extension DeviceActivityName {
-    static let dailyUsage = Self("lockstep.dailyUsage")
+    static let dailyUsage = Self("omo.dailyUsage")
 }
 
 /// Names for the background timers. The monitor extension reads the prefix to
 /// know what to do when one fires.
 enum TimerName {
-    static let focusEndPrefix = "lockstep.focusEnd."
-    static let focusBreakPrefix = "lockstep.focusBreak."
-    static let friendBreakPrefix = "lockstep.friendBreak."
-    static let usageEventPrefix = "lockstep.usage."
+    static let focusEndPrefix = "omo.focusEnd."
+    static let focusBreakPrefix = "omo.focusBreak."
+    static let friendBreakPrefix = "omo.friendBreak."
+    static let usageEventPrefix = "omo.usage."
 
     static func focusEnd(_ id: UUID) -> String { focusEndPrefix + id.uuidString }
     static func focusBreak(_ id: UUID) -> String { focusBreakPrefix + id.uuidString }
@@ -20,7 +20,7 @@ enum TimerName {
 }
 
 /// Wraps DeviceActivityCenter, which wakes the monitor extension at a given time even
-/// when Lockstep isn't running. That's how sessions and breaks end on time.
+/// when OMO isn't running. That's how sessions and breaks end on time.
 enum ActivityScheduler {
     /// iOS refuses schedules shorter than 15 minutes.
     private static let minimumInterval: TimeInterval = 15 * 60

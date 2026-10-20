@@ -4,9 +4,9 @@ import ManagedSettings
 
 extension ManagedSettingsStore.Name {
     /// Shields from your own solo focus sessions.
-    static let focus = Self("lockstep.focus")
+    static let focus = Self("omo.focus")
     /// Shields from a study session where a friend holds your key.
-    static let friendLock = Self("lockstep.friendLock")
+    static let friendLock = Self("omo.friendLock")
 }
 
 /// Turns blocking on and off. Solo sessions and friend locks use separate stores,

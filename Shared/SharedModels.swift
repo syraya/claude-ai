@@ -45,6 +45,8 @@ struct FocusSession: Codable, Identifiable {
     var breakStartedAt: Date?
     var breakEndsAt: Date?
     var totalBreakSeconds: TimeInterval = 0
+    /// What you're working toward, written like a wish on a shrine's ema plaque.
+    var intention: String?
 
     var isOnBreak: Bool { breakEndsAt != nil }
     var breaksLeft: Int { max(0, maxBreaks - breaksTaken) }
@@ -88,7 +90,7 @@ struct AppSettings: Codable, Equatable {
     var defaultBreakMinutes: Int = 5
     var maxBreaksPerSession: Int = 3
     var defaultSessionMinutes: Int = 45
-    /// While a friend holds your key, iOS won't let you delete apps (including Lockstep).
+    /// While a friend holds your key, iOS won't let you delete apps (including OMO).
     var preventAppDeletionWhenLocked: Bool = true
     var shareScreenTimeWithFriends: Bool = true
     var hasCompletedOnboarding: Bool = false

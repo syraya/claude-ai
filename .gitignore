@@ -10,8 +10,8 @@ build/
 *.dSYM.zip
 
 # XcodeGen also writes these from project.yml
-Lockstep/Info.plist
-Lockstep/Lockstep.entitlements
+Omo/Info.plist
+Omo/Omo.entitlements
 Extensions/*/Info.plist
 Extensions/*/*.entitlements
 

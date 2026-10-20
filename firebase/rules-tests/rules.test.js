@@ -30,7 +30,7 @@ const db = (uid) => env.authenticatedContext(uid).firestore();
 
 before(async () => {
   env = await initializeTestEnvironment({
-    projectId: "demo-lockstep",
+    projectId: "demo-omo",
     firestore: { rules: readFileSync(new URL("../firestore.rules", import.meta.url), "utf8") },
   });
 });
