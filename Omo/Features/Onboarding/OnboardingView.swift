@@ -25,9 +25,22 @@ struct OnboardingView: View {
 
             switch step {
             case 0:
-                page(icon: "building.columns.fill",
-                     title: "OMO",
-                     text: "thoughts of many\n\nBlock distractions, pause before you give in, and study alongside friends.")
+                VStack(spacing: 18) {
+                    OmoLogo(size: 132)
+                        .shadow(color: Color.omoInk.opacity(0.2), radius: 16, y: 8)
+                    VStack(spacing: 4) {
+                        Text("OMO")
+                            .font(.omoSerif(.largeTitle, weight: .bold))
+                            .kerning(6)
+                        Text("thoughts of many")
+                            .font(.system(.title3, design: .serif).italic())
+                            .foregroundStyle(.secondary)
+                    }
+                    Text("Block distractions, pause before you give in, and study alongside friends.")
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .transition(.opacity)
             case 1:
                 page(icon: "hourglass",
                      title: "Allow Screen Time access",

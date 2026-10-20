@@ -4,6 +4,8 @@ A Screen Time blocker for iPhone that you can use with friends.
 
 **OMO: thoughts of many.** Think before you reach for a distraction, and study better alongside other people. The look is a modern take on Renaissance paintings of philosophers, like Raphael's *School of Athens*: parchment backgrounds, lapis-ultramarine and ochre-gold accents, and serif type.
 
+**The logo** (`docs/brand/omo-logo.svg`) is Leonardo's circle over a square, with two columns at the center where he drew the person. The square is structure, the limits you set. The circle is free thought. The columns are three things at once: a pause button (the reflection wait before every break), a place of thought, and two friends standing side by side.
+
 - **Block lists.** Pick the apps, categories and websites to block, and save as many named lists as you want ("Social", "Games", …).
 - **Focus sessions.** Choose a list and a length, and those apps are locked until time's up. Strict mode means no ending early.
 - **Intentions.** Write what each session is for ("Finish chapter 4"). It appears as a small inscribed slip of paper, like the *cartellino* in Renaissance paintings, on the timer and on the block screen when you try to open a blocked app.
@@ -36,6 +38,7 @@ firebase/
   functions/                     Push notifications (Cloud Functions, TypeScript)
   rules-tests/                   Tests for the security rules
 docs/APP_STORE.md                Checklist for getting it on the App Store
+docs/brand/omo-logo.svg          The logo, also used for the app icon
 ```
 
 ---

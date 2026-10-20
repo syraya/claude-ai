@@ -236,3 +236,38 @@ struct ArcadeBackdrop: View {
         }
     }
 }
+
+/// The OMO logo, drawn to match the app icon (docs/brand/omo-logo.svg).
+/// Leonardo's circle over a square, with two columns at the centre: a pause,
+/// a place of thought, and two friends side by side.
+struct OmoLogo: View {
+    var size: CGFloat = 120
+
+    var body: some View {
+        Canvas { context, canvas in
+            // Everything is laid out on the icon's 100 x 100 grid.
+            let u = canvas.width / 100
+            func rect(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat) -> CGRect {
+                CGRect(x: x * u, y: y * u, width: w * u, height: h * u)
+            }
+
+            context.fill(Path(rect(0, 0, 100, 100)), with: .color(.omoLapis))
+            context.stroke(Path(rect(25, 30.5, 50, 50)), with: .color(.omoOchre), lineWidth: 3 * u)
+            context.stroke(Path(ellipseIn: rect(19.5, 19.5, 61, 61)), with: .color(.omoParchment), lineWidth: 3 * u)
+
+            let top: CGFloat = 34.4, bottom: CGFloat = 74.41, capHeight: CGFloat = 2.8
+            for shaftX in [40.75, 53.25] as [CGFloat] {
+                let middle = shaftX + 3
+                context.fill(Path(rect(shaftX, top + capHeight, 6, bottom - top - 2 * capHeight)),
+                             with: .color(.omoParchment))
+                for capY in [top, bottom - capHeight] {
+                    context.fill(Path(roundedRect: rect(middle - 4.8, capY, 9.6, capHeight), cornerRadius: 0.6 * u),
+                                 with: .color(.omoOchre))
+                }
+            }
+        }
+        .frame(width: size, height: size)
+        .clipShape(RoundedRectangle(cornerRadius: size * 0.225, style: .continuous))
+        .accessibilityLabel("OMO")
+    }
+}
