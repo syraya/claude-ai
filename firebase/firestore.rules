@@ -1,0 +1,177 @@
+rules_version = '2';
+
+// Who can read and write what. The important one is `locks`: only the friend who
+// holds your key can unlock you. The only other way out is the emergency exit,
+// which is recorded where your keyholder can see it.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function me() {
+      return request.auth.uid;
+    }
+
+    function changedOnly(keys) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+    }
+
+    function acceptedFriendship(pairId) {
+      let path = /databases/$(database)/documents/friendships/$(pairId);
+      return exists(path) && get(path).data.status == 'accepted';
+    }
+
+    function areFriends(a, b) {
+      return (a < b && acceptedFriendship(a + '_' + b))
+          || (b < a && acceptedFriendship(b + '_' + a));
+    }
+
+    // Public profile: just a display name and friend code.
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if me() == uid
+        && request.resource.data.keys().hasOnly(['displayName', 'friendCode', 'createdAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 30;
+      allow update: if me() == uid
+        && changedOnly(['displayName'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 30;
+      allow delete: if me() == uid;
+
+      // Daily stats, visible to you and your friends.
+      match /stats/{day} {
+        allow read: if signedIn() && (me() == uid || areFriends(me(), uid));
+        allow write: if me() == uid;
+      }
+
+      // Push tokens. Only you (and the Cloud Functions) can see them.
+      match /private/{doc} {
+        allow read, write: if me() == uid;
+      }
+    }
+
+    // friendCodes/{CODE} -> { uid }. Create-only, so codes can't be stolen.
+    match /friendCodes/{code} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == me();
+      allow delete: if signedIn() && resource.data.uid == me();
+    }
+
+    // friendships/{uidA_uidB} (sorted). Pending until the other person accepts.
+    match /friendships/{pairId} {
+      allow get: if signedIn() && (resource == null || me() in resource.data.members);
+      allow list: if signedIn() && me() in resource.data.members;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['members', 'names', 'requester', 'status', 'createdAt'])
+        && request.resource.data.requester == me()
+        && request.resource.data.status == 'pending'
+        && request.resource.data.members.size() == 2
+        && me() in request.resource.data.members
+        && request.resource.data.members[0] < request.resource.data.members[1]
+        && pairId == request.resource.data.members[0] + '_' + request.resource.data.members[1];
+      allow update: if signedIn()
+        && me() in resource.data.members
+        && me() != resource.data.requester
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'accepted'
+        && changedOnly(['status', 'acceptedAt', 'names'])
+        && request.resource.data.names.diff(resource.data.names).affectedKeys().hasOnly([me()]);
+      allow delete: if signedIn() && me() in resource.data.members;
+    }
+
+    match /groupSessions/{sessionId} {
+      function sessionData() {
+        return get(/databases/$(database)/documents/groupSessions/$(sessionId)).data;
+      }
+
+      // Lobbies are readable so people can join by code.
+      allow read: if signedIn()
+        && (me() in resource.data.members
+            || me() in resource.data.invited
+            || resource.data.status == 'lobby');
+
+      allow create: if signedIn()
+        && request.resource.data.hostUID == me()
+        && request.resource.data.members == [me()]
+        && request.resource.data.status == 'lobby'
+        && request.resource.data.invited is list
+        && request.resource.data.invited.size() <= 20;
+
+      allow update: if signedIn() && (
+        // Host starts the session.
+        (resource.data.hostUID == me()
+          && resource.data.status == 'lobby'
+          && request.resource.data.status == 'active'
+          && resource.data.members.size() >= 2
+          && changedOnly(['status', 'startedAt']))
+        // Host cancels a lobby.
+        || (resource.data.hostUID == me()
+          && resource.data.status == 'lobby'
+          && request.resource.data.status == 'cancelled'
+          && changedOnly(['status']))
+        // Anyone joins a lobby, adding only themselves.
+        || (resource.data.status == 'lobby'
+          && !(me() in resource.data.members)
+          && request.resource.data.members.toSet() == resource.data.members.toSet().union([me()].toSet())
+          && request.resource.data.members.size() <= 8
+          && request.resource.data.memberNames.diff(resource.data.memberNames).affectedKeys().hasOnly([me()])
+          && changedOnly(['members', 'memberNames']))
+        // A guest leaves a lobby.
+        || (resource.data.status == 'lobby'
+          && me() in resource.data.members
+          && me() != resource.data.hostUID
+          && request.resource.data.members.toSet() == resource.data.members.toSet().difference([me()].toSet())
+          && request.resource.data.memberNames.diff(resource.data.memberNames).affectedKeys().hasOnly([me()])
+          && changedOnly(['members', 'memberNames']))
+        // Any member closes a finished session. Locks are separate, so this can't
+        // unlock anyone.
+        || (resource.data.status == 'active'
+          && me() in resource.data.members
+          && request.resource.data.status == 'ended'
+          && changedOnly(['status', 'endedAt']))
+      );
+
+      // groupSessions/{id}/locks/{lockedUID}
+      match /locks/{lockedUid} {
+        allow read: if signedIn() && me() in sessionData().members;
+
+        // Created by the host in the same batch that starts the session.
+        allow create: if signedIn()
+          && sessionData().hostUID == me()
+          && getAfter(/databases/$(database)/documents/groupSessions/$(sessionId)).data.status == 'active'
+          && lockedUid in sessionData().members
+          && request.resource.data.lockedUID == lockedUid
+          && request.resource.data.keyholderUID in sessionData().members
+          && request.resource.data.keyholderUID != lockedUid
+          && request.resource.data.locked == true;
+
+        allow update: if signedIn() && (
+          // The keyholder unlocks, grants a break, or answers a break request.
+          // They can never lock someone again.
+          (resource.data.keyholderUID == me()
+            && changedOnly(['locked', 'unlockedAt', 'breakUntil', 'breakRequestMinutes', 'breakRequestedAt'])
+            && (request.resource.data.locked == resource.data.locked || request.resource.data.locked == false))
+          // The locked person asks for a break...
+          || (resource.data.lockedUID == me()
+            && resource.data.locked == true
+            && changedOnly(['breakRequestMinutes', 'breakRequestedAt'])
+            && request.resource.data.breakRequestMinutes is int
+            && request.resource.data.breakRequestMinutes <= 60)
+          // ...or uses the emergency exit, which their keyholder sees.
+          || (resource.data.lockedUID == me()
+            && resource.data.locked == true
+            && changedOnly(['locked', 'emergencyExit', 'unlockedAt'])
+            && request.resource.data.locked == false
+            && request.resource.data.emergencyExit == true)
+        );
+      }
+    }
+  }
+}
