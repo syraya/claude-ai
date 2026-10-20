@@ -1,17 +1,41 @@
 import SwiftUI
 
-/// OMO's palette, borrowed from Renaissance frescoes of philosophers at work:
-/// plaster and parchment, lapis-lazuli ultramarine, ochre gold, burnt sienna,
-/// verdigris and madder rose. Bright, warm and calm.
+/// OMO's colours, by role. They come from the theme picked in Settings (see
+/// Shared/Themes.swift); RootView rebuilds the screen when the theme changes.
 extension Color {
-    static let omoParchment = Color(red: 0.98, green: 0.955, blue: 0.91)
-    static let omoCard = Color.white
-    static let omoInk = Color(red: 0.16, green: 0.17, blue: 0.27)
-    static let omoLapis = Color(red: 0.18, green: 0.29, blue: 0.62)
-    static let omoOchre = Color(red: 0.84, green: 0.63, blue: 0.23)
-    static let omoSienna = Color(red: 0.75, green: 0.38, blue: 0.23)
-    static let omoVerdigris = Color(red: 0.36, green: 0.61, blue: 0.54)
-    static let omoRose = Color(red: 0.85, green: 0.55, blue: 0.48)
+    init(_ rgb: RGB) { self.init(red: rgb.r, green: rgb.g, blue: rgb.b) }
+
+    private static var palette: ThemePalette { OmoTheme.current.palette }
+    static var omoPaper: Color { Color(palette.paper) }
+    static var omoCard: Color { Color(palette.card) }
+    static var omoInk: Color { Color(palette.ink) }
+    static var omoPrimary: Color { Color(palette.primary) }
+    static var omoGold: Color { Color(palette.gold) }
+    static var omoClay: Color { Color(palette.clay) }
+    static var omoSuccess: Color { Color(palette.success) }
+    static var omoBlush: Color { Color(palette.blush) }
+}
+
+/// The logo's own colours. They stay the same in every theme.
+enum Brand {
+    static let lapis = Color(red: 0.18, green: 0.29, blue: 0.62)
+    static let gold = Color(red: 0.84, green: 0.63, blue: 0.23)
+    static let parchment = Color(red: 0.98, green: 0.957, blue: 0.91)
+}
+
+/// UIKit pieces SwiftUI doesn't style for us: serif navigation titles in the theme's ink.
+enum ThemeAppearance {
+    static func apply() {
+        let ink = UIColor(Color.omoInk)
+        func serif(_ size: CGFloat, _ weight: UIFont.Weight) -> UIFont {
+            let base = UIFont.systemFont(ofSize: size, weight: weight)
+            guard let descriptor = base.fontDescriptor.withDesign(.serif) else { return base }
+            return UIFont(descriptor: descriptor, size: size)
+        }
+        let appearance = UINavigationBar.appearance()
+        appearance.largeTitleTextAttributes = [.font: serif(34, .bold), .foregroundColor: ink]
+        appearance.titleTextAttributes = [.font: serif(17, .semibold), .foregroundColor: ink]
+    }
 }
 
 extension Font {
@@ -26,10 +50,10 @@ extension Font {
 struct OmoBackground: View {
     var body: some View {
         ZStack {
-            Color.omoParchment
-            RadialGradient(colors: [Color.omoOchre.opacity(0.20), .clear],
+            Color.omoPaper
+            RadialGradient(colors: [Color.omoGold.opacity(0.20), .clear],
                            center: .top, startRadius: 10, endRadius: 460)
-            RadialGradient(colors: [Color.omoRose.opacity(0.14), .clear],
+            RadialGradient(colors: [Color.omoBlush.opacity(0.14), .clear],
                            center: .bottomTrailing, startRadius: 10, endRadius: 380)
         }
         .ignoresSafeArea()
@@ -67,7 +91,7 @@ extension View {
 }
 
 struct PrimaryButtonStyle: ButtonStyle {
-    var color: Color = .omoLapis
+    var color: Color = .omoPrimary
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -86,17 +110,17 @@ struct SecondaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(Color.omoLapis)
+            .foregroundStyle(Color.omoPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(Color.omoLapis.opacity(configuration.isPressed ? 0.25 : 0.14),
+            .background(Color.omoPrimary.opacity(configuration.isPressed ? 0.25 : 0.14),
                         in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 }
 
 struct ProgressRing: View {
     var progress: Double
-    var color: Color = .omoLapis
+    var color: Color = .omoPrimary
     var lineWidth: CGFloat = 14
 
     var body: some View {
@@ -114,7 +138,7 @@ struct ProgressRing: View {
 struct StatPill: View {
     var value: String
     var label: String
-    var color: Color = .omoLapis
+    var color: Color = .omoPrimary
 
     var body: some View {
         VStack(spacing: 4) {
@@ -142,7 +166,7 @@ struct Avatar: View {
     }
 
     private var color: Color {
-        let palette: [Color] = [.omoLapis, .omoVerdigris, .omoOchre, .pink, .purple, .teal]
+        let palette: [Color] = [.omoPrimary, .omoSuccess, .omoGold, .pink, .purple, .teal]
         let hash = name.unicodeScalars.reduce(0) { $0 &+ Int($1.value) }
         return palette[abs(hash) % palette.count]
     }
@@ -183,13 +207,14 @@ struct IntentionCard: View {
 
     var body: some View {
         VStack(spacing: 6) {
+            // The slip is always paper-coloured, so its text keeps dark ink in every theme.
             Text("INTENTION")
                 .font(.system(.caption2, design: .serif).weight(.semibold))
                 .kerning(3)
-                .foregroundStyle(Color.omoSienna)
+                .foregroundStyle(Color(red: 0.75, green: 0.38, blue: 0.23))
             Text(text)
                 .font(.system(.body, design: .serif).italic())
-                .foregroundStyle(Color.omoInk)
+                .foregroundStyle(Color(red: 0.16, green: 0.17, blue: 0.27))
                 .multilineTextAlignment(.center)
         }
         .padding(.horizontal, 22)
@@ -224,7 +249,7 @@ struct ArchShape: Shape {
 
 /// Three arches receding toward the centre, drawn faintly behind content.
 struct ArcadeBackdrop: View {
-    var color: Color = .omoLapis
+    var color: Color = .omoPrimary
 
     var body: some View {
         ZStack {
@@ -251,18 +276,18 @@ struct OmoLogo: View {
                 CGRect(x: x * u, y: y * u, width: w * u, height: h * u)
             }
 
-            context.fill(Path(rect(0, 0, 100, 100)), with: .color(.omoLapis))
-            context.stroke(Path(rect(25, 30.5, 50, 50)), with: .color(.omoOchre), lineWidth: 3 * u)
-            context.stroke(Path(ellipseIn: rect(19.5, 19.5, 61, 61)), with: .color(.omoParchment), lineWidth: 3 * u)
+            context.fill(Path(rect(0, 0, 100, 100)), with: .color(Brand.lapis))
+            context.stroke(Path(rect(25, 30.5, 50, 50)), with: .color(Brand.gold), lineWidth: 3 * u)
+            context.stroke(Path(ellipseIn: rect(19.5, 19.5, 61, 61)), with: .color(Brand.parchment), lineWidth: 3 * u)
 
             let top: CGFloat = 34.4, bottom: CGFloat = 74.41, capHeight: CGFloat = 2.8
             for shaftX in [40.75, 53.25] as [CGFloat] {
                 let middle = shaftX + 3
                 context.fill(Path(rect(shaftX, top + capHeight, 6, bottom - top - 2 * capHeight)),
-                             with: .color(.omoParchment))
+                             with: .color(Brand.parchment))
                 for capY in [top, bottom - capHeight] {
                     context.fill(Path(roundedRect: rect(middle - 4.8, capY, 9.6, capHeight), cornerRadius: 0.6 * u),
-                                 with: .color(.omoOchre))
+                                 with: .color(Brand.gold))
                 }
             }
         }

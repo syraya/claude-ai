@@ -22,15 +22,18 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     private func makeConfiguration(appName: String?) -> ShieldConfiguration {
         let name = appName ?? "This app"
-        // OMO's fresco palette: parchment, ink, lapis ultramarine.
-        let paper = UIColor(red: 0.98, green: 0.955, blue: 0.91, alpha: 1)
-        let ink = UIColor(red: 0.16, green: 0.17, blue: 0.27, alpha: 1)
+        // Use the theme picked in OMO's settings.
+        let theme = SharedStore.settings.theme
+        let palette = theme.palette
+        let paper = UIColor(palette.paper)
+        let ink = UIColor(palette.ink)
         let subtle = ink.withAlphaComponent(0.7)
-        let lapis = UIColor(red: 0.18, green: 0.29, blue: 0.62, alpha: 1)
+        let lapis = UIColor(palette.primary)
+        let blur: UIBlurEffect.Style = theme.isDark ? .systemUltraThinMaterialDark : .systemUltraThinMaterialLight
 
         if let lock = SharedStore.friendLock, !lock.isOnBreak {
             return ShieldConfiguration(
-                backgroundBlurStyle: .systemUltraThinMaterialLight,
+                backgroundBlurStyle: blur,
                 backgroundColor: paper,
                 icon: icon("person.2.badge.key.fill", lapis),
                 title: .init(text: "\(lock.keyholderName) holds your key", color: ink),
@@ -48,7 +51,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
             let subtitle = session.intention.map { "\(timeText)\n\nYour intention: \($0)" } ?? "\(timeText) Gather your thoughts."
             let breakText = session.canTakeBreak ? "Take a break" : nil
             return ShieldConfiguration(
-                backgroundBlurStyle: .systemUltraThinMaterialLight,
+                backgroundBlurStyle: blur,
                 backgroundColor: paper,
                 icon: icon("building.columns.fill", lapis),
                 title: .init(text: "Stay with your thoughts", color: ink),
@@ -60,7 +63,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
         }
 
         return ShieldConfiguration(
-            backgroundBlurStyle: .systemUltraThinMaterialLight,
+            backgroundBlurStyle: blur,
             backgroundColor: paper,
             icon: icon("lock.fill", lapis),
             title: .init(text: "Blocked by OMO", color: ink),
@@ -72,5 +75,11 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     private func icon(_ symbol: String, _ color: UIColor) -> UIImage? {
         UIImage(systemName: symbol)?.withTintColor(color, renderingMode: .alwaysOriginal)
+    }
+}
+
+private extension UIColor {
+    convenience init(_ rgb: RGB) {
+        self.init(red: rgb.r, green: rgb.g, blue: rgb.b, alpha: 1)
     }
 }

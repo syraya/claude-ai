@@ -55,7 +55,13 @@ final class BlockListStore {
 @Observable @MainActor
 final class SettingsStore {
     var settings: AppSettings {
-        didSet { SharedStore.settings = settings }
+        didSet {
+            SharedStore.settings = settings
+            if settings.theme != oldValue.theme {
+                OmoTheme.current = settings.theme
+                ThemeAppearance.apply()
+            }
+        }
     }
 
     /// The apps whose daily time friends can see.

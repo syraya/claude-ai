@@ -76,7 +76,7 @@ struct FriendsView: View {
                 .disabled(code.count < 6)
             }
             if let sentMessage {
-                Text(sentMessage).font(.footnote).foregroundStyle(Color.omoVerdigris)
+                Text(sentMessage).font(.footnote).foregroundStyle(Color.omoSuccess)
             }
         }
         .card()
@@ -162,7 +162,7 @@ struct FriendsView: View {
             VStack(alignment: .trailing, spacing: 2) {
                 Text(Format.minutes(stats.focusMinutes))
                     .font(.headline.monospacedDigit())
-                    .foregroundStyle(Color.omoVerdigris)
+                    .foregroundStyle(Color.omoSuccess)
                 Text("focused").font(.caption2).foregroundStyle(.secondary)
             }
         }
@@ -194,8 +194,8 @@ struct FriendDetailView: View {
                 .padding(.top)
 
                 HStack(spacing: 10) {
-                    StatPill(value: Format.minutes(totalFocus), label: "Focused this week", color: .omoVerdigris)
-                    StatPill(value: "\(totalSessions)", label: "Sessions", color: .omoLapis)
+                    StatPill(value: Format.minutes(totalFocus), label: "Focused this week", color: .omoSuccess)
+                    StatPill(value: "\(totalSessions)", label: "Sessions", color: .omoPrimary)
                 }
 
                 VStack(alignment: .leading, spacing: 12) {
@@ -203,7 +203,7 @@ struct FriendDetailView: View {
                     Chart(week) { day in
                         BarMark(x: .value("Day", day.date ?? Date(), unit: .day),
                                 y: .value("Minutes", day.focusMinutes))
-                            .foregroundStyle(Color.omoVerdigris.gradient)
+                            .foregroundStyle(Color.omoSuccess.gradient)
                             .cornerRadius(6)
                     }
                     .chartXAxis {
@@ -221,7 +221,7 @@ struct FriendDetailView: View {
                         Chart(week) { day in
                             BarMark(x: .value("Day", day.date ?? Date(), unit: .day),
                                     y: .value("Minutes", max(0, day.distractingMinutes)))
-                                .foregroundStyle(Color.omoOchre.gradient)
+                                .foregroundStyle(Color.omoGold.gradient)
                                 .cornerRadius(6)
                         }
                         .chartXAxis {

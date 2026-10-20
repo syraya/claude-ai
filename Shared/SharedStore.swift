@@ -17,6 +17,7 @@ enum SharedStore {
         static let dailyStats = "dailyStats"
         static let trackedSelection = "trackedSelection"
         static let pendingShieldRequest = "pendingShieldRequest"
+        static let lifetime = "lifetime"
     }
 
     private static func read<T: Decodable>(_ type: T.Type, _ key: String) -> T? {
@@ -62,6 +63,25 @@ enum SharedStore {
     static var pendingShieldRequest: String? {
         get { defaults.string(forKey: Key.pendingShieldRequest) }
         set { defaults.set(newValue, forKey: Key.pendingShieldRequest) }
+    }
+
+    // MARK: Lifetime stats
+
+    /// Created (and its start date fixed) the first time anything reads it.
+    static var lifetime: LifetimeStats {
+        get {
+            if let stored = read(LifetimeStats.self, Key.lifetime) { return stored }
+            let fresh = LifetimeStats()
+            write(fresh, Key.lifetime)
+            return fresh
+        }
+        set { write(newValue, Key.lifetime) }
+    }
+
+    static func updateLifetime(_ change: (inout LifetimeStats) -> Void) {
+        var stats = lifetime
+        change(&stats)
+        lifetime = stats
     }
 
     // MARK: Daily stats

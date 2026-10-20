@@ -94,6 +94,26 @@ struct AppSettings: Codable, Equatable {
     var preventAppDeletionWhenLocked: Bool = true
     var shareScreenTimeWithFriends: Bool = true
     var hasCompletedOnboarding: Bool = false
+    var theme: OmoTheme = .fresco
+
+    init() {}
+
+    /// Missing keys fall back to defaults, so adding a setting in an update never
+    /// wipes the ones people already saved.
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = AppSettings()
+        reflectionSeconds = try c.decodeIfPresent(Int.self, forKey: .reflectionSeconds) ?? d.reflectionSeconds
+        defaultBreakMinutes = try c.decodeIfPresent(Int.self, forKey: .defaultBreakMinutes) ?? d.defaultBreakMinutes
+        maxBreaksPerSession = try c.decodeIfPresent(Int.self, forKey: .maxBreaksPerSession) ?? d.maxBreaksPerSession
+        defaultSessionMinutes = try c.decodeIfPresent(Int.self, forKey: .defaultSessionMinutes) ?? d.defaultSessionMinutes
+        preventAppDeletionWhenLocked = try c.decodeIfPresent(Bool.self, forKey: .preventAppDeletionWhenLocked)
+            ?? d.preventAppDeletionWhenLocked
+        shareScreenTimeWithFriends = try c.decodeIfPresent(Bool.self, forKey: .shareScreenTimeWithFriends)
+            ?? d.shareScreenTimeWithFriends
+        hasCompletedOnboarding = try c.decodeIfPresent(Bool.self, forKey: .hasCompletedOnboarding) ?? d.hasCompletedOnboarding
+        theme = (try? c.decodeIfPresent(OmoTheme.self, forKey: .theme)) ?? d.theme
+    }
 
     static let reflectionOptions = [5, 10, 15, 30, 60]
     static let breakOptions = [1, 3, 5, 10, 15]

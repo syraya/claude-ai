@@ -46,7 +46,7 @@ struct ActiveSessionView: View {
             HStack {
                 Label("Focusing", systemImage: "building.columns.fill")
                     .font(.headline)
-                    .foregroundStyle(Color.omoLapis)
+                    .foregroundStyle(Color.omoPrimary)
                 Spacer()
                 Text("\(session.blockListName) blocked")
                     .font(.subheadline)
@@ -108,11 +108,11 @@ struct ActiveSessionView: View {
         return VStack(spacing: 22) {
             Label("On a break", systemImage: "cup.and.saucer.fill")
                 .font(.headline)
-                .foregroundStyle(Color.omoOchre)
+                .foregroundStyle(Color.omoGold)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             ZStack {
-                ProgressRing(progress: breakLength > 0 ? 1 - left / breakLength : 1, color: .omoOchre)
+                ProgressRing(progress: breakLength > 0 ? 1 - left / breakLength : 1, color: .omoGold)
                 VStack(spacing: 4) {
                     Text(Format.clock(left))
                         .font(.system(size: 52, weight: .bold, design: .rounded).monospacedDigit())
@@ -125,7 +125,7 @@ struct ActiveSessionView: View {
             .frame(maxWidth: .infinity)
 
             Button("I'm done, back to focus") { focus.endBreak() }
-                .buttonStyle(PrimaryButtonStyle(color: .omoVerdigris))
+                .buttonStyle(PrimaryButtonStyle(color: .omoSuccess))
 
             Text("Session ends at \(session.endsAt.formatted(date: .omitted, time: .shortened))")
                 .font(.footnote)

@@ -32,11 +32,14 @@ struct RootView: View {
                         .tabItem { Label("Settings", systemImage: "gearshape.fill") }
                         .tag(AppTab.settings)
                 }
-                .tint(.omoLapis)
+                .tint(.omoPrimary)
             } else {
                 OnboardingView()
             }
         }
+        // Colours are read from the current theme, so rebuild everything when it changes.
+        .id(settings.settings.theme)
+        .preferredColorScheme(settings.settings.theme.isDark ? .dark : .light)
         .task { startServices() }
         .onChange(of: scenePhase) { _, phase in
             switch phase {

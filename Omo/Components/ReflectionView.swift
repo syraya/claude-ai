@@ -43,10 +43,10 @@ struct ReflectionView: View {
 
                 ZStack {
                     Circle()
-                        .fill(Color.omoVerdigris.opacity(0.15))
+                        .fill(Color.omoSuccess.opacity(0.15))
                         .scaleEffect(breatheIn ? 1.0 : 0.6)
                     Circle()
-                        .fill(Color.omoVerdigris.opacity(0.25))
+                        .fill(Color.omoSuccess.opacity(0.25))
                         .scaleEffect(breatheIn ? 0.75 : 0.45)
                     VStack(spacing: 6) {
                         Text(done ? "✓" : "\(Int(remaining.rounded(.up)))")
@@ -69,7 +69,7 @@ struct ReflectionView: View {
 
                 VStack(spacing: 12) {
                     Button("Never mind, back to it", action: onCancel)
-                        .buttonStyle(PrimaryButtonStyle(color: .omoVerdigris))
+                        .buttonStyle(PrimaryButtonStyle(color: .omoSuccess))
                     Button(done ? confirmLabel : "Wait \(Int(remaining.rounded(.up)))s…", action: onConfirm)
                         .buttonStyle(SecondaryButtonStyle())
                         .disabled(!done)

@@ -9,6 +9,7 @@ final class FocusController {
     private(set) var session: FocusSession?
     private(set) var friendLock: FriendLockState?
     private(set) var today = DailyStats(day: DailyStats.key(for: Date()))
+    private(set) var lifetime = LifetimeStats()
     var errorMessage: String?
 
     init() {
@@ -19,6 +20,7 @@ final class FocusController {
         session = SharedStore.focusSession
         friendLock = SharedStore.friendLock
         today = SharedStore.stats()
+        lifetime = SharedStore.lifetime
     }
 
     /// Catches up on any timers that fired while the app was closed.

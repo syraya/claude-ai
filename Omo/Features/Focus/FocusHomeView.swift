@@ -14,6 +14,13 @@ struct FocusHomeView: View {
                 VStack(spacing: 18) {
                     todayCard
 
+                    NavigationLink {
+                        LifetimeView()
+                    } label: {
+                        LifetimeCard(lifetime: focus.lifetime)
+                    }
+                    .buttonStyle(.plain)
+
                     if !screenTime.isApproved {
                         permissionCard
                     }
@@ -45,9 +52,9 @@ struct FocusHomeView: View {
 
     private var todayCard: some View {
         HStack(spacing: 10) {
-            StatPill(value: Format.minutes(focus.today.focusMinutes), label: "Focused today", color: .omoVerdigris)
-            StatPill(value: "\(focus.today.sessionsCompleted)", label: "Sessions", color: .omoLapis)
-            StatPill(value: "\(focus.today.breaksTaken)", label: "Breaks", color: .omoOchre)
+            StatPill(value: Format.minutes(focus.today.focusMinutes), label: "Focused today", color: .omoSuccess)
+            StatPill(value: "\(focus.today.sessionsCompleted)", label: "Sessions", color: .omoPrimary)
+            StatPill(value: "\(focus.today.breaksTaken)", label: "Breaks", color: .omoGold)
         }
     }
 
@@ -55,7 +62,7 @@ struct FocusHomeView: View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Screen Time access needed", systemImage: "exclamationmark.triangle.fill")
                 .font(.headline)
-                .foregroundStyle(Color.omoOchre)
+                .foregroundStyle(Color.omoGold)
             Text("OMO can't block anything until you allow it.")
                 .foregroundStyle(.secondary)
             Button("Allow access") { Task { await screenTime.request() } }
@@ -71,7 +78,7 @@ struct FocusHomeView: View {
             HStack(spacing: 14) {
                 Image(systemName: "person.2.badge.key.fill")
                     .font(.title)
-                    .foregroundStyle(Color.omoVerdigris)
+                    .foregroundStyle(Color.omoSuccess)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(lock.isOnBreak ? "On a break from your study session" : "\(lock.keyholderName) has your key")
                         .font(.headline)

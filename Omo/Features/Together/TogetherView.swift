@@ -100,7 +100,7 @@ struct NewGroupSessionView: View {
                 Text("What gets locked on your phone").font(.omoSerif(.headline))
                 if blockLists.lists.isEmpty {
                     Text("Make a block list first (Block Lists tab).")
-                        .foregroundStyle(Color.omoOchre)
+                        .foregroundStyle(Color.omoGold)
                 } else {
                     Picker("Block list", selection: Binding(
                         get: { chosenList?.id },
@@ -111,7 +111,7 @@ struct NewGroupSessionView: View {
                         }
                     }
                     .pickerStyle(.menu)
-                    .tint(.omoLapis)
+                    .tint(.omoPrimary)
                 }
             }
             .card()
@@ -133,7 +133,7 @@ struct NewGroupSessionView: View {
                                 Text(friendship.otherName(me: friends.uid ?? ""))
                                 Spacer()
                                 Image(systemName: invited.contains(friendUID) ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(invited.contains(friendUID) ? Color.omoLapis : .secondary)
+                                    .foregroundStyle(invited.contains(friendUID) ? Color.omoPrimary : .secondary)
                             }
                         }
                         .buttonStyle(.plain)
@@ -229,7 +229,7 @@ struct LobbyView: View {
                         if member == session.hostUID {
                             Text("Host").font(.caption.weight(.semibold))
                                 .padding(.horizontal, 8).padding(.vertical, 4)
-                                .background(Color.omoLapis.opacity(0.2), in: Capsule())
+                                .background(Color.omoPrimary.opacity(0.2), in: Capsule())
                         }
                     }
                 }
@@ -317,13 +317,13 @@ struct ActiveGroupSessionView: View {
                     Label(mine.emergencyExit == true ? "You used the emergency unlock" : "You're unlocked ✓",
                           systemImage: "lock.open.fill")
                         .font(.omoSerif(.title3))
-                        .foregroundStyle(Color.omoVerdigris)
+                        .foregroundStyle(Color.omoSuccess)
                     Text("Your apps are back. Others in the session may still be locked.")
                         .foregroundStyle(.secondary)
                 } else if let until = mine.breakUntil, until > now {
                     Label("On a break", systemImage: "cup.and.saucer.fill")
                         .font(.omoSerif(.title3))
-                        .foregroundStyle(Color.omoOchre)
+                        .foregroundStyle(Color.omoGold)
                     Text("Your apps lock again in \(Format.clock(until.timeIntervalSince(now))).")
                         .foregroundStyle(.secondary)
                 } else {
@@ -341,7 +341,7 @@ struct ActiveGroupSessionView: View {
                     if let minutes = mine.breakRequestMinutes {
                         Label("Asked \(mine.keyholderName) for \(minutes) minutes. Waiting…", systemImage: "hourglass")
                             .font(.subheadline)
-                            .foregroundStyle(Color.omoOchre)
+                            .foregroundStyle(Color.omoGold)
                     } else {
                         Menu {
                             ForEach(AppSettings.breakOptions, id: \.self) { minutes in
@@ -393,7 +393,7 @@ struct ActiveGroupSessionView: View {
                         HStack {
                             Text("Wants a \(minutes)-min break")
                                 .font(.subheadline)
-                                .foregroundStyle(Color.omoOchre)
+                                .foregroundStyle(Color.omoGold)
                             Spacer()
                             Button("Deny") { Task { await together.denyBreak(lock) } }
                                 .buttonStyle(.bordered)
@@ -413,7 +413,7 @@ struct ActiveGroupSessionView: View {
             ForEach(together.locks) { lock in
                 HStack {
                     Image(systemName: lock.locked ? "lock.fill" : "lock.open.fill")
-                        .foregroundStyle(lock.locked ? Color.omoLapis : Color.omoVerdigris)
+                        .foregroundStyle(lock.locked ? Color.omoPrimary : Color.omoSuccess)
                         .frame(width: 24)
                     Text(lock.lockedName + (lock.lockedUID == together.uid ? " (you)" : ""))
                     Spacer()

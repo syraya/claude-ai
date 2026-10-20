@@ -10,7 +10,7 @@ struct SignInCard: View {
         VStack(spacing: 16) {
             Image(systemName: "person.2.circle.fill")
                 .font(.system(size: 56))
-                .foregroundStyle(Color.omoLapis.gradient)
+                .foregroundStyle(Color.omoPrimary.gradient)
             Text("Many minds, one focus")
                 .font(.omoSerif(.title2, weight: .bold))
             Text(reason)
@@ -23,7 +23,7 @@ struct SignInCard: View {
                 } onCompletion: { result in
                     Task { await auth.completeSignIn(result) }
                 }
-                .signInWithAppleButtonStyle(.black)
+                .signInWithAppleButtonStyle(OmoTheme.current.isDark ? .white : .black)
                 .frame(height: 52)
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 .disabled(auth.isWorking)
@@ -35,7 +35,7 @@ struct SignInCard: View {
             } else {
                 Text("Friends aren't set up in this build yet. Add GoogleService-Info.plist (see README) to turn them on.")
                     .font(.footnote)
-                    .foregroundStyle(Color.omoOchre)
+                    .foregroundStyle(Color.omoGold)
                     .multilineTextAlignment(.center)
             }
         }

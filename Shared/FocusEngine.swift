@@ -72,6 +72,7 @@ enum FocusEngine {
             $0.focusMinutes += minutes
             if completed { $0.sessionsCompleted += 1 }
         }
+        SharedStore.updateLifetime { $0.record(minutes: minutes, completedSession: completed, friendSession: false) }
         SharedStore.focusSession = nil
         ShieldManager.clear(.focus)
         ActivityScheduler.cancelTimer(named: TimerName.focusEnd(session.id))
@@ -111,6 +112,7 @@ enum FocusEngine {
             $0.focusMinutes += minutes
             $0.friendSessions += 1
         }
+        SharedStore.updateLifetime { $0.record(minutes: minutes, completedSession: false, friendSession: true) }
         SharedStore.friendLock = nil
         ShieldManager.clear(.friendLock)
         ActivityScheduler.cancelTimer(named: TimerName.friendBreak(state.sessionID))

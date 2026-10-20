@@ -124,7 +124,7 @@ struct BlockListEditorView: View {
                                 Text(emoji)
                                     .font(.title2)
                                     .padding(6)
-                                    .background(list.emoji == emoji ? Color.omoLapis.opacity(0.4) : .clear, in: Circle())
+                                    .background(list.emoji == emoji ? Color.omoPrimary.opacity(0.4) : .clear, in: Circle())
                                     .onTapGesture { list.emoji = emoji }
                             }
                         }

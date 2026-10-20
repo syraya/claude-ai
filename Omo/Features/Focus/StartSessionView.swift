@@ -50,7 +50,7 @@ struct StartSessionView: View {
                 if let list = selectedList, list.isEmpty {
                     Text("“\(list.name)” has no apps yet. Add some in Block Lists.")
                         .font(.footnote)
-                        .foregroundStyle(Color.omoOchre)
+                        .foregroundStyle(Color.omoGold)
                 }
             }
 
@@ -59,7 +59,7 @@ struct StartSessionView: View {
                 TextField("e.g. Finish chapter 4 of biology", text: $intention)
                     .font(.system(.body, design: .serif))
                     .padding(12)
-                    .background(Color.omoOchre.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color.omoGold.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
                 Text("Write down what this session is for. It shows on your timer and on blocked apps.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -79,7 +79,7 @@ struct StartSessionView: View {
                                 .font(.subheadline.weight(.medium))
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 8)
-                                .background(minutes == preset ? Color.omoLapis : Color.omoInk.opacity(0.06), in: Capsule())
+                                .background(minutes == preset ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Capsule())
                                 .foregroundStyle(minutes == preset ? .white : .primary)
                                 .buttonStyle(.plain)
                         }
@@ -103,7 +103,7 @@ struct StartSessionView: View {
                     }
                 }
             }
-            .tint(.omoLapis)
+            .tint(.omoPrimary)
 
             Button {
                 guard let list = selectedList else { return }
@@ -146,7 +146,7 @@ struct StartSessionView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(isSelected ? Color.omoLapis : Color.omoInk.opacity(0.06), in: Capsule())
+            .background(isSelected ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Capsule())
             .foregroundStyle(isSelected ? .white : .primary)
         }
         .buttonStyle(.plain)

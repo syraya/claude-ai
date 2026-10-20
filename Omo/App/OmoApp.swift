@@ -16,20 +16,7 @@ struct OmoApp: App {
         // None of the services above touch Firebase until start() is called, so it's
         // fine that they're created before this runs.
         FirebaseBootstrap.configureIfPossible()
-        Self.styleNavigationBars()
-    }
-
-    /// Serif navigation titles in indigo ink, to match the rest of OMO.
-    private static func styleNavigationBars() {
-        let ink = UIColor(Color.omoInk)
-        func serif(_ size: CGFloat, _ weight: UIFont.Weight) -> UIFont {
-            let base = UIFont.systemFont(ofSize: size, weight: weight)
-            guard let descriptor = base.fontDescriptor.withDesign(.serif) else { return base }
-            return UIFont(descriptor: descriptor, size: size)
-        }
-        let appearance = UINavigationBar.appearance()
-        appearance.largeTitleTextAttributes = [.font: serif(34, .bold), .foregroundColor: ink]
-        appearance.titleTextAttributes = [.font: serif(17, .semibold), .foregroundColor: ink]
+        ThemeAppearance.apply()
     }
 
     var body: some Scene {
@@ -43,7 +30,6 @@ struct OmoApp: App {
                 .environment(auth)
                 .environment(friends)
                 .environment(together)
-                .preferredColorScheme(.light)
         }
     }
 }

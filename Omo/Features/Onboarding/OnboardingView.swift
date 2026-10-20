@@ -18,7 +18,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 24) {
             ProgressView(value: Double(step + 1), total: 4)
-                .tint(.omoLapis)
+                .tint(.omoPrimary)
                 .padding(.top, 12)
 
             Spacer()
@@ -110,7 +110,7 @@ struct OnboardingView: View {
         VStack(spacing: 18) {
             Image(systemName: icon)
                 .font(.system(size: 64))
-                .foregroundStyle(Color.omoLapis.gradient)
+                .foregroundStyle(Color.omoPrimary.gradient)
             Text(title)
                 .font(.omoSerif(.largeTitle, weight: .bold))
                 .multilineTextAlignment(.center)
