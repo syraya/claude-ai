@@ -2,11 +2,11 @@
 
 A Screen Time blocker for iPhone that you can use with friends.
 
-OMO is named for **Omoikane (思兼)**, the Shinto deity of wisdom and deliberation, whose name means "serving the thoughts of many people." Students in Japan pray to him before exams. The app follows that idea: think before you reach for a distraction, and study better together. The look is bright and calm, like a shrine on a clear morning: washi-paper background, torii vermilion, indigo ink, temple gold, and serif headings.
+OMO takes its name from **Omoikane**, a name that means "the thoughts of many": deep, deliberate thinking, done together. That idea is what the app is about: think before you reach for a distraction, and study better alongside other people. The look is a modern take on Renaissance paintings of philosophers, like Raphael's *School of Athens*: classical arches in perspective, parchment and plaster backgrounds, lapis-ultramarine and ochre-gold accents, and serif type.
 
 - **Block lists.** Pick the apps, categories and websites to block, and save as many named lists as you want ("Social", "Games", …).
 - **Focus sessions.** Choose a list and a length, and those apps are locked until time's up. Strict mode means no ending early.
-- **Intentions (ema).** At shrines, students write their wishes on wooden ema plaques. You can write one for each session ("Finish chapter 4"). It shows on the timer and on the block screen when you try to open a blocked app.
+- **Intentions.** Write what each session is for ("Finish chapter 4"). It appears as a small inscribed slip of paper, like the *cartellino* in Renaissance paintings, on the timer and on the block screen when you try to open a blocked app.
 - **Breaks with a reflection wait.** Before a break starts you sit through a short countdown (5–60 seconds, your choice) with a breathing circle and a question like *"Will this make the next hour better or worse?"*. Then you pick a break length and the apps re-lock on their own when it's over.
 - **Friends.** Add each other with a 6-character friend code. See each other's focus time and roughly how long you spent on distracting apps, plus a daily leaderboard and a 7-day chart.
 - **Study Circle.** Everyone joins a session with a 6-digit code (or an invite), the host starts it, and every phone locks. Each person's key is held by a friend, so with two people you hold each other's. **Only your keyholder can unlock you.** You can ask them for a break, and they can allow it, deny it, or unlock you for good.

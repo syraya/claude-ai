@@ -18,16 +18,16 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 24) {
             ProgressView(value: Double(step + 1), total: 4)
-                .tint(.omoVermilion)
+                .tint(.omoLapis)
                 .padding(.top, 12)
 
             Spacer()
 
             switch step {
             case 0:
-                page(icon: "sun.horizon.fill",
+                page(icon: "building.columns.fill",
                      title: "Welcome to OMO",
-                     text: "Named for Omoikane (思兼), the Shinto deity of wisdom whose name means \"serving the thoughts of many.\" Students visit his shrines before exams.\n\nOMO helps you think clearly: block distractions, pause before you give in, and study alongside friends.")
+                     text: "OMO takes its name from Omoikane, a name that means \"the thoughts of many.\" It stands for deep, deliberate thinking, done together.\n\nBlock distractions, pause before you give in, and study alongside friends.")
             case 1:
                 page(icon: "hourglass",
                      title: "Allow Screen Time access",
@@ -97,7 +97,7 @@ struct OnboardingView: View {
         VStack(spacing: 18) {
             Image(systemName: icon)
                 .font(.system(size: 64))
-                .foregroundStyle(Color.omoVermilion.gradient)
+                .foregroundStyle(Color.omoLapis.gradient)
             Text(title)
                 .font(.omoSerif(.largeTitle, weight: .bold))
                 .multilineTextAlignment(.center)

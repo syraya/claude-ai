@@ -23,6 +23,9 @@ struct ReflectionView: View {
         "Is this a choice, or a habit choosing for you?",
         "What would the version of you who passes this exam do now?",
         "Who are you studying for? Picture them for a moment.",
+        "“The unexamined life is not worth living.” (Socrates) What are you avoiding?",
+        "“You have power over your mind, not outside events.” (Marcus Aurelius)",
+        "“We suffer more often in imagination than in reality.” (Seneca)",
     ]
 
     var body: some View {
@@ -40,10 +43,10 @@ struct ReflectionView: View {
 
                 ZStack {
                     Circle()
-                        .fill(Color.omoMatcha.opacity(0.15))
+                        .fill(Color.omoVerdigris.opacity(0.15))
                         .scaleEffect(breatheIn ? 1.0 : 0.6)
                     Circle()
-                        .fill(Color.omoMatcha.opacity(0.25))
+                        .fill(Color.omoVerdigris.opacity(0.25))
                         .scaleEffect(breatheIn ? 0.75 : 0.45)
                     VStack(spacing: 6) {
                         Text(done ? "✓" : "\(Int(remaining.rounded(.up)))")
@@ -66,7 +69,7 @@ struct ReflectionView: View {
 
                 VStack(spacing: 12) {
                     Button("Never mind, back to it", action: onCancel)
-                        .buttonStyle(PrimaryButtonStyle(color: .omoMatcha))
+                        .buttonStyle(PrimaryButtonStyle(color: .omoVerdigris))
                     Button(done ? confirmLabel : "Wait \(Int(remaining.rounded(.up)))s…", action: onConfirm)
                         .buttonStyle(SecondaryButtonStyle())
                         .disabled(!done)

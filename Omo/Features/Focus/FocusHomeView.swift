@@ -45,9 +45,9 @@ struct FocusHomeView: View {
 
     private var todayCard: some View {
         HStack(spacing: 10) {
-            StatPill(value: Format.minutes(focus.today.focusMinutes), label: "Focused today", color: .omoMatcha)
-            StatPill(value: "\(focus.today.sessionsCompleted)", label: "Sessions", color: .omoVermilion)
-            StatPill(value: "\(focus.today.breaksTaken)", label: "Breaks", color: .omoGold)
+            StatPill(value: Format.minutes(focus.today.focusMinutes), label: "Focused today", color: .omoVerdigris)
+            StatPill(value: "\(focus.today.sessionsCompleted)", label: "Sessions", color: .omoLapis)
+            StatPill(value: "\(focus.today.breaksTaken)", label: "Breaks", color: .omoOchre)
         }
     }
 
@@ -55,7 +55,7 @@ struct FocusHomeView: View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Screen Time access needed", systemImage: "exclamationmark.triangle.fill")
                 .font(.headline)
-                .foregroundStyle(Color.omoGold)
+                .foregroundStyle(Color.omoOchre)
             Text("OMO can't block anything until you allow it.")
                 .foregroundStyle(.secondary)
             Button("Allow access") { Task { await screenTime.request() } }
@@ -71,7 +71,7 @@ struct FocusHomeView: View {
             HStack(spacing: 14) {
                 Image(systemName: "person.2.badge.key.fill")
                     .font(.title)
-                    .foregroundStyle(Color.omoMatcha)
+                    .foregroundStyle(Color.omoVerdigris)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(lock.isOnBreak ? "On a break from your study session" : "\(lock.keyholderName) has your key")
                         .font(.headline)

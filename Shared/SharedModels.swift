@@ -45,7 +45,7 @@ struct FocusSession: Codable, Identifiable {
     var breakStartedAt: Date?
     var breakEndsAt: Date?
     var totalBreakSeconds: TimeInterval = 0
-    /// What you're working toward, written like a wish on a shrine's ema plaque.
+    /// What you're working toward, shown on the timer and the block screen.
     var intention: String?
 
     var isOnBreak: Bool { breakEndsAt != nil }

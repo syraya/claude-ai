@@ -22,23 +22,23 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     private func makeConfiguration(appName: String?) -> ShieldConfiguration {
         let name = appName ?? "This app"
-        // OMO's bright palette: washi paper, indigo ink, torii vermilion.
-        let paper = UIColor(red: 0.98, green: 0.965, blue: 0.935, alpha: 1)
-        let ink = UIColor(red: 0.17, green: 0.19, blue: 0.31, alpha: 1)
+        // OMO's fresco palette: parchment, ink, lapis ultramarine.
+        let paper = UIColor(red: 0.98, green: 0.955, blue: 0.91, alpha: 1)
+        let ink = UIColor(red: 0.16, green: 0.17, blue: 0.27, alpha: 1)
         let subtle = ink.withAlphaComponent(0.7)
-        let vermilion = UIColor(red: 0.90, green: 0.33, blue: 0.24, alpha: 1)
+        let lapis = UIColor(red: 0.18, green: 0.29, blue: 0.62, alpha: 1)
 
         if let lock = SharedStore.friendLock, !lock.isOnBreak {
             return ShieldConfiguration(
                 backgroundBlurStyle: .systemUltraThinMaterialLight,
                 backgroundColor: paper,
-                icon: icon("person.2.badge.key.fill", vermilion),
+                icon: icon("person.2.badge.key.fill", lapis),
                 title: .init(text: "\(lock.keyholderName) holds your key", color: ink),
-                subtitle: .init(text: "\(name) stays closed until \(lock.keyholderName) unlocks you. Your study circle is counting on you.",
+                subtitle: .init(text: "\(name) stays closed until \(lock.keyholderName) unlocks you. Your circle is counting on you.",
                                 color: subtle),
                 primaryButtonLabel: .init(text: "Back to studying", color: .white),
-                primaryButtonBackgroundColor: vermilion,
-                secondaryButtonLabel: .init(text: "Ask for a break", color: vermilion)
+                primaryButtonBackgroundColor: lapis,
+                secondaryButtonLabel: .init(text: "Ask for a break", color: lapis)
             )
         }
 
@@ -50,23 +50,23 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
             return ShieldConfiguration(
                 backgroundBlurStyle: .systemUltraThinMaterialLight,
                 backgroundColor: paper,
-                icon: icon("sun.horizon.fill", vermilion),
+                icon: icon("building.columns.fill", lapis),
                 title: .init(text: "Stay with your thoughts", color: ink),
                 subtitle: .init(text: subtitle, color: subtle),
                 primaryButtonLabel: .init(text: "Back to focus", color: .white),
-                primaryButtonBackgroundColor: vermilion,
-                secondaryButtonLabel: breakText.map { ShieldConfiguration.Label(text: $0, color: vermilion) }
+                primaryButtonBackgroundColor: lapis,
+                secondaryButtonLabel: breakText.map { ShieldConfiguration.Label(text: $0, color: lapis) }
             )
         }
 
         return ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterialLight,
             backgroundColor: paper,
-            icon: icon("lock.fill", vermilion),
+            icon: icon("lock.fill", lapis),
             title: .init(text: "Blocked by OMO", color: ink),
             subtitle: .init(text: "Open OMO to see why.", color: subtle),
             primaryButtonLabel: .init(text: "OK", color: .white),
-            primaryButtonBackgroundColor: vermilion
+            primaryButtonBackgroundColor: lapis
         )
     }
 

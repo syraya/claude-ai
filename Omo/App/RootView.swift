@@ -17,13 +17,13 @@ struct RootView: View {
             if settings.settings.hasCompletedOnboarding {
                 TabView(selection: $router.tab) {
                     FocusHomeView()
-                        .tabItem { Label("Focus", systemImage: "sun.horizon.fill") }
+                        .tabItem { Label("Focus", systemImage: "building.columns.fill") }
                         .tag(AppTab.focus)
                     BlockListsView()
                         .tabItem { Label("Block Lists", systemImage: "square.stack.3d.up.fill") }
                         .tag(AppTab.lists)
                     TogetherView()
-                        .tabItem { Label("Circle", systemImage: "circle.hexagongrid.fill") }
+                        .tabItem { Label("Circle", systemImage: "person.3.fill") }
                         .tag(AppTab.together)
                     FriendsView()
                         .tabItem { Label("Friends", systemImage: "heart.fill") }
@@ -32,7 +32,7 @@ struct RootView: View {
                         .tabItem { Label("Settings", systemImage: "gearshape.fill") }
                         .tag(AppTab.settings)
                 }
-                .tint(.omoVermilion)
+                .tint(.omoLapis)
             } else {
                 OnboardingView()
             }

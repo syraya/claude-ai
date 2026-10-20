@@ -10,7 +10,7 @@ struct SignInCard: View {
         VStack(spacing: 16) {
             Image(systemName: "person.2.circle.fill")
                 .font(.system(size: 56))
-                .foregroundStyle(Color.omoVermilion.gradient)
+                .foregroundStyle(Color.omoLapis.gradient)
             Text("Many minds, one focus")
                 .font(.omoSerif(.title2, weight: .bold))
             Text(reason)
@@ -35,7 +35,7 @@ struct SignInCard: View {
             } else {
                 Text("Friends aren't set up in this build yet. Add GoogleService-Info.plist (see README) to turn them on.")
                     .font(.footnote)
-                    .foregroundStyle(Color.omoGold)
+                    .foregroundStyle(Color.omoOchre)
                     .multilineTextAlignment(.center)
             }
         }

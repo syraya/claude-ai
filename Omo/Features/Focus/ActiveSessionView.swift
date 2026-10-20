@@ -44,9 +44,9 @@ struct ActiveSessionView: View {
     private func focusContent(session: FocusSession, now: Date) -> some View {
         VStack(spacing: 22) {
             HStack {
-                Label("Focusing", systemImage: "sun.horizon.fill")
+                Label("Focusing", systemImage: "building.columns.fill")
                     .font(.headline)
-                    .foregroundStyle(Color.omoVermilion)
+                    .foregroundStyle(Color.omoLapis)
                 Spacer()
                 Text("\(session.blockListName) blocked")
                     .font(.subheadline)
@@ -54,20 +54,26 @@ struct ActiveSessionView: View {
             }
 
             ZStack {
-                ProgressRing(progress: session.progress(at: now))
-                VStack(spacing: 4) {
-                    Text(Format.clock(session.remaining(at: now)))
-                        .font(.system(size: 52, weight: .bold, design: .rounded).monospacedDigit())
-                    Text("ends \(session.endsAt.formatted(date: .omitted, time: .shortened))")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                ArcadeBackdrop()
+                ZStack {
+                    ProgressRing(progress: session.progress(at: now))
+                    VStack(spacing: 4) {
+                        Text(Format.clock(session.remaining(at: now)))
+                            .font(.system(size: 52, weight: .semibold, design: .serif).monospacedDigit())
+                            .foregroundStyle(Color.omoInk)
+                        Text("ends \(session.endsAt.formatted(date: .omitted, time: .shortened))")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                 }
+                .frame(width: 240, height: 240)
+                .offset(y: 22)
             }
-            .frame(width: 250, height: 250)
+            .frame(width: 290, height: 330)
             .frame(maxWidth: .infinity)
 
             if let intention = session.intention {
-                EmaView(text: intention)
+                IntentionCard(text: intention)
             }
 
             if session.allowsBreaks {
@@ -102,11 +108,11 @@ struct ActiveSessionView: View {
         return VStack(spacing: 22) {
             Label("On a break", systemImage: "cup.and.saucer.fill")
                 .font(.headline)
-                .foregroundStyle(Color.omoGold)
+                .foregroundStyle(Color.omoOchre)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
             ZStack {
-                ProgressRing(progress: breakLength > 0 ? 1 - left / breakLength : 1, color: .omoGold)
+                ProgressRing(progress: breakLength > 0 ? 1 - left / breakLength : 1, color: .omoOchre)
                 VStack(spacing: 4) {
                     Text(Format.clock(left))
                         .font(.system(size: 52, weight: .bold, design: .rounded).monospacedDigit())
@@ -119,7 +125,7 @@ struct ActiveSessionView: View {
             .frame(maxWidth: .infinity)
 
             Button("I'm done, back to focus") { focus.endBreak() }
-                .buttonStyle(PrimaryButtonStyle(color: .omoMatcha))
+                .buttonStyle(PrimaryButtonStyle(color: .omoVerdigris))
 
             Text("Session ends at \(session.endsAt.formatted(date: .omitted, time: .shortened))")
                 .font(.footnote)
