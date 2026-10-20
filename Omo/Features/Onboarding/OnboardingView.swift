@@ -26,8 +26,8 @@ struct OnboardingView: View {
             switch step {
             case 0:
                 page(icon: "building.columns.fill",
-                     title: "Welcome to OMO",
-                     text: "OMO takes its name from Omoikane, a name that means \"the thoughts of many.\" It stands for deep, deliberate thinking, done together.\n\nBlock distractions, pause before you give in, and study alongside friends.")
+                     title: "OMO",
+                     text: "thoughts of many\n\nBlock distractions, pause before you give in, and study alongside friends.")
             case 1:
                 page(icon: "hourglass",
                      title: "Allow Screen Time access",

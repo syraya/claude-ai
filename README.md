@@ -2,7 +2,7 @@
 
 A Screen Time blocker for iPhone that you can use with friends.
 
-OMO takes its name from **Omoikane**, a name that means "the thoughts of many": deep, deliberate thinking, done together. That idea is what the app is about: think before you reach for a distraction, and study better alongside other people. The look is a modern take on Renaissance paintings of philosophers, like Raphael's *School of Athens*: classical arches in perspective, parchment and plaster backgrounds, lapis-ultramarine and ochre-gold accents, and serif type.
+**OMO: thoughts of many.** Think before you reach for a distraction, and study better alongside other people. The look is a modern take on Renaissance paintings of philosophers, like Raphael's *School of Athens*: parchment backgrounds, lapis-ultramarine and ochre-gold accents, and serif type.
 
 - **Block lists.** Pick the apps, categories and websites to block, and save as many named lists as you want ("Social", "Games", …).
 - **Focus sessions.** Choose a list and a length, and those apps are locked until time's up. Strict mode means no ending early.
