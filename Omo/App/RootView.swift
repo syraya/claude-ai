@@ -40,6 +40,14 @@ struct RootView: View {
         // Colours come from your OMO, so rebuild everything when you pick a different one.
         .id(settings.settings.companion)
         .preferredColorScheme(settings.settings.companion.isDark ? .dark : .light)
+        .overlay {
+            // Sits outside the .id above, so it keeps playing while the screens are rebuilt.
+            if let arriving = settings.arrivingCompanion {
+                CompanionTransitionView(companion: arriving,
+                                        onCovered: { settings.settings.companion = arriving },
+                                        onFinished: { settings.arrivingCompanion = nil })
+            }
+        }
         .task { startServices() }
         .onChange(of: scenePhase) { _, phase in
             switch phase {

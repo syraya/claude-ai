@@ -64,6 +64,16 @@ final class SettingsStore {
         }
     }
 
+    /// An OMO you've just picked that's still arriving. RootView plays the transition
+    /// and swaps the theme while the screen is covered.
+    var arrivingCompanion: OmoCompanion?
+
+    /// Switch OMOs with a transition instead of snapping to the new theme.
+    func switchCompanion(to companion: OmoCompanion) {
+        guard companion != settings.companion, arrivingCompanion == nil else { return }
+        arrivingCompanion = companion
+    }
+
     /// The apps whose daily time friends can see.
     var trackedSelection: FamilyActivitySelection {
         didSet {

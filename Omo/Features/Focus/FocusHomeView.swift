@@ -20,7 +20,7 @@ struct FocusHomeView: View {
                         OmoHeader(selected: settings.settings.companion,
                                   stats: focus.lifetime,
                                   collapse: collapse) { companion in
-                            settings.settings.companion = companion
+                            settings.switchCompanion(to: companion)
                         }
                         .id("top")
                         .background(GeometryReader { geo in
@@ -88,7 +88,7 @@ struct FocusHomeView: View {
                 OmoJoinsView(companion: companion,
                              onUse: {
                                  focus.markCelebrated(companion)
-                                 settings.settings.companion = companion
+                                 settings.switchCompanion(to: companion)
                              },
                              onClose: { focus.markCelebrated(companion) })
             }
