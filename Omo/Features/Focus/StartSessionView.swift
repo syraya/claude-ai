@@ -91,7 +91,9 @@ struct StartSessionView: View {
                 Toggle(isOn: $allowsBreaks) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Allow breaks")
-                        Text("Up to \(settings.settings.maxBreaksPerSession), each after a \(settings.settings.reflectionSeconds)s pause")
+                        Text(settings.settings.hasUnlimitedBreaks
+                             ? "As many as you need, each after a \(settings.settings.reflectionSeconds)s pause"
+                             : "Up to \(settings.settings.maxBreaksPerSession), each after a \(settings.settings.reflectionSeconds)s pause")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }

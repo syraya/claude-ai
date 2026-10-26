@@ -28,12 +28,22 @@ struct SettingsView: View {
                             Text("\(minutes) min").tag(minutes)
                         }
                     }
-                    Stepper("Breaks per session: \(settings.settings.maxBreaksPerSession)",
-                            value: $settings.settings.maxBreaksPerSession, in: 1...10)
+                    Stepper {
+                        Text("Breaks per session: \(settings.settings.hasUnlimitedBreaks ? "Unlimited" : "\(settings.settings.maxBreaksPerSession)")")
+                    } onIncrement: {
+                        let count = settings.settings.maxBreaksPerSession
+                        guard count != FocusSession.unlimitedBreaks else { return }
+                        settings.settings.maxBreaksPerSession = count >= AppSettings.maxBreakSteps
+                            ? FocusSession.unlimitedBreaks : count + 1
+                    } onDecrement: {
+                        let count = settings.settings.maxBreaksPerSession
+                        settings.settings.maxBreaksPerSession = count == FocusSession.unlimitedBreaks
+                            ? AppSettings.maxBreakSteps : max(1, count - 1)
+                    }
                 } header: {
                     Text("Breaks")
                 } footer: {
-                    Text("Before any break starts you'll sit through the reflection wait. Long enough to ask yourself if you really want it.")
+                    Text("Before any break starts you'll sit through the reflection wait. Long enough to ask yourself if you really want it. Unlimited still makes you wait every time.")
                 }
 
                 Section {

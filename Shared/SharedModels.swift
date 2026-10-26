@@ -40,6 +40,7 @@ struct FocusSession: Codable, Identifiable {
     var endsAt: Date
     var allowsBreaks: Bool
     var allowsEndingEarly: Bool
+    /// `FocusSession.unlimitedBreaks` for no limit.
     var maxBreaks: Int
     var breaksTaken: Int = 0
     var breakStartedAt: Date?
@@ -48,7 +49,10 @@ struct FocusSession: Codable, Identifiable {
     /// What you're working toward, shown on the timer and the block screen.
     var intention: String?
 
+    static let unlimitedBreaks = Int.max
+
     var isOnBreak: Bool { breakEndsAt != nil }
+    var hasUnlimitedBreaks: Bool { maxBreaks == Self.unlimitedBreaks }
     var breaksLeft: Int { max(0, maxBreaks - breaksTaken) }
     var canTakeBreak: Bool { allowsBreaks && breaksLeft > 0 && !isOnBreak }
 
@@ -88,6 +92,7 @@ struct AppSettings: Codable, Equatable {
     /// How long you have to wait on the reflection screen before a break starts.
     var reflectionSeconds: Int = 10
     var defaultBreakMinutes: Int = 5
+    /// `FocusSession.unlimitedBreaks` for no limit.
     var maxBreaksPerSession: Int = 3
     var defaultSessionMinutes: Int = 45
     /// While a friend holds your key, iOS won't let you delete apps (including OMO).
@@ -118,6 +123,10 @@ struct AppSettings: Codable, Equatable {
 
     static let reflectionOptions = [5, 10, 15, 30, 60]
     static let breakOptions = [1, 3, 5, 10, 15]
+    /// The stepper goes 1…10, then Unlimited.
+    static let maxBreakSteps = 10
+
+    var hasUnlimitedBreaks: Bool { maxBreaksPerSession == FocusSession.unlimitedBreaks }
 }
 
 /// One day of numbers, kept on the phone and (if you're signed in) shared with friends.

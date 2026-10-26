@@ -80,8 +80,8 @@ struct ActiveSessionView: View {
                 Button {
                     showBreakFlow = true
                 } label: {
-                    Label(session.breaksLeft > 0
-                          ? "Take a break (\(session.breaksLeft) left)"
+                    Label(session.hasUnlimitedBreaks ? "Take a break"
+                          : session.breaksLeft > 0 ? "Take a break (\(session.breaksLeft) left)"
                           : "No breaks left",
                           systemImage: "cup.and.saucer.fill")
                 }
