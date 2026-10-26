@@ -73,9 +73,16 @@ final class FocusController {
 
     /// An OMO that has joined you since the app last celebrated one, if any.
     var uncelebratedCompanion: OmoCompanion? {
-        OmoCompanion.allCases.first {
+        // The developer code unlocks everything at once; don't celebrate each one.
+        guard !lifetime.developerAccess else { return nil }
+        return OmoCompanion.allCases.first {
             $0.unlock != .free && $0.isUnlocked(lifetime) && !lifetime.hasCelebrated($0)
         }
+    }
+
+    func setDeveloperAccess(_ isOn: Bool) {
+        SharedStore.updateLifetime { $0.developerAccess = isOn }
+        refresh()
     }
 
     func markCelebrated(_ companion: OmoCompanion) {

@@ -125,7 +125,7 @@ struct ActiveSessionView: View {
             .frame(maxWidth: .infinity)
 
             Button("I'm done, back to focus") { focus.endBreak() }
-                .buttonStyle(PrimaryButtonStyle(color: .omoSuccess))
+                .buttonStyle(PrimaryButtonStyle(color: .omoSuccess, textColor: .omoOnSuccess))
 
             Text("Session ends at \(session.endsAt.formatted(date: .omitted, time: .shortened))")
                 .font(.footnote)

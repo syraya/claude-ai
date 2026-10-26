@@ -69,7 +69,7 @@ struct ReflectionView: View {
 
                 VStack(spacing: 12) {
                     Button("Never mind, back to it", action: onCancel)
-                        .buttonStyle(PrimaryButtonStyle(color: .omoSuccess))
+                        .buttonStyle(PrimaryButtonStyle(color: .omoSuccess, textColor: .omoOnSuccess))
                     Button(done ? confirmLabel : "Wait \(Int(remaining.rounded(.up)))s…", action: onConfirm)
                         .buttonStyle(SecondaryButtonStyle())
                         .disabled(!done)

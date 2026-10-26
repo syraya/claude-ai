@@ -6,10 +6,13 @@ struct SettingsView: View {
     @Environment(SettingsStore.self) private var settings
     @Environment(AuthService.self) private var auth
     @Environment(ScreenTimeAuthorizer.self) private var screenTime
+    @Environment(FocusController.self) private var focus
 
     @State private var showTrackedPicker = false
     @State private var editingName = ""
     @State private var showDeleteAccount = false
+    @State private var developerCode = ""
+    @State private var codeProblem: String?
 
     var body: some View {
         @Bindable var settings = settings
@@ -113,15 +116,59 @@ struct SettingsView: View {
                 } footer: {
                     Text("OMO never sees which apps you block. Apple hands us anonymous tokens instead of app names.")
                 }
+
+                Section {
+                    if focus.lifetime.developerAccess {
+                        Label("Every OMO is unlocked", systemImage: "checkmark.seal.fill")
+                            .foregroundStyle(Color.omoPrimary)
+                        Button("Turn off developer access", role: .destructive, action: turnOffDeveloperAccess)
+                    } else {
+                        HStack {
+                            TextField("Enter code", text: $developerCode)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                                .submitLabel(.go)
+                                .onSubmit(redeemDeveloperCode)
+                            if !developerCode.isEmpty {
+                                Button("Unlock", action: redeemDeveloperCode)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Developer code")
+                } footer: {
+                    Text("For testing. Unlocks every OMO and its theme on this phone. Your focus hours and titles don't change.")
+                }
             }
             .scrollContentBackground(.hidden)
             .background(OmoBackground())
+            .topBanner($codeProblem)
             .navigationTitle("Settings")
             .familyActivityPicker(isPresented: $showTrackedPicker, selection: $settings.trackedSelection)
             .onAppear { editingName = auth.displayName }
             .onChange(of: auth.profile?.displayName) { _, name in editingName = name ?? "" }
             .sheet(isPresented: $showDeleteAccount) { DeleteAccountView() }
             .errorAlert($auth.errorMessage)
+        }
+    }
+
+    private func redeemDeveloperCode() {
+        guard !developerCode.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+        if DeveloperAccess.isValid(developerCode) {
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+            developerCode = ""
+            withAnimation { focus.setDeveloperAccess(true) }
+        } else {
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+            codeProblem = "That code didn't work"
+        }
+    }
+
+    private func turnOffDeveloperAccess() {
+        withAnimation { focus.setDeveloperAccess(false) }
+        // Go back to a free OMO if the one you're using hasn't been earned.
+        if !settings.settings.companion.isUnlocked(focus.lifetime) {
+            settings.switchCompanion(to: .glaux)
         }
     }
 

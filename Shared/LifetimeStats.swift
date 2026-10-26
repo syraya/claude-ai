@@ -22,6 +22,8 @@ struct LifetimeStats: Codable, Equatable {
     var earnedHolidays: [String] = []
     /// OMOs whose arrival the app has already celebrated with you.
     var celebratedCompanions: [String] = []
+    /// Every OMO unlocked by the developer code in Settings, for testing.
+    var developerAccess = false
 
     init() {}
 
@@ -40,6 +42,7 @@ struct LifetimeStats: Codable, Equatable {
         maxFriends = try c.decodeIfPresent(Int.self, forKey: .maxFriends) ?? 0
         earnedHolidays = try c.decodeIfPresent([String].self, forKey: .earnedHolidays) ?? []
         celebratedCompanions = try c.decodeIfPresent([String].self, forKey: .celebratedCompanions) ?? []
+        developerAccess = try c.decodeIfPresent(Bool.self, forKey: .developerAccess) ?? false
     }
 
     static let monthFormatter: DateFormatter = {

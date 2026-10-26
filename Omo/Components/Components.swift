@@ -14,6 +14,8 @@ extension Color {
     static var omoClay: Color { Color(palette.clay) }
     static var omoSuccess: Color { Color(palette.success) }
     static var omoBlush: Color { Color(palette.blush) }
+    /// Text on an `omoSuccess` button. Dark themes use a light success colour, so it gets dark text.
+    static var omoOnSuccess: Color { OmoCompanion.current.isDark ? Color(palette.paper) : .white }
 }
 
 /// The logo's own colours. They stay the same in every theme.
@@ -132,11 +134,12 @@ extension View {
 
 struct PrimaryButtonStyle: ButtonStyle {
     var color: Color = .omoPrimary
+    var textColor: Color = .white
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(.white)
+            .foregroundStyle(textColor)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(color.opacity(configuration.isPressed ? 0.7 : 1),

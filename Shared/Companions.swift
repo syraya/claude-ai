@@ -280,6 +280,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
     }
 
     func isUnlocked(_ stats: LifetimeStats) -> Bool {
+        if stats.developerAccess { return true }
         switch unlock {
         case .free: return true
         case .hours(let hours): return stats.totalFocusMinutes >= hours * 60
@@ -371,7 +372,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .selene:
             return ThemePalette(paper: RGB(0.07, 0.09, 0.17), card: RGB(0.11, 0.14, 0.25), ink: RGB(0.95, 0.92, 0.86),
                                 primary: RGB(0.38, 0.50, 0.90), gold: RGB(0.86, 0.67, 0.29), clay: RGB(0.85, 0.52, 0.38),
-                                success: RGB(0.45, 0.75, 0.65), blush: RGB(0.55, 0.40, 0.62))
+                                success: RGB(0xB5C0E0), blush: RGB(0.55, 0.40, 0.62))
         case .daphne:
             return ThemePalette(paper: RGB(0xEEF4EC), card: RGB(0xFBFDF9), ink: RGB(0x17301F),
                                 primary: RGB(0x2F6B45), gold: RGB(0x9BB85A), clay: RGB(0x4F7A3A),
@@ -379,7 +380,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .noor:
             return ThemePalette(paper: RGB(0xFFF2EF), card: RGB(0xFFFBFA), ink: RGB(0x3A1424),
                                 primary: RGB(0xC2264B), gold: RGB(0xE9A23B), clay: RGB(0xB8432F),
-                                success: RGB(0x3E8E5E), blush: RGB(0xF6BFC9))
+                                success: RGB(0xA8407A), blush: RGB(0xF6BFC9))
         case .sphinx:
             return ThemePalette(paper: RGB(0.955, 0.955, 0.948), card: RGB(1, 1, 1), ink: RGB(0.17, 0.18, 0.20),
                                 primary: RGB(0.22, 0.37, 0.43), gold: RGB(0.76, 0.61, 0.35), clay: RGB(0.55, 0.45, 0.40),
@@ -387,7 +388,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .nyx:
             return ThemePalette(paper: RGB(0.04, 0.035, 0.06), card: RGB(0.10, 0.08, 0.15), ink: RGB(0.94, 0.91, 0.98),
                                 primary: RGB(0.55, 0.36, 0.96), gold: RGB(0.77, 0.69, 0.99), clay: RGB(0.93, 0.45, 0.70),
-                                success: RGB(0.45, 0.80, 0.70), blush: RGB(0.43, 0.25, 0.75))
+                                success: RGB(0xD58AF0), blush: RGB(0.43, 0.25, 0.75))
         case .hippocampus:
             return ThemePalette(paper: RGB(0.94, 0.965, 0.95), card: RGB(1, 1, 1), ink: RGB(0.17, 0.23, 0.26),
                                 primary: RGB(0.78, 0.40, 0.35), gold: RGB(0.86, 0.68, 0.40), clay: RGB(0.28, 0.55, 0.55),
@@ -395,15 +396,15 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .phoenix:
             return ThemePalette(paper: RGB(0.975, 0.94, 0.89), card: RGB(1, 0.995, 0.985), ink: RGB(0.22, 0.18, 0.15),
                                 primary: RGB(0.68, 0.32, 0.19), gold: RGB(0.72, 0.62, 0.28), clay: RGB(0.24, 0.36, 0.27),
-                                success: RGB(0.45, 0.54, 0.27), blush: RGB(0.88, 0.62, 0.50))
+                                success: RGB(0xB23A48), blush: RGB(0.88, 0.62, 0.50))
         case .pegasus:
             return ThemePalette(paper: RGB(0.98, 0.955, 0.875), card: RGB(1, 0.995, 0.97), ink: RGB(0.20, 0.16, 0.10),
                                 primary: RGB(0.55, 0.39, 0.08), gold: RGB(0.85, 0.66, 0.20), clay: RGB(0.55, 0.20, 0.17),
-                                success: RGB(0.36, 0.50, 0.32), blush: RGB(0.93, 0.80, 0.52))
+                                success: RGB(0x4A7BB0), blush: RGB(0.93, 0.80, 0.52))
         case .apollo:
             return ThemePalette(paper: RGB(0.93, 0.95, 0.98), card: RGB(1, 1, 1), ink: RGB(0.15, 0.20, 0.30),
                                 primary: RGB(0.24, 0.42, 0.71), gold: RGB(0.88, 0.65, 0.31), clay: RGB(0.79, 0.50, 0.48),
-                                success: RGB(0.38, 0.62, 0.55), blush: RGB(0.95, 0.80, 0.70))
+                                success: RGB(0xC9711C), blush: RGB(0.95, 0.80, 0.70))
         case .athena:
             return ThemePalette(paper: RGB(0.95, 0.90, 0.80), card: RGB(0.985, 0.955, 0.895), ink: RGB(0.23, 0.16, 0.10),
                                 primary: RGB(0.48, 0.29, 0.14), gold: RGB(0.72, 0.53, 0.18), clay: RGB(0.55, 0.23, 0.17),
@@ -411,7 +412,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .huginnMuninn:
             return ThemePalette(paper: RGB(0xEEF0F2), card: RGB(0xFFFFFF), ink: RGB(0x1E232B),
                                 primary: RGB(0x2F3A4A), gold: RGB(0x8FA6BC), clay: RGB(0x6B5A48),
-                                success: RGB(0x5E8C7E), blush: RGB(0xB8C4CF))
+                                success: RGB(0x5A7896), blush: RGB(0xB8C4CF))
         case .anansi:
             return ThemePalette(paper: RGB(0xF7EFE2), card: RGB(0xFFFDF8), ink: RGB(0x2A2140),
                                 primary: RGB(0x2E3A6E), gold: RGB(0xD9A13B), clay: RGB(0xA4462B),
@@ -447,15 +448,15 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .janus:
             return ThemePalette(paper: RGB(0x14121C), card: RGB(0x211E2C), ink: RGB(0xF2EAD8),
                                 primary: RGB(0xA8843A), gold: RGB(0xE8CF8A), clay: RGB(0xB07A5A),
-                                success: RGB(0x7FB59E), blush: RGB(0x4A3F5E))
+                                success: RGB(0xC7CEDD), blush: RGB(0x4A3F5E))
         case .qilin:
             return ThemePalette(paper: RGB(0xFBEFE6), card: RGB(0xFFFCF8), ink: RGB(0x3A1A14),
                                 primary: RGB(0xB8322A), gold: RGB(0xD9A23A), clay: RGB(0x7A2E1E),
-                                success: RGB(0x4F8A5A), blush: RGB(0xF2B8A0))
+                                success: RGB(0xC9622A), blush: RGB(0xF2B8A0))
         case .psyche:
             return ThemePalette(paper: RGB(0xFBEFF3), card: RGB(0xFFFFFF), ink: RGB(0x3A2238),
                                 primary: RGB(0x8A4B8F), gold: RGB(0xD9A65A), clay: RGB(0xB5566E),
-                                success: RGB(0x5C9C8A), blush: RGB(0xE6C2E8))
+                                success: RGB(0xC2557F), blush: RGB(0xE6C2E8))
         case .gaia:
             return ThemePalette(paper: RGB(0xF0F5EC), card: RGB(0xFFFFFF), ink: RGB(0x1F2E1E),
                                 primary: RGB(0x2F6B3A), gold: RGB(0xC9A04A), clay: RGB(0x7A5A3A),
@@ -463,7 +464,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .loon:
             return ThemePalette(paper: RGB(0xFFFFFF), card: RGB(0xF8F6F3), ink: RGB(0x1A1A1A),
                                 primary: RGB(0xD52B1E), gold: RGB(0xB8862E), clay: RGB(0x1F4E79),
-                                success: RGB(0x4F8A6E), blush: RGB(0xF4C4BE))
+                                success: RGB(0x36789F), blush: RGB(0xF4C4BE))
         case .chiron:
             return ThemePalette(paper: RGB(0x22332B), card: RGB(0x2B3F35), ink: RGB(0xF1EEE4),
                                 primary: RGB(0x4E8A6C), gold: RGB(0xE9D58C), clay: RGB(0xE39A7A),
@@ -471,11 +472,11 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .hecate:
             return ThemePalette(paper: RGB(0x140D0A), card: RGB(0x221713), ink: RGB(0xF2E6D8),
                                 primary: RGB(0xC8661C), gold: RGB(0xF2B84B), clay: RGB(0xA04AC9),
-                                success: RGB(0x7FB59E), blush: RGB(0x5A2E1A))
+                                success: RGB(0xB48AF0), blush: RGB(0x5A2E1A))
         case .demeter:
             return ThemePalette(paper: RGB(0xFAF1E1), card: RGB(0xFFFCF5), ink: RGB(0x3A2614),
                                 primary: RGB(0x8A5A22), gold: RGB(0xD9A13B), clay: RGB(0xB5432C),
-                                success: RGB(0x6E7F45), blush: RGB(0xE8C79A))
+                                success: RGB(0xA83A3A), blush: RGB(0xE8C79A))
         case .yuleStag:
             return ThemePalette(paper: RGB(0xF4F7F5), card: RGB(0xFFFFFF), ink: RGB(0x1A2B22),
                                 primary: RGB(0x1F5A3E), gold: RGB(0xD4A23A), clay: RGB(0xB5302A),
