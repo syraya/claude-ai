@@ -143,7 +143,7 @@ struct StatPill: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.title2.weight(.bold).monospacedDigit())
+                .font(.system(.title2, design: .serif).weight(.semibold).monospacedDigit())
                 .foregroundStyle(color)
             Text(label)
                 .font(.caption)
