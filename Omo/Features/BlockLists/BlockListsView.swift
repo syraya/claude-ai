@@ -95,6 +95,9 @@ struct BlockListEditorView: View {
 
     @State private var showPicker = false
     @State private var confirmDelete = false
+    @State private var problem: String?
+    @State private var nameMissing = false
+    @FocusState private var nameFocused: Bool
 
     private let emojis = ["🚫", "📱", "🎮", "📺", "🛍️", "💬", "🎵", "📰", "🍿", "🧠", "📚", "🌙"]
 
@@ -104,8 +107,15 @@ struct BlockListEditorView: View {
         self.onSave = onSave
     }
 
-    private var canSave: Bool {
-        !list.name.trimmingCharacters(in: .whitespaces).isEmpty && !list.isEmpty
+    /// What's stopping the list from being saved, if anything.
+    private var missing: String? {
+        let noName = list.name.trimmingCharacters(in: .whitespaces).isEmpty
+        switch (noName, list.isEmpty) {
+        case (true, true): return "Give your list a name and choose some apps"
+        case (true, false): return "Give your list a name"
+        case (false, true): return "Choose at least one app or website"
+        case (false, false): return nil
+        }
     }
 
     /// Editing the list a running session uses would change nothing until next time.
@@ -118,6 +128,13 @@ struct BlockListEditorView: View {
             Form {
                 Section("Name") {
                     TextField("e.g. Social media", text: $list.name)
+                        .focused($nameFocused)
+                        .onChange(of: list.name) { _, _ in nameMissing = false }
+                        .listRowBackground(
+                            Color.omoCard.overlay(
+                                Rectangle().stroke(Color.omoClay.opacity(nameMissing ? 0.8 : 0), lineWidth: 2)
+                            )
+                        )
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack {
                             ForEach(emojis, id: \.self) { emoji in
@@ -166,6 +183,7 @@ struct BlockListEditorView: View {
             }
             .scrollContentBackground(.hidden)
             .background(OmoBackground())
+            .topBanner($problem)
             .navigationTitle(isNew ? "New block list" : list.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -173,13 +191,7 @@ struct BlockListEditorView: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        list.name = list.name.trimmingCharacters(in: .whitespaces)
-                        blockLists.save(list)
-                        onSave?(list)
-                        dismiss()
-                    }
-                    .disabled(!canSave)
+                    Button("Save", action: save)
                 }
             }
             .familyActivityPicker(isPresented: $showPicker, selection: $list.selection)
@@ -190,5 +202,19 @@ struct BlockListEditorView: View {
                 }
             }
         }
+    }
+
+    private func save() {
+        if let missing {
+            UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            withAnimation { nameMissing = list.name.trimmingCharacters(in: .whitespaces).isEmpty }
+            if nameMissing { nameFocused = true }
+            problem = missing
+            return
+        }
+        list.name = list.name.trimmingCharacters(in: .whitespaces)
+        blockLists.save(list)
+        onSave?(list)
+        dismiss()
     }
 }

@@ -90,6 +90,46 @@ extension View {
     }
 }
 
+/// A short message that drops in from the top of the screen and goes away on its own.
+struct TopBannerModifier: ViewModifier {
+    @Binding var message: String?
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(alignment: .top) {
+                if let message {
+                    HStack(spacing: 8) {
+                        Image(systemName: "exclamationmark.circle.fill")
+                            .foregroundStyle(Color.omoClay)
+                        Text(message)
+                            .foregroundStyle(Color.omoInk)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.omoCard, in: Capsule())
+                    .overlay(Capsule().stroke(Color.omoClay.opacity(0.3), lineWidth: 1))
+                    .shadow(color: Color.omoInk.opacity(0.15), radius: 12, y: 6)
+                    .padding(.top, 8)
+                    .padding(.horizontal, 20)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onTapGesture { self.message = nil }
+                    .task(id: message) {
+                        AccessibilityNotification.Announcement(message).post()
+                        try? await Task.sleep(for: .seconds(2.5))
+                        if self.message == message { self.message = nil }
+                    }
+                }
+            }
+            .animation(.spring(duration: 0.35), value: message)
+    }
+}
+
+extension View {
+    func topBanner(_ message: Binding<String?>) -> some View { modifier(TopBannerModifier(message: message)) }
+}
+
 struct PrimaryButtonStyle: ButtonStyle {
     var color: Color = .omoPrimary
 
