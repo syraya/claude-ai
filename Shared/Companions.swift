@@ -45,7 +45,7 @@ enum OmoUnlock: Equatable {
 /// Some are earned with focus hours, some with other milestones, and some only on holidays.
 enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
     // The path (focus hours), then milestones, then holidays in calendar order.
-    case glaux, selene, sphinx, nyx, hippocampus, phoenix, pegasus, apollo, athena, huginnMuninn, anansi, koi, thoth, dragon, odin, salmon, simurgh, quetzalcoatl, janus, qilin, psyche, gaia, loon, chiron, hecate, demeter, yuleStag
+    case glaux, selene, daphne, sphinx, nyx, hippocampus, phoenix, pegasus, apollo, athena, huginnMuninn, anansi, koi, thoth, dragon, odin, salmon, simurgh, quetzalcoatl, janus, qilin, psyche, gaia, loon, chiron, hecate, demeter, yuleStag
 
     enum Kind: String, CaseIterable {
         case path = "The Path"
@@ -59,6 +59,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .glaux: return "Glaux"
         case .selene: return "Selene"
+        case .daphne: return "Daphne"
         case .sphinx: return "Sphinx"
         case .nyx: return "Nyx"
         case .hippocampus: return "Hippocampus"
@@ -91,6 +92,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .glaux: return "Athena's owl"
         case .selene: return "The moon"
+        case .daphne: return "The laurel"
         case .sphinx: return "Keeper of riddles"
         case .nyx: return "Goddess of night"
         case .hippocampus: return "The sea-horse"
@@ -124,6 +126,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .glaux: return "The owl of wisdom, who sees clearly when all else is dark."
         case .selene: return "She lights the night for anyone still studying."
+        case .daphne: return "The nymph who became the laurel tree. Scholars are still crowned with her leaves, and \"baccalaureate\" comes from the laurel berry."
         case .sphinx: return "Guards the answer until you've thought it through."
         case .nyx: return "Older than the gods, and at home in the quiet of night."
         case .hippocampus: return "Your brain's memory centre is named after this sea-horse."
@@ -157,6 +160,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .glaux: return "Wisdom watches over the patient."
         case .selene: return "The night belongs to those who stay."
+        case .daphne: return "Keep growing. The laurel waits."
         case .sphinx: return "Answer, or remain."
         case .nyx: return "In the deepest quiet, the mind is sharpest."
         case .hippocampus: return "What you repeat, I keep."
@@ -190,6 +194,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .glaux: return "Parchment, lapis blue and ochre gold."
         case .selene: return "Midnight navy and moonlight. Dark, and free."
+        case .daphne: return "Sage, forest and laurel green. Free."
         case .sphinx: return "Cool marble and slate."
         case .nyx: return "Black and deep violet."
         case .hippocampus: return "Sea-foam and coral."
@@ -222,6 +227,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .glaux: return .free
         case .selene: return .free
+        case .daphne: return .free
         case .sphinx: return .hours(10)
         case .nyx: return .hours(50)
         case .hippocampus: return .hours(100)
@@ -360,6 +366,10 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
             return ThemePalette(paper: RGB(0.07, 0.09, 0.17), card: RGB(0.11, 0.14, 0.25), ink: RGB(0.95, 0.92, 0.86),
                                 primary: RGB(0.38, 0.50, 0.90), gold: RGB(0.86, 0.67, 0.29), clay: RGB(0.85, 0.52, 0.38),
                                 success: RGB(0.45, 0.75, 0.65), blush: RGB(0.55, 0.40, 0.62))
+        case .daphne:
+            return ThemePalette(paper: RGB(0xEEF4EC), card: RGB(0xFBFDF9), ink: RGB(0x17301F),
+                                primary: RGB(0x2F6B45), gold: RGB(0x9BB85A), clay: RGB(0x4F7A3A),
+                                success: RGB(0x3E9A6A), blush: RGB(0xC9E0BC))
         case .sphinx:
             return ThemePalette(paper: RGB(0.955, 0.955, 0.948), card: RGB(1, 1, 1), ink: RGB(0.17, 0.18, 0.20),
                                 primary: RGB(0.22, 0.37, 0.43), gold: RGB(0.76, 0.61, 0.35), clay: RGB(0.55, 0.45, 0.40),
