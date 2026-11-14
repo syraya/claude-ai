@@ -51,13 +51,13 @@ Shared/Figures.xcassets          The OMO figures (SVG)
 
 ## Setup (on a Mac)
 
-You need a Mac with **Xcode 16 or newer**, an **iPhone** (Screen Time blocking does not work in the simulator), and a free Apple ID to start. Publishing needs the paid Apple Developer Program ($99/year).
+You need a Mac with **Xcode 16 or newer**, an **iPhone** (Screen Time blocking does not work in the simulator), and the paid **Apple Developer Program** ($99/year, [developer.apple.com/programs/enroll](https://developer.apple.com/programs/enroll/)). A free Apple ID isn't enough even to run OMO on your own phone, because free accounts can't use the Family Controls (Screen Time), push notification or Sign in with Apple capabilities. Enroll first; approval can take up to a couple of days.
 
 ### 1. Generate the Xcode project
 
 ```bash
 brew install xcodegen          # install Homebrew first if you don't have it: https://brew.sh
-git clone <this repo>
+git clone -b claude/busy-noether-s4gads https://github.com/syraya/claude-ai.git
 cd claude-ai
 ```
 
