@@ -79,6 +79,11 @@ struct OnboardingView: View {
                     if let error = screenTime.errorMessage {
                         Text(error).font(.footnote).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
+                    #if targetEnvironment(simulator)
+                    // Screen Time can't be authorized in the simulator, so let previews get past it.
+                    Button("Skip (simulator only)") { step = 2 }
+                        .font(.footnote)
+                    #endif
                 case 2:
                     Button(pickedCount == 0 ? "Choose apps" : "Change apps") { showPicker = true }
                         .buttonStyle(SecondaryButtonStyle())
