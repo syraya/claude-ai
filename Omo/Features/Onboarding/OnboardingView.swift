@@ -91,6 +91,10 @@ struct OnboardingView: View {
                         .buttonStyle(PrimaryButtonStyle())
                         .disabled(pickedCount == 0)
                         .opacity(pickedCount == 0 ? 0.5 : 1)
+                    if pickedCount == 0 {
+                        Button("Skip for now") { step = 3 }
+                            .font(.footnote)
+                    }
                 default:
                     Button("Turn on notifications") {
                         Task {
