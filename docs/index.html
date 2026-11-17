@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMO Support</title>
+<meta name="description" content="Help and contact for OMO, the focus app you use with friends.">
+<style>
+  :root {
+    --paper: #FAF4E8; --card: #FFFFFF; --ink: #292B45; --muted: #5E6075;
+    --lapis: #2E4A9E; --gold: #D6A03B; --line: rgba(41, 43, 69, 0.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --paper: #121729; --card: #1C2340; --ink: #F2EBDB; --muted: #B9B4C6;
+            --lapis: #8FA6F0; --gold: #DDAB4A; --line: rgba(242, 235, 219, 0.12); }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 17px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 680px; margin: 0 auto; padding: 48px 20px 64px; }
+  h1, h2 { font-family: "New York", "Iowan Old Style", Georgia, serif; line-height: 1.2; }
+  h1 { font-size: 2.4rem; margin: 18px 0 4px; letter-spacing: 0.04em; }
+  h2 { font-size: 1.35rem; margin: 0 0 8px; }
+  .tagline { font-family: "New York", Georgia, serif; font-style: italic; color: var(--muted); margin: 0 0 28px; }
+  header { text-align: center; }
+  header svg { width: 88px; height: 88px; border-radius: 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 20px 22px; margin: 16px 0; }
+  .card p { margin: 0 0 10px; color: var(--muted); }
+  .card p:last-child { margin-bottom: 0; }
+  .contact { text-align: center; }
+  .contact a { color: var(--lapis); font-weight: 600; font-size: 1.1rem; }
+  .label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 36px 0 4px; }
+  a { color: var(--lapis); }
+  footer { text-align: center; color: var(--muted); font-size: 0.9rem; margin-top: 40px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <svg viewBox="0 0 100 100" role="img" aria-label="OMO logo"><rect width="100" height="100" fill="#2E4A9E"/><rect x="25" y="30.5" width="50" height="50" fill="none" stroke="#D6A03B" stroke-width="3"/><circle cx="50" cy="50.0" r="30.5" fill="none" stroke="#FAF4E8" stroke-width="3"/><rect x="40.75" y="37.20" width="6" height="34.41" fill="#FAF4E8"/><rect x="38.95" y="34.40" width="9.6" height="2.8" rx="0.6" fill="#D6A03B"/><rect x="38.95" y="71.61" width="9.6" height="2.8" rx="0.6" fill="#D6A03B"/><rect x="53.25" y="37.20" width="6" height="34.41" fill="#FAF4E8"/><rect x="51.45" y="34.40" width="9.6" height="2.8" rx="0.6" fill="#D6A03B"/><rect x="51.45" y="71.61" width="9.6" height="2.8" rx="0.6" fill="#D6A03B"/></svg>
+    <h1>OMO</h1>
+    <p class="tagline">thoughts of many</p>
+  </header>
+
+  <div class="card contact">
+    <h2>Need help?</h2>
+    <p>Email us and we'll get back to you, usually within a couple of days.</p>
+    <p><a href="mailto:SUPPORT_EMAIL">SUPPORT_EMAIL</a></p>
+  </div>
+
+  <p class="label">Common questions</p>
+
+  <div class="card">
+    <h2>OMO isn't blocking my apps</h2>
+    <p>Check that OMO has Screen Time access: in OMO, go to Settings › Permissions, or in your iPhone's Settings, go to Screen Time › Apps with Screen Time Access. Then make sure your block list actually has apps in it (Block Lists tab).</p>
+    <p>Blocking only works on a real iPhone, not in a simulator.</p>
+  </div>
+
+  <div class="card">
+    <h2>My schedule didn't turn on</h2>
+    <p>Schedules run even when OMO is closed, but iOS can be a minute or so late. Check the schedule is switched on, that today is one of its days, and that its block list isn't empty. Opening OMO during the block always turns it on.</p>
+  </div>
+
+  <div class="card">
+    <h2>A friend holds my key and their phone died</h2>
+    <p>In the Circle tab, use the emergency exit. You can unlock yourself after a 60-second wait, and your keyholder is told you used it.</p>
+  </div>
+
+  <div class="card">
+    <h2>Why do I have to wait before a break?</h2>
+    <p>That pause is the point: a few seconds to ask if you really want the break. You can change how long it is in Settings › Breaks.</p>
+  </div>
+
+  <div class="card">
+    <h2>How do I unlock more OMOs?</h2>
+    <p>Most come with lifetime focus hours. Others come from adding friends, finishing sessions, keeping streaks, Study Circles, or focusing 25 minutes on certain holidays. Tap a locked OMO to see what it takes.</p>
+  </div>
+
+  <div class="card">
+    <h2>How do I delete my account?</h2>
+    <p>In OMO, go to Settings › Delete account. That removes your profile, friends and shared stats from our servers. Deleting the app removes everything stored on your phone.</p>
+  </div>
+
+  <footer>
+    <p><a href="privacy.html">Privacy policy</a></p>
+    <p>OMO is a focus app for iPhone that you use with friends.</p>
+  </footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# GitHub Pages: publish only the support and privacy pages, not the working notes.
+exclude:
+  - APP_STORE.md
+  - APP_STORE_LISTING.md
+  - app-store
+  - brand
