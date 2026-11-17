@@ -59,9 +59,11 @@ study,screen time,app blocker,productivity,pomodoro,timer,detox,habit,school,lim
 
 | Field | Value |
 |---|---|
-| Support URL | Required. A simple page with a contact email works (Notion, GitHub Pages, Google Sites). |
-| Privacy Policy URL | Required. Same text as Settings › Privacy policy in the app. |
+| Support URL | https://syraya.github.io/claude-ai/ (docs/index.html, once GitHub Pages is on) |
+| Privacy Policy URL | https://syraya.github.io/claude-ai/privacy.html (docs/privacy.html) |
 | Marketing URL | Optional. |
+
+Support email: omoikaneapp@gmail.com
 
 ## Copyright
 
