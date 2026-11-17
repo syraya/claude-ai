@@ -110,7 +110,7 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Link("Privacy policy", destination: URL(string: "https://example.com/omo/privacy")!)
+                    NavigationLink("Privacy policy") { PrivacyPolicyView() }
                     LabeledContent("Version",
                                    value: Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.0")
                 } footer: {

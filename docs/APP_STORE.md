@@ -29,7 +29,7 @@ Screen Time apps need special permission to be distributed. Development builds o
 - [x] **Account deletion** is in the app (Settings › Delete account), and it revokes the Apple token, as Apple requires.
 - [x] **Emergency exit.** Reviewers dislike apps that can trap users. Mention it in the review notes.
 - [x] The app works without friends, so a reviewer can test it alone.
-- [ ] **Privacy policy URL.** Host one (a free GitHub Pages or Notion page is fine) and replace `https://example.com/omo/privacy` in `SettingsView.swift`. A starting point is below.
+- [ ] **Privacy policy URL.** The app shows its policy itself (Settings › Privacy policy, `PrivacyPolicyView.swift`), but App Store Connect also needs a public web address for it. Put the same text on a free GitHub Pages or Notion page. A starting point is below.
 - [ ] **Developer code.** Settings › Developer code unlocks every OMO for testing. Apple doesn't allow hidden features, so either put the code in the review notes ("Settings › Developer code unlocks all themes for review: …") or remove the section before submitting. Only its SHA-256 is in the code (`Shared/DeveloperAccess.swift`); to change it, hash the new code's letters and digits, uppercased.
 - [ ] **Review notes.** Give the reviewer a demo flow. Suggested text:
 
