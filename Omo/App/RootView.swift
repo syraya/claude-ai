@@ -14,7 +14,9 @@ struct RootView: View {
         @Bindable var router = router
 
         Group {
-            if settings.settings.hasCompletedOnboarding {
+            if let demo = demoScreen {
+                demo
+            } else if settings.settings.hasCompletedOnboarding {
                 TabView(selection: $router.tab) {
                     FocusHomeView()
                         .tabItem { Label("Focus", systemImage: "building.columns.fill") }
@@ -73,6 +75,25 @@ struct RootView: View {
         auth.start()
         settings.restartUsageTracking()
         becameActive()
+        ScreenshotDemo.route(router)
+    }
+
+    /// Screens that aren't tabs, opened directly for simulator screenshots.
+    private var demoScreen: AnyView? {
+        switch ScreenshotDemo.screen {
+        case "session":
+            return AnyView(NavigationStack {
+                ScrollView { ActiveSessionView().padding() }
+                    .background(OmoBackground())
+                    .navigationTitle("Focus")
+            })
+        case "lifetime":
+            return AnyView(NavigationStack { LifetimeView() })
+        case "omos":
+            return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime) { _ in })
+        default:
+            return nil
+        }
     }
 
     private func becameActive() {

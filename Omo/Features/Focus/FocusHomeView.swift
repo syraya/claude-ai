@@ -41,7 +41,7 @@ struct FocusHomeView: View {
                         }
                         .buttonStyle(.plain)
 
-                        if !screenTime.isApproved {
+                        if !screenTime.isApproved && !ScreenshotDemo.isActive {
                             permissionCard
                         }
 
@@ -75,7 +75,8 @@ struct FocusHomeView: View {
                     .padding(.trailing, 16)
                     .padding(.top, 6)
                     .scaleEffect(0.4 + 0.6 * collapse, anchor: .topTrailing)
-                    .opacity(collapse)
+                    // Fully hidden until you've actually scrolled (collapse rests a little above 0).
+                    .opacity(max(0, collapse - 0.15) / 0.85)
                     .allowsHitTesting(collapse > 0.6)
                     .accessibilityHidden(collapse < 0.6)
                 }

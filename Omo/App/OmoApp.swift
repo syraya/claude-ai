@@ -4,6 +4,8 @@ import SwiftUI
 struct OmoApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
+    // Must stay first: the stores below read the data it seeds (simulator screenshots only).
+    private let demoSeeded = ScreenshotDemo.seedIfRequested()
     @State private var focus = FocusController()
     @State private var blockLists = BlockListStore()
     @State private var settings = SettingsStore()

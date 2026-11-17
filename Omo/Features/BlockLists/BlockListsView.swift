@@ -156,7 +156,7 @@ struct BlockListsView: View {
                 .font(.largeTitle)
             VStack(alignment: .leading, spacing: 6) {
                 Text(list.name).font(.headline)
-                Text(list.summary).font(.subheadline).foregroundStyle(.secondary)
+                Text(ScreenshotDemo.summary(for: list) ?? list.summary).font(.subheadline).foregroundStyle(.secondary)
                 if !list.selection.applicationTokens.isEmpty {
                     HStack(spacing: 4) {
                         ForEach(Array(list.selection.applicationTokens.prefix(6)), id: \.self) { token in
