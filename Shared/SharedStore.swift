@@ -18,6 +18,7 @@ enum SharedStore {
         static let trackedSelection = "trackedSelection"
         static let pendingShieldRequest = "pendingShieldRequest"
         static let lifetime = "lifetime"
+        static let schedules = "schedules"
     }
 
     private static func read<T: Decodable>(_ type: T.Type, _ key: String) -> T? {
@@ -36,6 +37,11 @@ enum SharedStore {
     static var blockLists: [BlockList] {
         get { read([BlockList].self, Key.blockLists) ?? [] }
         set { write(newValue, Key.blockLists) }
+    }
+
+    static var schedules: [BlockSchedule] {
+        get { read([BlockSchedule].self, Key.schedules) ?? [] }
+        set { write(newValue, Key.schedules) }
     }
 
     static var focusSession: FocusSession? {

@@ -62,6 +62,21 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
             )
         }
 
+        if let schedule = ScheduleEngine.activeSchedules().first {
+            let until = schedule.endDate().map { " until \($0.formatted(date: .omitted, time: .shortened))" } ?? ""
+            let title = schedule.name.isEmpty ? "Scheduled block" : schedule.name
+            return ShieldConfiguration(
+                backgroundBlurStyle: blur,
+                backgroundColor: paper,
+                icon: UIImage(named: companion.imageName) ?? icon("calendar.badge.clock", lapis),
+                title: .init(text: title, color: ink),
+                subtitle: .init(text: "\(name) is blocked\(until) by your schedule. This time is set aside on purpose.",
+                                color: subtle),
+                primaryButtonLabel: .init(text: "Back to it", color: .white),
+                primaryButtonBackgroundColor: lapis
+            )
+        }
+
         return ShieldConfiguration(
             backgroundBlurStyle: blur,
             backgroundColor: paper,

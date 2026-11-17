@@ -19,9 +19,9 @@ options:
 
 settings:
   base:
-    DEVELOPMENT_TEAM: ""                       # your 10-character Apple Team ID
-    APP_BUNDLE_ID: com.example.omo        # must be unique on the App Store
-    APP_GROUP_ID: group.com.example.omo   # "group." + something unique
+    DEVELOPMENT_TEAM: "3S8BF927L9"             # your 10-character Apple Team ID
+    APP_BUNDLE_ID: com.hserieh.omo        # must be unique on the App Store
+    APP_GROUP_ID: group.com.hserieh.omo   # "group." + something unique
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"

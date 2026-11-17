@@ -49,6 +49,8 @@ struct FocusHomeView: View {
                             friendLockCard(lock)
                         }
 
+                        ScheduleStatusCard()
+
                         if focus.session != nil {
                             ActiveSessionView()
                         } else {

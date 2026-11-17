@@ -4,14 +4,24 @@ import FamilyControls
 struct BlockListsView: View {
     @Environment(BlockListStore.self) private var blockLists
     @Environment(FocusController.self) private var focus
+    @Environment(SettingsStore.self) private var settings
 
     @State private var editing: BlockList?
     @State private var creating: BlockList?
+    @State private var editingSchedule: BlockSchedule?
+    @State private var creatingSchedule: BlockSchedule?
+    /// A schedule that's blocking now, waiting on the reflection wait before it turns off.
+    @State private var turningOff: BlockSchedule?
 
     var body: some View {
+        @Bindable var blockLists = blockLists
+
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
+                    schedulesSection
+
+                    sectionTitle("Lists")
                     if blockLists.lists.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "square.stack.3d.up.slash")
@@ -44,11 +54,18 @@ struct BlockListsView: View {
             .navigationTitle("Block Lists")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        creating = BlockList(name: "")
+                    Menu {
+                        Button("New block list", systemImage: "square.stack.3d.up") {
+                            creating = BlockList(name: "")
+                        }
+                        Button("New schedule", systemImage: "calendar.badge.clock") {
+                            creatingSchedule = BlockSchedule()
+                        }
+                        .disabled(!blockLists.canAddSchedule)
                     } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Add")
                 }
             }
             .sheet(item: $editing) { list in
@@ -57,7 +74,80 @@ struct BlockListsView: View {
             .sheet(item: $creating) { list in
                 BlockListEditorView(list: list, isNew: true)
             }
+            .sheet(item: $editingSchedule) { schedule in
+                ScheduleEditorView(schedule: schedule, isNew: false)
+            }
+            .sheet(item: $creatingSchedule) { schedule in
+                ScheduleEditorView(schedule: schedule, isNew: true)
+            }
+            .fullScreenCover(item: $turningOff) { schedule in
+                ReflectionView(seconds: settings.settings.reflectionSeconds,
+                               title: "Turn off “\(schedule.name)” early?",
+                               confirmLabel: "Turn it off",
+                               onConfirm: {
+                                   blockLists.setEnabled(schedule, false)
+                                   turningOff = nil
+                               },
+                               onCancel: { turningOff = nil })
+            }
+            .errorAlert($blockLists.scheduleError)
         }
+    }
+
+    // MARK: Schedules
+
+    private var schedulesSection: some View {
+        VStack(spacing: 14) {
+            sectionTitle("Schedules")
+            if blockLists.schedules.isEmpty {
+                Button {
+                    creatingSchedule = BlockSchedule()
+                } label: {
+                    HStack(spacing: 14) {
+                        Image(systemName: "calendar.badge.clock")
+                            .font(.title)
+                            .foregroundStyle(Color.omoPrimary)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Block on a schedule").font(.headline)
+                            Text("Like 9 to 5 on weekdays, or bedtime every night. It turns on by itself, even with OMO closed.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(Color.omoPrimary)
+                    }
+                    .card()
+                }
+                .buttonStyle(.plain)
+            }
+            ForEach(blockLists.schedules) { schedule in
+                ScheduleRow(schedule: schedule,
+                            list: blockLists.list(id: schedule.blockListID),
+                            onOpen: { editingSchedule = schedule },
+                            onToggle: { isOn in toggle(schedule, isOn) })
+            }
+        }
+    }
+
+    /// Turning off a schedule that's blocking right now asks for the reflection wait first.
+    private func toggle(_ schedule: BlockSchedule, _ isOn: Bool) {
+        if !isOn, schedule.isActive() {
+            guard !schedule.isStrict else { return }
+            turningOff = schedule
+        } else {
+            blockLists.setEnabled(schedule, isOn)
+        }
+    }
+
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(.caption.weight(.semibold))
+            .kerning(1.5)
+            .foregroundStyle(Color.omoClay)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
     }
 
     private func row(_ list: BlockList) -> some View {

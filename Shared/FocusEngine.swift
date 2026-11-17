@@ -194,6 +194,8 @@ enum FocusEngine {
             if let breakEnd = state.breakEndsAt, now >= breakEnd { state.breakEndsAt = nil }
             applyFriendLock(state)
         }
+
+        ScheduleEngine.reconcile(at: now)
     }
 
     // MARK: Usage tracking

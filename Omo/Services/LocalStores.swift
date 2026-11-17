@@ -27,9 +27,13 @@ final class ScreenTimeAuthorizer {
 @Observable @MainActor
 final class BlockListStore {
     private(set) var lists: [BlockList]
+    private(set) var schedules: [BlockSchedule]
+    /// Set when iOS refuses a schedule.
+    var scheduleError: String?
 
     init() {
         lists = SharedStore.blockLists
+        schedules = SharedStore.schedules
     }
 
     func list(id: UUID?) -> BlockList? {
@@ -44,11 +48,48 @@ final class BlockListStore {
             lists.append(list)
         }
         SharedStore.blockLists = lists
+        // A schedule blocking this list right now picks up the change.
+        ScheduleEngine.reconcile()
     }
 
     func delete(_ list: BlockList) {
         lists.removeAll { $0.id == list.id }
         SharedStore.blockLists = lists
+        ScheduleEngine.reconcile()
+    }
+
+    // MARK: Schedules
+
+    var canAddSchedule: Bool { schedules.count < ScheduleEngine.maxSchedules }
+
+    func save(_ schedule: BlockSchedule) {
+        if let index = schedules.firstIndex(where: { $0.id == schedule.id }) {
+            schedules[index] = schedule
+        } else {
+            schedules.append(schedule)
+        }
+        syncSchedules()
+    }
+
+    func delete(_ schedule: BlockSchedule) {
+        schedules.removeAll { $0.id == schedule.id }
+        ScheduleEngine.remove(schedule)
+        syncSchedules()
+    }
+
+    func setEnabled(_ schedule: BlockSchedule, _ isEnabled: Bool) {
+        var changed = schedule
+        changed.isEnabled = isEnabled
+        save(changed)
+    }
+
+    private func syncSchedules() {
+        SharedStore.schedules = schedules
+        do {
+            try ScheduleEngine.sync()
+        } catch {
+            scheduleError = "iOS wouldn't set up one of your schedules, so it may not turn on by itself. Opening OMO during the block still turns it on."
+        }
     }
 }
 

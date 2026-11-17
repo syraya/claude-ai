@@ -4,9 +4,16 @@ import Foundation
 /// iOS wakes this up in the background when one of our scheduled timers ends or a
 /// usage threshold is crossed. It has a small memory budget, so keep it lean.
 final class OmoMonitorExtension: DeviceActivityMonitor {
+    /// A scheduled block starting.
+    override func intervalDidStart(for activity: DeviceActivityName) {
+        super.intervalDidStart(for: activity)
+        ScheduleEngine.handleEvent(named: activity.rawValue)
+    }
+
     override func intervalDidEnd(for activity: DeviceActivityName) {
         super.intervalDidEnd(for: activity)
         FocusEngine.handleTimer(named: activity.rawValue)
+        ScheduleEngine.handleEvent(named: activity.rawValue)
     }
 
     /// Short timers (under 15 minutes) land here instead; see ActivityScheduler.
