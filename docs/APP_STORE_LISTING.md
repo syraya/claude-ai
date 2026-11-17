@@ -89,7 +89,7 @@ Block lists, schedules and the apps people pick never leave the phone.
 
 ## Screenshots
 
-Six 6.9-inch screenshots (1320 × 2868), in this order:
+Six screenshots for the "iPhone with Dynamic Island (medium display)" slot, 1206 × 2622 (6.3-inch), in this order:
 
 1. Think before you scroll (Focus tab, Glaux)
 2. Focus with intention (a session with its intention, Daphne)

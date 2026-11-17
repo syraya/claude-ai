@@ -1,9 +1,15 @@
 // Builds the App Store screenshots: each raw simulator capture, scaled down, under a
 // serif caption, on a background sampled from the screenshot's own theme.
-// Run: swift make-frames.swift   (from this folder)
+// Run: swift make-frames.swift [width height folder]   (from this folder)
+// Default 1206 x 2622, the 6.3-inch size App Store Connect asks for.
 import AppKit
 
-let width = 1320, height = 2868
+let args = CommandLine.arguments
+let width = args.count > 2 ? Int(args[1])! : 1206
+let height = args.count > 2 ? Int(args[2])! : 2622
+let folderName = args.count > 3 ? args[3] : "App Store \(width)x\(height)"
+/// Everything was laid out at 1320 points wide; this scales it to the chosen size.
+let k = CGFloat(width) / 1320
 let folder = URL(fileURLWithPath: FileManager.default.currentDirectoryPath)
 
 let shots: [(file: String, title: String, subtitle: String)] = [
@@ -26,7 +32,7 @@ func luminance(_ color: NSColor) -> CGFloat {
     return 0.2126 * c.redComponent + 0.7152 * c.greenComponent + 0.0722 * c.blueComponent
 }
 
-let output = folder.appendingPathComponent("App Store 6.9 inch")
+let output = folder.appendingPathComponent(folderName)
 try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
 
 for shot in shots {
@@ -35,7 +41,7 @@ for shot in shots {
         print("missing \(shot.file)"); continue
     }
     // The theme's paper colour, just under the status bar.
-    let paper = rawRep.colorAt(x: 40, y: 260) ?? .white
+    let paper = rawRep.colorAt(x: 40, y: rawRep.pixelsHigh * 260 / 2868) ?? .white
     let isDark = luminance(paper) < 0.4
     let ink = isDark ? NSColor(srgbRed: 0.96, green: 0.93, blue: 0.87, alpha: 1)
                      : NSColor(srgbRed: 0.14, green: 0.13, blue: 0.18, alpha: 1)
@@ -58,32 +64,32 @@ for shot in shots {
     centered.alignment = .center
     centered.lineBreakMode = .byWordWrapping
     let title = NSAttributedString(string: shot.title, attributes: [
-        .font: serif(104, .bold), .foregroundColor: ink, .paragraphStyle: centered])
+        .font: serif(104 * k, .bold), .foregroundColor: ink, .paragraphStyle: centered])
     let subtitle = NSAttributedString(string: shot.subtitle, attributes: [
-        .font: NSFont.systemFont(ofSize: 50, weight: .regular),
+        .font: NSFont.systemFont(ofSize: 50 * k, weight: .regular),
         .foregroundColor: ink.withAlphaComponent(0.72), .paragraphStyle: centered])
-    let textWidth = CGFloat(width) - 160
+    let textWidth = CGFloat(width) - 160 * k
     let titleHeight = title.boundingRect(with: NSSize(width: textWidth, height: 1000),
                                          options: [.usesLineFragmentOrigin]).height
-    let subtitleHeight = subtitle.boundingRect(with: NSSize(width: textWidth - 40, height: 1000),
+    let subtitleHeight = subtitle.boundingRect(with: NSSize(width: textWidth - 40 * k, height: 1000),
                                                options: [.usesLineFragmentOrigin]).height
-    let titleTop = CGFloat(height) - 150
-    title.draw(with: NSRect(x: 80, y: titleTop - titleHeight, width: textWidth, height: titleHeight),
+    let titleTop = CGFloat(height) - 150 * k
+    title.draw(with: NSRect(x: 80 * k, y: titleTop - titleHeight, width: textWidth, height: titleHeight),
                options: [.usesLineFragmentOrigin])
-    let subtitleTop = titleTop - titleHeight - 30
-    subtitle.draw(with: NSRect(x: 100, y: subtitleTop - subtitleHeight, width: textWidth - 40, height: subtitleHeight),
+    let subtitleTop = titleTop - titleHeight - 30 * k
+    subtitle.draw(with: NSRect(x: 100 * k, y: subtitleTop - subtitleHeight, width: textWidth - 40 * k, height: subtitleHeight),
                   options: [.usesLineFragmentOrigin])
 
     // The screenshot, scaled into a rounded phone-shaped card with a soft shadow.
     let scale: CGFloat = 0.76
     let shotWidth = CGFloat(width) * scale, shotHeight = CGFloat(height) * scale
-    let shotTop = subtitleTop - subtitleHeight - 70
+    let shotTop = subtitleTop - subtitleHeight - 70 * k
     let frame = NSRect(x: (CGFloat(width) - shotWidth) / 2, y: shotTop - shotHeight, width: shotWidth, height: shotHeight)
-    let corner: CGFloat = 92
+    let corner: CGFloat = 92 * k
     let shadow = NSShadow()
     shadow.shadowColor = NSColor.black.withAlphaComponent(isDark ? 0.55 : 0.22)
-    shadow.shadowBlurRadius = 60
-    shadow.shadowOffset = NSSize(width: 0, height: -24)
+    shadow.shadowBlurRadius = 60 * k
+    shadow.shadowOffset = NSSize(width: 0, height: -24 * k)
     NSGraphicsContext.saveGraphicsState()
     shadow.set()
     paper.setFill()
@@ -95,8 +101,8 @@ for shot in shots {
              respectFlipped: true, hints: [.interpolation: NSImageInterpolation.high])
     NSGraphicsContext.restoreGraphicsState()
     (isDark ? NSColor.white.withAlphaComponent(0.14) : NSColor.black.withAlphaComponent(0.08)).setStroke()
-    let border = NSBezierPath(roundedRect: frame.insetBy(dx: 1.5, dy: 1.5), xRadius: corner, yRadius: corner)
-    border.lineWidth = 3
+    let border = NSBezierPath(roundedRect: frame.insetBy(dx: 1.5 * k, dy: 1.5 * k), xRadius: corner, yRadius: corner)
+    border.lineWidth = 3 * k
     border.stroke()
 
     NSGraphicsContext.restoreGraphicsState()
