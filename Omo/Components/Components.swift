@@ -307,18 +307,25 @@ struct ArchShape: Shape {
     }
 }
 
-/// Three arches receding toward the centre, drawn faintly behind content.
-struct ArcadeBackdrop: View {
+/// Two arches around the timer ring, sharing its centre so their curves run alongside
+/// the ring instead of crossing it. Put it behind a ring of `ringSize`, aligned to the top.
+struct RingArches: View {
     var color: Color = .omoPrimary
+    var ringSize: CGFloat
+    /// How far the legs run below the ring.
+    var legs: CGFloat = 28
 
     var body: some View {
-        ZStack {
-            ForEach(0..<3) { index in
+        ZStack(alignment: .top) {
+            ForEach([18, 34] as [CGFloat], id: \.self) { gap in
                 ArchShape()
-                    .stroke(color.opacity(0.10 + Double(index) * 0.05), lineWidth: 1.5)
-                    .scaleEffect(1 - CGFloat(index) * 0.16, anchor: .bottom)
+                    .stroke(color.opacity(gap < 20 ? 0.22 : 0.11), lineWidth: 1)
+                    .frame(width: ringSize + gap * 2, height: ringSize + gap + legs)
+                    .offset(y: -gap)
             }
         }
+        .frame(width: ringSize, height: ringSize + legs, alignment: .top)
+        .accessibilityHidden(true)
     }
 }
 

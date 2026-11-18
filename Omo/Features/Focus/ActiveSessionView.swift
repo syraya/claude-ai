@@ -58,8 +58,8 @@ struct ActiveSessionView: View {
                     .foregroundStyle(faint)
             }
 
-            ZStack {
-                ArcadeBackdrop(color: .omoOnPrimary)
+            ZStack(alignment: .top) {
+                RingArches(color: .omoOnPrimary, ringSize: 230)
                 ZStack {
                     ProgressRing(progress: session.progress(at: now), color: .omoGold, lineWidth: 8)
                     VStack(spacing: 4) {
@@ -71,9 +71,8 @@ struct ActiveSessionView: View {
                     }
                 }
                 .frame(width: 230, height: 230)
-                .offset(y: 18)
             }
-            .frame(width: 280, height: 300)
+            .padding(.top, 36)
             .frame(maxWidth: .infinity)
 
             if let intention = session.intention {
