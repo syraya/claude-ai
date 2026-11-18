@@ -120,7 +120,7 @@ struct LifetimeView: View {
             if let next, let companion = next.companions.first {
                 Divider()
                 HStack(spacing: 14) {
-                    OmoFigure(companion: companion, size: 64, locked: true, backdrop: true)
+                    OmoFigure(companion: companion, size: 64, backdrop: true)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(companion.name).font(.omoSerif(.headline))
                         Text("Joins you at \(next.hours.formatted()) focus hours")
