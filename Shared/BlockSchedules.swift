@@ -21,8 +21,6 @@ struct BlockSchedule: Codable, Identifiable, Equatable {
     /// Whether its blocked time adds to your focus totals. Unset means the default:
     /// yes for daytime schedules, no for overnight ones, so sleep doesn't count.
     var countsAsFocus: Bool?
-    /// When it was last saved. A block switched on halfway through counts from then.
-    var editedAt: Date?
 
     var countsTowardFocus: Bool { countsAsFocus ?? !crossesMidnight }
 
@@ -101,12 +99,17 @@ struct BlockSchedule: Codable, Identifiable, Equatable {
 struct ScheduleRun: Codable, Equatable {
     /// When this occurrence of the schedule began.
     var occurrence: Date
-    /// When counting began: the occurrence, or later if the schedule was switched on mid-way.
+    /// When counting began: when OMO first saw this block running. That's the
+    /// occurrence when iOS wakes OMO at the start time, or later if the schedule was
+    /// switched on halfway through.
     var start: Date
     /// When this occurrence is scheduled to end. Counting never goes past it.
     var end: Date
     /// Time a focus session or friend lock already counted while this block ran.
     var excludedSeconds: TimeInterval = 0
+    /// Set on runs started by this version. Runs saved by the first version counted
+    /// from the scheduled start even when the schedule was switched on later.
+    var startsWhenSeen: Bool?
 }
 
 extension ManagedSettingsStore.Name {
@@ -182,6 +185,9 @@ enum ScheduleEngine {
 
     // MARK: Focus time
 
+    /// How late iOS's start-time wake-up can be and still count from the scheduled start.
+    private static let startSlack: TimeInterval = 3 * 60
+
     /// Starts counting blocks that have begun and records the ones that have ended.
     private static func trackFocusTime(at date: Date, lists: [BlockList]) {
         let now = Date()
@@ -199,9 +205,18 @@ enum ScheduleEngine {
                 runs[key] = nil
             }
             if let occurrence, runs[key] == nil {
-                runs[key] = ScheduleRun(occurrence: occurrence,
-                                        start: max(occurrence, schedule.editedAt ?? .distantPast),
-                                        end: occurrence.addingTimeInterval(TimeInterval(schedule.durationMinutes * 60)))
+                // Count from now, not from the scheduled start: a block only counts once
+                // OMO has seen it running. iOS wakes OMO at the start time, so a schedule
+                // that was on all along still counts in full (within a little slack).
+                let seen = now.timeIntervalSince(occurrence) < startSlack ? occurrence : now
+                runs[key] = ScheduleRun(occurrence: occurrence, start: seen,
+                                        end: occurrence.addingTimeInterval(TimeInterval(schedule.durationMinutes * 60)),
+                                        startsWhenSeen: true)
+            } else if let run = runs[key], run.startsWhenSeen == nil {
+                // A run from the first version may have counted from the scheduled start
+                // even though the schedule was switched on later. Count it from now.
+                runs[key]?.start = max(run.start, now)
+                runs[key]?.startsWhenSeen = true
             }
         }
         // Schedules that were deleted while blocking.
@@ -213,7 +228,9 @@ enum ScheduleEngine {
     }
 
     private static func record(_ run: ScheduleRun, until end: Date) {
-        let minutes = Int((end.timeIntervalSince(run.start) - run.excludedSeconds) / 60)
+        // A run left by the first version may start too early; never count it before now.
+        let start = run.startsWhenSeen == nil ? max(run.start, Date()) : run.start
+        let minutes = Int((end.timeIntervalSince(start) - run.excludedSeconds) / 60)
         guard minutes > 0 else { return }
         FocusEngine.recordScheduledFocus(minutes: minutes, endedAt: end)
     }

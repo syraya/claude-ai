@@ -63,8 +63,6 @@ final class BlockListStore {
     var canAddSchedule: Bool { schedules.count < ScheduleEngine.maxSchedules }
 
     func save(_ schedule: BlockSchedule) {
-        var schedule = schedule
-        schedule.editedAt = Date()
         if let index = schedules.firstIndex(where: { $0.id == schedule.id }) {
             schedules[index] = schedule
         } else {
