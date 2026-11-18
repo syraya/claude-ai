@@ -19,6 +19,7 @@ let shots: [(file: String, title: String, subtitle: String)] = [
     ("4-schedules", "Blocks that run themselves", "Weekdays 9 to 5, bedtime every night. Set it once."),
     ("5-lifetime", "Watch your focus grow", "Every hour since day one, with titles to earn along the way."),
     ("6-omos", "Earn mythic companions", "29 OMOs from myths around the world, each with its own theme."),
+    ("7-ended", "See what you made of it", "Every session ends with the minutes you earned and what they were for."),
 ]
 
 func serif(_ size: CGFloat, _ weight: NSFont.Weight) -> NSFont {

@@ -96,6 +96,14 @@ struct RootView: View {
                     .background(OmoBackground())
                     .navigationTitle("Focus")
             })
+        case "ended":
+            return AnyView(NavigationStack {
+                ScrollView {
+                    if let finished = focus.lastFinished { SessionSummaryCard(finished: finished).padding() }
+                }
+                .background(OmoBackground())
+                .navigationTitle("Focus")
+            })
         case "lifetime":
             return AnyView(NavigationStack { LifetimeView() })
         case "omos":
