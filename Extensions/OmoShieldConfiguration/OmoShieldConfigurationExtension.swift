@@ -22,7 +22,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     private func makeConfiguration(appName: String?) -> ShieldConfiguration {
         let name = appName ?? "This app"
-        // Use the colours (and figure) of the OMO you've picked.
+        // The colours, figure and voice of the OMO you've picked.
         let companion = SharedStore.settings.companion
         let palette = companion.palette
         let paper = UIColor(palette.paper)
@@ -31,14 +31,17 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
         let lapis = UIColor(palette.primary)
         let onLapis = UIColor(palette.onPrimary)
         let blur: UIBlurEffect.Style = companion.isDark ? .systemUltraThinMaterialDark : .systemUltraThinMaterialLight
+        let figure = figureIcon(companion) ?? icon("building.columns.fill", lapis)
+        // A different line every time the screen appears.
+        let quote = FocusQuotes.random(app: name, companion: companion)
 
         if let lock = SharedStore.friendLock, !lock.isOnBreak {
             return ShieldConfiguration(
                 backgroundBlurStyle: blur,
                 backgroundColor: paper,
-                icon: icon("person.2.badge.key.fill", lapis),
+                icon: figure,
                 title: .init(text: "\(lock.keyholderName) holds your key", color: ink),
-                subtitle: .init(text: "\(name) stays closed until \(lock.keyholderName) unlocks you. Your circle is counting on you.",
+                subtitle: .init(text: "\(name) stays closed until \(lock.keyholderName) unlocks you.\n\n\(quote)",
                                 color: subtle),
                 primaryButtonLabel: .init(text: "Back to studying", color: onLapis),
                 primaryButtonBackgroundColor: lapis,
@@ -48,18 +51,18 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
 
         if let session = SharedStore.focusSession {
             let minutesLeft = Int((session.remaining() / 60).rounded(.up))
-            let timeText = "\(name) is resting for \(minutesLeft) more minute\(minutesLeft == 1 ? "" : "s")."
-            let subtitle = session.intention.map { "\(timeText)\n\nYour intention: \($0)" } ?? "\(timeText) Gather your thoughts."
-            let breakText = session.canTakeBreak ? "Take a break" : nil
+            var lines = ["\(name) is resting for \(minutesLeft) more minute\(minutesLeft == 1 ? "" : "s")."]
+            if let intention = session.intention { lines.append("Your intention: \(intention)") }
+            lines.append(quote)
             return ShieldConfiguration(
                 backgroundBlurStyle: blur,
                 backgroundColor: paper,
-                icon: UIImage(named: companion.imageName) ?? icon("building.columns.fill", lapis),
+                icon: figure,
                 title: .init(text: "Stay with your thoughts", color: ink),
-                subtitle: .init(text: subtitle, color: subtle),
+                subtitle: .init(text: lines.joined(separator: "\n\n"), color: subtle),
                 primaryButtonLabel: .init(text: "Back to focus", color: onLapis),
                 primaryButtonBackgroundColor: lapis,
-                secondaryButtonLabel: breakText.map { ShieldConfiguration.Label(text: $0, color: lapis) }
+                secondaryButtonLabel: session.canTakeBreak ? .init(text: "Take a break", color: lapis) : nil
             )
         }
 
@@ -69,10 +72,9 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
             return ShieldConfiguration(
                 backgroundBlurStyle: blur,
                 backgroundColor: paper,
-                icon: UIImage(named: companion.imageName) ?? icon("calendar.badge.clock", lapis),
+                icon: figure,
                 title: .init(text: title, color: ink),
-                subtitle: .init(text: "\(name) is blocked\(until) by your schedule. This time is set aside on purpose.",
-                                color: subtle),
+                subtitle: .init(text: "\(name) is blocked\(until) by your schedule.\n\n\(quote)", color: subtle),
                 primaryButtonLabel: .init(text: "Back to it", color: onLapis),
                 primaryButtonBackgroundColor: lapis
             )
@@ -81,12 +83,24 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
         return ShieldConfiguration(
             backgroundBlurStyle: blur,
             backgroundColor: paper,
-            icon: icon("lock.fill", lapis),
+            icon: figure,
             title: .init(text: "Blocked by OMO", color: ink),
-            subtitle: .init(text: "Open OMO to see why.", color: subtle),
+            subtitle: .init(text: quote, color: subtle),
             primaryButtonLabel: .init(text: "OK", color: onLapis),
             primaryButtonBackgroundColor: lapis
         )
+    }
+
+    /// Your OMO, drawn small. Shield extensions get very little memory, so the figure
+    /// is rendered at icon size rather than loaded at full resolution.
+    private func figureIcon(_ companion: OmoCompanion) -> UIImage? {
+        guard let image = UIImage(named: companion.imageName) else { return nil }
+        let size = CGSize(width: 88, height: 88)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 3
+        return UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            image.draw(in: CGRect(origin: .zero, size: size))
+        }
     }
 
     private func icon(_ symbol: String, _ color: UIColor) -> UIImage? {

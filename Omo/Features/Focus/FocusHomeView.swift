@@ -17,16 +17,34 @@ struct FocusHomeView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: 18) {
+                        // Smaller than a large title and centred, so a name never gets cut off.
+                        Text(greeting)
+                            .font(.omoSerif(.title2))
+                            .foregroundStyle(Color.omoInk)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 4)
+                            .id("top")
+                            .background(GeometryReader { geo in
+                                Color.clear.preference(key: HeaderOffsetKey.self,
+                                                       value: geo.frame(in: .named("focusScroll")).minY)
+                            })
+
                         OmoHeader(selected: settings.settings.companion,
                                   stats: focus.lifetime,
                                   collapse: collapse) { companion in
                             settings.switchCompanion(to: companion)
                         }
-                        .id("top")
-                        .background(GeometryReader { geo in
-                            Color.clear.preference(key: HeaderOffsetKey.self,
-                                                   value: geo.frame(in: .named("focusScroll")).minY)
-                        })
+
+                        // Your total focus is the headline, with today's numbers right under it.
+                        NavigationLink {
+                            LifetimeView()
+                        } label: {
+                            LifetimeCard(lifetime: focus.lifetime)
+                        }
+                        .buttonStyle(.plain)
+
+                        todayCard
 
                         if let event = focus.holidayToEarn {
                             HolidayCard(holiday: event.holiday, companion: event.companion)
@@ -42,21 +60,11 @@ struct FocusHomeView: View {
 
                         ScheduleStatusCard()
 
-                        // The one primary action comes first; the numbers follow it.
                         if focus.session != nil {
                             ActiveSessionView()
                         } else {
                             StartSessionView()
                         }
-
-                        todayCard
-
-                        NavigationLink {
-                            LifetimeView()
-                        } label: {
-                            LifetimeCard(lifetime: focus.lifetime)
-                        }
-                        .buttonStyle(.plain)
                     }
                     .padding()
                 }
@@ -83,7 +91,7 @@ struct FocusHomeView: View {
                 }
             }
             .background(OmoBackground())
-            .navigationTitle(greeting)
+            .toolbar(.hidden, for: .navigationBar)
             .errorAlert($focus.errorMessage)
             .sheet(item: Binding(
                 get: { focus.uncelebratedCompanion },

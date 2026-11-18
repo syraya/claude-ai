@@ -25,7 +25,7 @@ struct LifetimeCard: View {
                     .foregroundStyle(Color.omoLabels)
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(LifetimeFormat.hours(lifetime.totalFocusMinutes))
-                        .font(.system(size: 34, weight: .semibold, design: .serif).monospacedDigit())
+                        .font(.system(size: 46, weight: .semibold, design: .serif).monospacedDigit())
                         .foregroundStyle(Color.omoInk)
                     Text("hours").font(.subheadline).foregroundStyle(.secondary)
                 }
