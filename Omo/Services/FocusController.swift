@@ -16,6 +16,31 @@ final class FocusController {
         refresh()
     }
 
+    /// Minutes focused today that aren't saved yet: a session or friend lock that's still
+    /// running only adds its time to the stats when it ends. Breaks don't count.
+    func runningMinutesToday(at now: Date = Date()) -> Int {
+        let startOfDay = Calendar.current.startOfDay(for: now)
+        var minutes = 0
+        if let session {
+            minutes += session.focusedMinutes(at: now)
+            if session.startedAt < startOfDay {
+                // Only the part since midnight belongs to today.
+                minutes -= session.focusedMinutes(at: startOfDay)
+            }
+        }
+        if let lock = friendLock, !lock.isOnBreak {
+            minutes += Int(now.timeIntervalSince(max(lock.lockedAt, startOfDay)) / 60)
+        }
+        return max(0, minutes)
+    }
+
+    /// Lifetime totals with minutes from a running session added on top.
+    func lifetimeIncluding(runningMinutes: Int) -> LifetimeStats {
+        var stats = lifetime
+        stats.totalFocusMinutes += runningMinutes
+        return stats
+    }
+
     func refresh() {
         session = SharedStore.focusSession
         friendLock = SharedStore.friendLock

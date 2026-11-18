@@ -40,7 +40,10 @@ struct FocusHomeView: View {
                         NavigationLink {
                             LifetimeView()
                         } label: {
-                            LifetimeCard(lifetime: focus.lifetime)
+                            // Ticks up while a session runs, like today's minutes below.
+                            TimelineView(.periodic(from: .now, by: 15)) { context in
+                                LifetimeCard(lifetime: focus.lifetimeIncluding(runningMinutes: focus.runningMinutesToday(at: context.date)))
+                            }
                         }
                         .buttonStyle(.plain)
 
@@ -116,8 +119,14 @@ struct FocusHomeView: View {
 
     /// Today's numbers in one quiet row.
     private var todayCard: some View {
+        TimelineView(.periodic(from: .now, by: 15)) { context in
+            todayRow(focusedMinutes: focus.today.focusMinutes + focus.runningMinutesToday(at: context.date))
+        }
+    }
+
+    private func todayRow(focusedMinutes: Int) -> some View {
         HStack(spacing: 0) {
-            todayStat(Format.minutes(focus.today.focusMinutes), "focused today")
+            todayStat(Format.minutes(focusedMinutes), "focused today")
             Divider().frame(height: 36)
             todayStat("\(focus.today.sessionsCompleted)", focus.today.sessionsCompleted == 1 ? "session" : "sessions")
             Divider().frame(height: 36)
