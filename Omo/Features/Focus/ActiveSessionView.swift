@@ -7,6 +7,7 @@ struct ActiveSessionView: View {
 
     @State private var showBreakFlow = false
     @State private var showEndFlow = false
+    @State private var endConfirmed = false
 
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -33,12 +34,18 @@ struct ActiveSessionView: View {
             .fullScreenCover(isPresented: $showBreakFlow) {
                 BreakFlowView { showBreakFlow = false }
             }
-            .fullScreenCover(isPresented: $showEndFlow) {
+            .fullScreenCover(isPresented: $showEndFlow, onDismiss: {
+                // End only once the reflection screen has slid away, so you see the
+                // timer settle into its summary instead of it vanishing underneath.
+                guard endConfirmed else { return }
+                endConfirmed = false
+                focus.endEarly()
+            }) {
                 ReflectionView(seconds: max(15, SharedStore.settings.reflectionSeconds),
                                title: "End your session early?",
                                confirmLabel: "End session",
                                onConfirm: {
-                                   focus.endEarly()
+                                   endConfirmed = true
                                    showEndFlow = false
                                },
                                onCancel: { showEndFlow = false })

@@ -72,6 +72,13 @@ enum ScreenshotDemo {
                 startedAt: now.addingTimeInterval(-17 * 60), endsAt: now.addingTimeInterval(28 * 60),
                 allowsBreaks: true, allowsEndingEarly: true, maxBreaks: 3,
                 intention: "Finish chapter 4 of biology")
+        } else if screen == "ended" {
+            // Ran out a minute ago, so opening the app finishes it and shows the summary.
+            SharedStore.focusSession = FocusSession(
+                blockListName: social.name, selection: FamilyActivitySelection(),
+                startedAt: now.addingTimeInterval(-46 * 60), endsAt: now.addingTimeInterval(-60),
+                allowsBreaks: true, allowsEndingEarly: true, maxBreaks: 3,
+                intention: "Finish chapter 4 of biology")
         } else {
             SharedStore.focusSession = nil
         }

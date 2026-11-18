@@ -63,11 +63,23 @@ struct FocusHomeView: View {
 
                         ScheduleStatusCard()
 
-                        if focus.session != nil {
-                            ActiveSessionView()
-                        } else {
-                            StartSessionView()
+                        // The timer settles into a summary, then the start card, rather than
+                        // snapping from one to the next.
+                        Group {
+                            if focus.session != nil {
+                                ActiveSessionView()
+                                    .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.96)),
+                                                            removal: .opacity.combined(with: .scale(scale: 0.92))))
+                            } else if let finished = focus.lastFinished {
+                                SessionSummaryCard(finished: finished)
+                                    .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 1.04)),
+                                                            removal: .opacity.combined(with: .move(edge: .top))))
+                            } else {
+                                StartSessionView()
+                                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                            }
                         }
+                        .animation(.spring(duration: 0.7, bounce: 0.12), value: sessionPhase)
                     }
                     .padding()
                 }
@@ -108,6 +120,13 @@ struct FocusHomeView: View {
                              onClose: { focus.markCelebrated(companion) })
             }
         }
+    }
+
+    /// Which of the three session cards is showing, for animating between them.
+    private var sessionPhase: String {
+        if let session = focus.session { return "active-\(session.id)" }
+        if let finished = focus.lastFinished { return "finished-\(finished.id)" }
+        return "start"
     }
 
     private var greeting: String {

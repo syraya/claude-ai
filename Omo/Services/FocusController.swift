@@ -10,7 +10,18 @@ final class FocusController {
     private(set) var friendLock: FriendLockState?
     private(set) var today = DailyStats(day: DailyStats.key(for: Date()))
     private(set) var lifetime = LifetimeStats()
+    /// The session that just ended, shown as a summary card until you start another.
+    private(set) var lastFinished: FinishedSession?
     var errorMessage: String?
+
+    struct FinishedSession: Equatable {
+        let id: UUID
+        let minutes: Int
+        let intention: String?
+        let blockListName: String
+        /// Ran to the end rather than being ended early.
+        let completed: Bool
+    }
 
     init() {
         refresh()
@@ -46,10 +57,29 @@ final class FocusController {
     }
 
     func refresh() {
+        let previous = session
         session = SharedStore.focusSession
         friendLock = SharedStore.friendLock
         today = SharedStore.stats()
         lifetime = SharedStore.lifetime
+        if let previous, session == nil { noteFinished(previous) }
+    }
+
+    /// Keeps a summary of a session that just ended, so the timer can settle into it
+    /// instead of vanishing.
+    private func noteFinished(_ old: FocusSession) {
+        let now = Date()
+        // One that ended long ago while OMO sat in the background isn't news any more.
+        guard now.timeIntervalSince(min(now, old.endsAt)) < 30 * 60 else { return }
+        lastFinished = FinishedSession(id: old.id,
+                                       minutes: old.focusedMinutes(at: now),
+                                       intention: old.intention,
+                                       blockListName: old.blockListName,
+                                       completed: now >= old.endsAt.addingTimeInterval(-90))
+    }
+
+    func dismissFinished() {
+        lastFinished = nil
     }
 
     /// Catches up on any timers that fired while the app was closed.
@@ -78,6 +108,7 @@ final class FocusController {
             // The app still ends the session on time whenever it's opened.
             errorMessage = "Your session started, but iOS wouldn't schedule the end timer. Open OMO when time's up to unlock."
         }
+        lastFinished = nil
         refresh()
     }
 
