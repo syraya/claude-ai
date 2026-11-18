@@ -35,7 +35,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
         // A different line every time the screen appears.
         let quote = FocusQuotes.random(app: name, companion: companion)
 
-        // After "Take a break" or "Ask for a break": point to the notification that opens OMO.
+        // After "Take a break" or "Ask for a break": opening OMO picks up from here.
         if let pending = SharedStore.pendingShieldRequest,
            (pending == LocalNotifier.Route.takeBreak.rawValue && SharedStore.focusSession?.canTakeBreak == true)
             || (pending == LocalNotifier.Route.together.rawValue && SharedStore.friendLock != nil) {
@@ -43,8 +43,10 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
                 backgroundBlurStyle: blur,
                 backgroundColor: paper,
                 icon: figure,
-                title: .init(text: "Take a breath first", color: ink),
-                subtitle: .init(text: "Tap the OMO notification at the top of your screen, or open OMO, to start your break.",
+                title: .init(text: "Open OMO to take your break", color: ink),
+                subtitle: .init(text: pending == LocalNotifier.Route.together.rawValue
+                                ? "OMO will open to your study session, where you can ask for a break."
+                                : "It starts with a short breath, then you choose how long.",
                                 color: subtle),
                 primaryButtonLabel: .init(text: "Never mind, back to focus", color: onLapis),
                 primaryButtonBackgroundColor: lapis
