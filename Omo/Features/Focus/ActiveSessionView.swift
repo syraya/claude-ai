@@ -20,7 +20,12 @@ struct ActiveSessionView: View {
                         focusContent(session: session, now: context.date)
                     }
                 }
-                .card()
+                // The session is the one thing that matters while it runs, so it gets the
+                // theme's primary colour as a panel of its own.
+                .foregroundStyle(Color.omoOnPrimary)
+                .padding(22)
+                .frame(maxWidth: .infinity)
+                .background(Color.omoPrimary, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
             .onReceive(ticker) { _ in focus.tick() }
             .onAppear(perform: openBreakIfRequested)
@@ -41,63 +46,76 @@ struct ActiveSessionView: View {
         }
     }
 
+    private var faint: Color { Color.omoOnPrimary.opacity(0.72) }
+
     private func focusContent(session: FocusSession, now: Date) -> some View {
-        VStack(spacing: 22) {
-            HStack {
-                Label("Focusing", systemImage: "building.columns.fill")
-                    .font(.headline)
-                    .foregroundStyle(Color.omoPrimary)
-                Spacer()
+        VStack(spacing: 18) {
+            VStack(spacing: 2) {
+                Text("Focusing")
+                    .font(.omoSerif(.title2))
                 Text("\(session.blockListName) blocked")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(faint)
             }
 
             ZStack {
-                ArcadeBackdrop()
+                ArcadeBackdrop(color: .omoOnPrimary)
                 ZStack {
-                    ProgressRing(progress: session.progress(at: now))
+                    ProgressRing(progress: session.progress(at: now), color: .omoGold, lineWidth: 8)
                     VStack(spacing: 4) {
                         Text(Format.clock(session.remaining(at: now)))
                             .font(.system(size: 52, weight: .semibold, design: .serif).monospacedDigit())
-                            .foregroundStyle(Color.omoInk)
                         Text("ends \(session.endsAt.formatted(date: .omitted, time: .shortened))")
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(faint)
                     }
                 }
-                .frame(width: 240, height: 240)
-                .offset(y: 22)
+                .frame(width: 230, height: 230)
+                .offset(y: 18)
             }
-            .frame(width: 290, height: 330)
+            .frame(width: 280, height: 300)
             .frame(maxWidth: .infinity)
 
             if let intention = session.intention {
-                IntentionCard(text: intention)
+                Text(intention)
+                    .font(.system(.body, design: .serif).italic())
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.omoGold, lineWidth: 1.25))
+                    .accessibilityLabel("Intention: \(intention)")
             }
+
+            VStack(spacing: 6) {
+                OmoFigure(companion: OmoCompanion.current, size: 104, backdrop: true)
+                    .hovering(4)
+                Text(OmoCompanion.current.name)
+                    .font(.omoSerif(.subheadline))
+                    .foregroundStyle(faint)
+            }
+            .padding(.vertical, 4)
 
             if session.allowsBreaks {
                 Button {
                     showBreakFlow = true
                 } label: {
-                    Label(session.hasUnlimitedBreaks ? "Take a break"
-                          : session.breaksLeft > 0 ? "Take a break (\(session.breaksLeft) left)"
-                          : "No breaks left",
-                          systemImage: "cup.and.saucer.fill")
+                    Text(session.hasUnlimitedBreaks ? "Take a break"
+                         : session.breaksLeft > 0 ? "Take a break · \(session.breaksLeft) left"
+                         : "No breaks left")
                 }
-                .buttonStyle(SecondaryButtonStyle())
+                .buttonStyle(SecondaryButtonStyle(color: .omoOnPrimary))
                 .disabled(!session.canTakeBreak)
                 .opacity(session.canTakeBreak ? 1 : 0.5)
             }
 
             if session.allowsEndingEarly {
-                Button("End early") { showEndFlow = true }
+                Button("End session") { showEndFlow = true }
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(faint)
             } else {
                 Label("Strict mode: this session can't be ended early", systemImage: "lock.fill")
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(faint)
             }
         }
     }
@@ -105,31 +123,29 @@ struct ActiveSessionView: View {
     private func breakContent(session: FocusSession, breakEnd: Date, now: Date) -> some View {
         let breakLength = breakEnd.timeIntervalSince(session.breakStartedAt ?? now)
         let left = max(0, breakEnd.timeIntervalSince(now))
-        return VStack(spacing: 22) {
-            Label("On a break", systemImage: "cup.and.saucer.fill")
-                .font(.headline)
-                .foregroundStyle(Color.omoGold)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        return VStack(spacing: 20) {
+            Text("On a break")
+                .font(.omoSerif(.title2))
 
             ZStack {
-                ProgressRing(progress: breakLength > 0 ? 1 - left / breakLength : 1, color: .omoGold)
+                ProgressRing(progress: breakLength > 0 ? 1 - left / breakLength : 1, color: .omoGold, lineWidth: 8)
                 VStack(spacing: 4) {
                     Text(Format.clock(left))
-                        .font(.system(size: 52, weight: .bold, design: .rounded).monospacedDigit())
+                        .font(.system(size: 52, weight: .semibold, design: .serif).monospacedDigit())
                     Text("then \(session.blockListName) locks again")
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(faint)
                 }
             }
-            .frame(width: 250, height: 250)
+            .frame(width: 240, height: 240)
             .frame(maxWidth: .infinity)
 
             Button("I'm done, back to focus") { focus.endBreak() }
-                .buttonStyle(PrimaryButtonStyle(color: .omoSuccess, textColor: .omoOnSuccess))
+                .buttonStyle(PrimaryButtonStyle(color: .omoOnPrimary, textColor: .omoPrimary))
 
             Text("Session ends at \(session.endsAt.formatted(date: .omitted, time: .shortened))")
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(faint)
         }
     }
 

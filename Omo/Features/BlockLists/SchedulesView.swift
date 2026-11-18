@@ -21,7 +21,7 @@ struct ScheduleRow: View {
                     .tint(.omoPrimary)
                     .disabled(schedule.isLocked(at: context.date))
             }
-            .card()
+            .padding(.vertical, 12)
             .opacity(schedule.isEnabled ? 1 : 0.6)
         }
     }
@@ -30,7 +30,8 @@ struct ScheduleRow: View {
         let active = schedule.isActive(at: now) && list.map { !$0.isEmpty } == true
         return HStack(alignment: .top, spacing: 14) {
             Text(list?.emoji ?? "🗓️")
-                .font(.largeTitle)
+                .font(.title2)
+                .frame(width: 32)
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
                     Text(schedule.name).font(.headline)
@@ -45,7 +46,7 @@ struct ScheduleRow: View {
                     .font(.system(.subheadline, design: .serif).weight(.semibold).monospacedDigit())
                 Text("\(schedule.daysText) · \(list?.name ?? "No block list")")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.omoLabels)
                 if active, let end = schedule.endDate(after: now) {
                     Label("Blocking now, until \(end.formatted(date: .omitted, time: .shortened))",
                           systemImage: "moon.fill")

@@ -80,12 +80,21 @@ struct LifetimeView: View {
                 .font(.caption2.weight(.semibold))
                 .kerning(1.5)
                 .foregroundStyle(Color.omoLabels)
-            Text(LifetimeFormat.hours(shownMinutes))
-                .font(.system(size: 72, weight: .semibold, design: .serif).monospacedDigit())
-                .foregroundStyle(Color.omoInk)
-                .contentTransition(.numericText(value: Double(shownMinutes)))
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
+            HStack(spacing: 10) {
+                Image(systemName: "laurel.leading")
+                    .font(.system(size: 44))
+                    .foregroundStyle(Color.omoGold)
+                Text(LifetimeFormat.hours(shownMinutes))
+                    .font(.system(size: 72, weight: .semibold, design: .serif).monospacedDigit())
+                    .foregroundStyle(Color.omoInk)
+                    .contentTransition(.numericText(value: Double(shownMinutes)))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                Image(systemName: "laurel.trailing")
+                    .font(.system(size: 44))
+                    .foregroundStyle(Color.omoGold)
+            }
+            .accessibilityElement(children: .combine)
             Text("hours focused")
                 .font(.system(.title3, design: .serif).italic())
                 .foregroundStyle(.secondary)
@@ -102,20 +111,31 @@ struct LifetimeView: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("Your title").font(.caption).foregroundStyle(.secondary)
+                    Text("Your title").font(.caption).foregroundStyle(Color.omoLabels)
                     Text(rank.title).font(.omoSerif(.title2, weight: .bold)).foregroundStyle(Color.omoPrimary)
                 }
                 Spacer()
-                Image(systemName: "laurel.leading").font(.title).foregroundStyle(Color.omoGold)
             }
-            Text(rank.motto).font(.system(.body, design: .serif).italic()).foregroundStyle(.secondary)
+            Text(rank.motto).font(.system(.body, design: .serif).italic()).foregroundStyle(Color.omoLabels)
+            if let next, let companion = next.companions.first {
+                Divider()
+                HStack(spacing: 14) {
+                    OmoFigure(companion: companion, size: 64, locked: true, backdrop: true)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(companion.name).font(.omoSerif(.headline))
+                        Text("Joins you at \(next.hours.formatted()) focus hours")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.omoLabels)
+                    }
+                }
+            }
             if let next {
                 ProgressView(value: FocusRank.progress(minutes: lifetime.totalFocusMinutes, from: rank))
                     .tint(.omoGold)
                 let left = max(0, next.hours * 60 - lifetime.totalFocusMinutes)
-                Text("\(left < 60 ? "\(left) minutes" : "\(LifetimeFormat.hours(left)) hours") to \(next.title), when \(next.companions.map(\.name).joined(separator: " and ")) joins you")
+                Text("\(left < 60 ? "\(left) minutes" : "\(LifetimeFormat.hours(left)) hours") to \(next.title)")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.omoLabels)
             } else {
                 Text("You've reached the top. Ten thousand hours.").font(.caption).foregroundStyle(.secondary)
             }

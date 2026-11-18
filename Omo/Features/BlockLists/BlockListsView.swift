@@ -37,9 +37,15 @@ struct BlockListsView: View {
                         .padding(.vertical, 40)
                     }
 
-                    ForEach(blockLists.lists) { list in
-                        Button { editing = list } label: { row(list) }
-                            .buttonStyle(.plain)
+                    if !blockLists.lists.isEmpty {
+                        VStack(spacing: 0) {
+                            ForEach(Array(blockLists.lists.enumerated()), id: \.element.id) { index, list in
+                                if index > 0 { Divider() }
+                                Button { editing = list } label: { row(list) }
+                                    .buttonStyle(.plain)
+                            }
+                        }
+                        .groupedCard()
                     }
 
                     Text("Apple lets one list block up to 50 individual apps. Pick whole categories if you need more.")
@@ -122,11 +128,17 @@ struct BlockListsView: View {
                 }
                 .buttonStyle(.plain)
             }
-            ForEach(blockLists.schedules) { schedule in
-                ScheduleRow(schedule: schedule,
-                            list: blockLists.list(id: schedule.blockListID),
-                            onOpen: { editingSchedule = schedule },
-                            onToggle: { isOn in toggle(schedule, isOn) })
+            if !blockLists.schedules.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(Array(blockLists.schedules.enumerated()), id: \.element.id) { index, schedule in
+                        if index > 0 { Divider() }
+                        ScheduleRow(schedule: schedule,
+                                    list: blockLists.list(id: schedule.blockListID),
+                                    onOpen: { editingSchedule = schedule },
+                                    onToggle: { isOn in toggle(schedule, isOn) })
+                    }
+                }
+                .groupedCard()
             }
         }
     }
@@ -153,10 +165,11 @@ struct BlockListsView: View {
     private func row(_ list: BlockList) -> some View {
         HStack(spacing: 14) {
             Text(list.emoji)
-                .font(.largeTitle)
-            VStack(alignment: .leading, spacing: 6) {
+                .font(.title2)
+                .frame(width: 32)
+            VStack(alignment: .leading, spacing: 4) {
                 Text(list.name).font(.headline)
-                Text(ScreenshotDemo.summary(for: list) ?? list.summary).font(.subheadline).foregroundStyle(.secondary)
+                Text(ScreenshotDemo.summary(for: list) ?? list.summary).font(.subheadline).foregroundStyle(Color.omoLabels)
                 if !list.selection.applicationTokens.isEmpty {
                     HStack(spacing: 4) {
                         ForEach(Array(list.selection.applicationTokens.prefix(6)), id: \.self) { token in
@@ -168,9 +181,10 @@ struct BlockListsView: View {
                 }
             }
             Spacer()
-            Image(systemName: "chevron.right").foregroundStyle(.secondary)
+            Image(systemName: "chevron.right").foregroundStyle(Color.omoLabels)
         }
-        .card()
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
     }
 }
 

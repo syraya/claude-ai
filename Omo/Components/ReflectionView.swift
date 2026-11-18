@@ -50,30 +50,37 @@ struct ReflectionView: View {
                         .scaleEffect(breatheIn ? 0.75 : 0.45)
                     VStack(spacing: 6) {
                         Text(done ? "✓" : "\(Int(remaining.rounded(.up)))")
-                            .font(.system(size: 56, weight: .bold, design: .rounded).monospacedDigit())
+                            .font(.system(size: 64, weight: .semibold, design: .serif).monospacedDigit())
+                            .foregroundStyle(Color.omoInk)
                         Text(done ? "Your call" : (Int(elapsed / 4) % 2 == 0 ? "Breathe in" : "Breathe out"))
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Color.omoLabels)
                     }
                 }
                 .frame(width: 240, height: 240)
 
                 Text(Self.prompts[promptIndex])
-                    .font(.title3)
+                    .font(.system(.title3, design: .serif))
                     .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.omoInk)
                     .padding(.horizontal, 24)
                     .onTapGesture { promptIndex = (promptIndex + 1) % Self.prompts.count }
 
                 Spacer()
 
                 VStack(spacing: 12) {
-                    Button("Never mind, back to it", action: onCancel)
-                        .buttonStyle(PrimaryButtonStyle(color: .omoSuccess, textColor: .omoOnSuccess))
-                    Button(done ? confirmLabel : "Wait \(Int(remaining.rounded(.up)))s…", action: onConfirm)
-                        .buttonStyle(SecondaryButtonStyle())
-                        .disabled(!done)
-                        .opacity(done ? 1 : 0.5)
+                    Button("Back to focus", action: onCancel)
+                        .buttonStyle(PrimaryButtonStyle())
+                    Button(action: onConfirm) {
+                        if done {
+                            Text(confirmLabel)
+                        } else {
+                            Label("Available in \(Int(remaining.rounded(.up))) seconds", systemImage: "lock.fill")
+                                .monospacedDigit()
+                        }
+                    }
+                    .buttonStyle(SecondaryButtonStyle(color: done ? .omoPrimary : .omoLabels))
+                    .disabled(!done)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)

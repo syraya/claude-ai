@@ -25,66 +25,55 @@ struct StartSessionView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            Text("New focus session")
+        VStack(alignment: .leading, spacing: 16) {
+            Text("What will you focus on?")
                 .font(.omoSerif(.title3))
 
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Block").font(.subheadline).foregroundStyle(.secondary)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(blockLists.lists) { list in
-                            listChip(list)
-                        }
-                        Button {
-                            editingList = BlockList(name: "")
-                        } label: {
-                            Label("New list", systemImage: "plus")
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
-                                .background(Color.omoInk.opacity(0.06), in: Capsule())
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                if let list = selectedList, list.isEmpty {
-                    Text("“\(list.name)” has no apps yet. Add some in Block Lists.")
-                        .font(.footnote)
-                        .foregroundStyle(Color.omoGold)
-                }
+            VStack(alignment: .leading, spacing: 6) {
+                TextField("e.g. Finish chapter 4", text: $intention)
+                    .font(.system(.body, design: .serif))
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 12)
+                    .background(Color.omoPaper, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .stroke(Color.omoInk.opacity(0.12), lineWidth: 0.75))
+                Text("It shows on your timer and on blocked apps.")
+                    .font(.caption)
+                    .foregroundStyle(Color.omoLabels)
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Intention").font(.subheadline).foregroundStyle(.secondary)
-                TextField("e.g. Finish chapter 4 of biology", text: $intention)
-                    .font(.system(.body, design: .serif))
-                    .padding(12)
-                    .background(Color.omoGold.opacity(0.10), in: RoundedRectangle(cornerRadius: 12))
-                Text("Write down what this session is for. It shows on your timer and on blocked apps.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("For").font(.subheadline).foregroundStyle(.secondary)
+                    Text("Duration").font(.subheadline).foregroundStyle(Color.omoLabels)
                     Spacer()
                     Stepper(Format.minutes(minutes), value: $minutes, in: 5...720, step: 5)
                         .fixedSize()
+                        .font(.subheadline.monospacedDigit())
                 }
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(presets, id: \.self) { preset in
                             Button(Format.minutes(preset)) { minutes = preset }
                                 .font(.subheadline.weight(.medium))
-                                .padding(.horizontal, 14)
+                                .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
-                                .background(minutes == preset ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Capsule())
+                                .background(minutes == preset ? Color.omoPrimary : Color.omoPaper, in: Capsule())
+                                .overlay(Capsule().stroke(Color.omoInk.opacity(minutes == preset ? 0 : 0.12), lineWidth: 0.75))
                                 .foregroundStyle(minutes == preset ? Color.omoOnPrimary : Color.omoInk)
                                 .buttonStyle(.plain)
                         }
                     }
                 }
+            }
+
+            Divider()
+
+            blockListRow
+
+            if let list = selectedList, list.isEmpty {
+                Text("“\(list.name)” has no apps yet. Add some in Block Lists.")
+                    .font(.footnote)
+                    .foregroundStyle(Color.omoLabels)
             }
 
             VStack(spacing: 4) {
@@ -94,14 +83,14 @@ struct StartSessionView: View {
                         Text(settings.settings.hasUnlimitedBreaks
                              ? "As many as you need, each after a \(settings.settings.reflectionSeconds)s pause"
                              : "Up to \(settings.settings.maxBreaksPerSession), each after a \(settings.settings.reflectionSeconds)s pause")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(Color.omoLabels)
                     }
                 }
                 Toggle(isOn: $strictMode) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Strict mode")
                         Text("No ending the session early")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.caption).foregroundStyle(Color.omoLabels)
                     }
                 }
             }
@@ -118,7 +107,7 @@ struct StartSessionView: View {
                 intention = ""
                 settings.settings.defaultSessionMinutes = minutes
             } label: {
-                Label("Start focusing", systemImage: "play.fill")
+                Text("Start focus")
             }
             .buttonStyle(PrimaryButtonStyle())
             .disabled(!canStart)
@@ -137,20 +126,40 @@ struct StartSessionView: View {
         }
     }
 
-    private func listChip(_ list: BlockList) -> some View {
-        let isSelected = list.id == selectedList?.id
-        return Button {
-            selectedListID = list.id
-        } label: {
-            HStack(spacing: 6) {
-                Text(list.emoji)
-                Text(list.name).fontWeight(.medium)
+    /// One row for what gets blocked: tap to switch lists or make a new one.
+    private var blockListRow: some View {
+        Menu {
+            ForEach(blockLists.lists) { list in
+                Button {
+                    selectedListID = list.id
+                } label: {
+                    if list.id == selectedList?.id {
+                        Label("\(list.emoji) \(list.name)", systemImage: "checkmark")
+                    } else {
+                        Text("\(list.emoji) \(list.name)")
+                    }
+                }
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            .background(isSelected ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Capsule())
-            .foregroundStyle(isSelected ? Color.omoOnPrimary : Color.omoInk)
+            Divider()
+            Button("New block list", systemImage: "plus") { editingList = BlockList(name: "") }
+        } label: {
+            HStack(spacing: 10) {
+                Image(systemName: "square.stack.3d.up")
+                    .foregroundStyle(Color.omoPrimary)
+                Text("Block list")
+                    .foregroundStyle(Color.omoInk)
+                Spacer(minLength: 8)
+                Text(selectedList.map { "\($0.name) · \(ScreenshotDemo.summary(for: $0) ?? $0.summary)" } ?? "Choose")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.omoLabels)
+                    .lineLimit(1)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption)
+                    .foregroundStyle(Color.omoLabels)
+            }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .accessibilityLabel("Block list: \(selectedList?.name ?? "none")")
     }
 }

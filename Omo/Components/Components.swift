@@ -72,8 +72,23 @@ struct CardModifier: ViewModifier {
     }
 }
 
+/// Several rows in one surface, separated by thin dividers (the rows add their own).
+struct GroupedCardModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.omoCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.omoInk.opacity(0.09), lineWidth: 0.75)
+            )
+    }
+}
+
 extension View {
     func card() -> some View { modifier(CardModifier()) }
+    func groupedCard() -> some View { modifier(GroupedCardModifier()) }
 
     /// Shows `message` as an alert and clears it when dismissed.
     func errorAlert(_ message: Binding<String?>) -> some View {
@@ -146,16 +161,19 @@ struct PrimaryButtonStyle: ButtonStyle {
 }
 
 struct SecondaryButtonStyle: ButtonStyle {
+    /// The outline and text colour. On a primary-coloured panel, use `.omoOnPrimary`.
+    var color: Color = .omoPrimary
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundStyle(Color.omoPrimary)
+            .foregroundStyle(color)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(Color.omoPrimary.opacity(configuration.isPressed ? 0.12 : 0),
+            .background(color.opacity(configuration.isPressed ? 0.12 : 0),
                         in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .stroke(Color.omoPrimary, lineWidth: 1.25))
+                .stroke(color, lineWidth: 1.25))
             .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }

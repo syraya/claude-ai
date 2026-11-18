@@ -61,129 +61,52 @@ struct OmoHeader: View {
     var collapse: CGFloat
     var onSelect: (OmoCompanion) -> Void
 
-    @State private var inspected: OmoCompanion?
     @State private var showCollection = false
 
-    /// Yours first, then the ones still to earn.
-    private var ordered: [OmoCompanion] {
-        let all = OmoCompanion.allCases
-        return all.filter { $0.isUnlocked(stats) } + all.filter { !$0.isUnlocked(stats) }
-    }
-
     var body: some View {
-        VStack(spacing: 14) {
-            VStack(spacing: 10) {
-                ZStack(alignment: .bottom) {
-                    Ellipse()
-                        .fill(Color.omoInk.opacity(0.10))
-                        .frame(width: 90, height: 12)
-                        .blur(radius: 4)
-                        .offset(y: 10)
-                    OmoFigure(companion: selected, size: 150)
-                        .shadow(color: Color.omoInk.opacity(0.18), radius: 14, y: 10)
-                        .hovering(6)
-                }
-                .scaleEffect(1 - 0.45 * collapse, anchor: .top)
-                .opacity(1 - collapse)
+        Button {
+            showCollection = true
+        } label: {
+            HStack(alignment: .center, spacing: 18) {
+                OmoFigure(companion: selected, size: 128)
+                    .hovering(5)
+                    .scaleEffect(1 - 0.4 * collapse, anchor: .leading)
+                    .opacity(1 - collapse)
 
-                VStack(spacing: 3) {
+                Rectangle()
+                    .fill(Color.omoInk.opacity(0.15))
+                    .frame(width: 0.75, height: 96)
+
+                VStack(alignment: .leading, spacing: 4) {
                     Text(selected.name)
-                        .font(.omoSerif(.title2, weight: .bold))
+                        .font(.omoSerif(.title, weight: .semibold))
                         .foregroundStyle(Color.omoInk)
-                    Text(selected.epithet.uppercased())
-                        .font(.caption2.weight(.semibold))
-                        .kerning(1.5)
+                    Text(selected.epithet)
+                        .font(.system(.subheadline, design: .serif).italic())
                         .foregroundStyle(Color.omoLabels)
+                    Text("“\(selected.whisper)”")
+                        .font(.system(.footnote, design: .serif).italic())
+                        .foregroundStyle(Color.omoLabels)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 2)
+                    Label("All OMOs · \(OmoCompanion.allCases.filter { $0.isUnlocked(stats) }.count) of \(OmoCompanion.allCases.count)",
+                          systemImage: "square.grid.2x2")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(Color.omoPrimary)
+                        .padding(.top, 6)
                 }
-                Text("“\(selected.whisper)”")
-                    .font(.system(.body, design: .serif).italic())
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 14) {
-                    ForEach(Array(ordered.enumerated()), id: \.element) { index, companion in
-                        OmoPickButton(companion: companion,
-                                      locked: !companion.isUnlocked(stats),
-                                      isSelected: companion == selected,
-                                      hoverDelay: Double(index) * 0.25) {
-                            tap(companion)
-                        }
-                    }
-                }
-                .padding(.horizontal, 4)
-            }
-
-            Button {
-                showCollection = true
-            } label: {
-                Label("All OMOs · \(OmoCompanion.allCases.filter { $0.isUnlocked(stats) }.count) of \(OmoCompanion.allCases.count)",
-                      systemImage: "square.grid.3x3.fill")
-                    .font(.footnote.weight(.semibold))
-            }
-            .tint(.omoPrimary)
-
-            if let inspected {
-                OmoLockedInfo(companion: inspected, stats: stats)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+            .contentShape(Rectangle())
         }
-        .animation(.easeInOut(duration: 0.25), value: inspected)
+        .buttonStyle(.plain)
+        .accessibilityLabel("\(selected.name), \(selected.epithet). Show all OMOs")
         .sheet(isPresented: $showCollection) {
             OmoCollectionView(selected: selected, stats: stats) { companion in
                 onSelect(companion)
                 showCollection = false
             }
         }
-    }
-
-    private func tap(_ companion: OmoCompanion) {
-        if companion.isUnlocked(stats) {
-            inspected = nil
-            onSelect(companion)
-        } else {
-            inspected = inspected == companion ? nil : companion
-        }
-    }
-}
-
-/// One OMO in the floating row.
-struct OmoPickButton: View {
-    var companion: OmoCompanion
-    var locked: Bool
-    var isSelected: Bool
-    var hoverDelay: Double
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                ZStack(alignment: .bottomTrailing) {
-                    OmoFigure(companion: companion, size: 62, locked: locked, backdrop: true)
-                        .overlay(
-                            Circle().stroke(Color.omoPrimary, lineWidth: isSelected ? 3 : 0)
-                                .padding(-3)
-                        )
-                    if locked {
-                        Image(systemName: companion.kind == .holiday ? "calendar" : "lock.fill")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(Color.omoPaper)
-                            .padding(5)
-                            .background(Color.omoInk.opacity(0.8), in: Circle())
-                    }
-                }
-                .hovering(3, delay: hoverDelay)
-                Text(locked ? companion.shortRequirement : companion.name)
-                    .font(.caption2.weight(isSelected ? .bold : .regular))
-                    .foregroundStyle(isSelected ? Color.omoPrimary : .secondary)
-                    .lineLimit(1)
-                    .frame(maxWidth: 74)
-            }
-            .padding(.vertical, 8)
-        }
-        .buttonStyle(.plain)
     }
 }
 

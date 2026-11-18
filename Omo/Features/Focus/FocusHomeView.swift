@@ -32,15 +32,6 @@ struct FocusHomeView: View {
                             HolidayCard(holiday: event.holiday, companion: event.companion)
                         }
 
-                        todayCard
-
-                        NavigationLink {
-                            LifetimeView()
-                        } label: {
-                            LifetimeCard(lifetime: focus.lifetime)
-                        }
-                        .buttonStyle(.plain)
-
                         if !screenTime.isApproved && !ScreenshotDemo.isActive {
                             permissionCard
                         }
@@ -51,11 +42,21 @@ struct FocusHomeView: View {
 
                         ScheduleStatusCard()
 
+                        // The one primary action comes first; the numbers follow it.
                         if focus.session != nil {
                             ActiveSessionView()
                         } else {
                             StartSessionView()
                         }
+
+                        todayCard
+
+                        NavigationLink {
+                            LifetimeView()
+                        } label: {
+                            LifetimeCard(lifetime: focus.lifetime)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .padding()
                 }
@@ -105,12 +106,31 @@ struct FocusHomeView: View {
         return name.map { "\(base), \($0)" } ?? base
     }
 
+    /// Today's numbers in one quiet row.
     private var todayCard: some View {
-        HStack(spacing: 10) {
-            StatPill(value: Format.minutes(focus.today.focusMinutes), label: "Focused today", color: .omoSuccess)
-            StatPill(value: "\(focus.today.sessionsCompleted)", label: "Sessions", color: .omoPrimary)
-            StatPill(value: "\(focus.today.breaksTaken)", label: "Breaks", color: .omoGold)
+        HStack(spacing: 0) {
+            todayStat(Format.minutes(focus.today.focusMinutes), "focused today")
+            Divider().frame(height: 36)
+            todayStat("\(focus.today.sessionsCompleted)", focus.today.sessionsCompleted == 1 ? "session" : "sessions")
+            Divider().frame(height: 36)
+            todayStat("\(focus.today.breaksTaken)", focus.today.breaksTaken == 1 ? "break" : "breaks")
         }
+        .padding(.vertical, 14)
+        .frame(maxWidth: .infinity)
+        .background(Color.omoCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.omoInk.opacity(0.09), lineWidth: 0.75))
+    }
+
+    private func todayStat(_ value: String, _ label: String) -> some View {
+        VStack(spacing: 2) {
+            Text(value)
+                .font(.system(.title2, design: .serif).weight(.semibold).monospacedDigit())
+                .foregroundStyle(Color.omoInk)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(Color.omoLabels)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var permissionCard: some View {
