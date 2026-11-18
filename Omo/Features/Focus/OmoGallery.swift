@@ -39,8 +39,8 @@ struct OmoFigure: View {
             .resizable()
             .scaledToFit()
             .padding(backdrop ? size * 0.1 : 0)
-            .colorMultiply(locked ? Color(white: 0.15) : .white)
-            .opacity(locked ? 0.5 : 1)
+            .saturation(locked ? 0.25 : 1)
+            .opacity(locked ? 0.45 : 1)
             .frame(width: size, height: size)
             .background {
                 if backdrop {
@@ -93,7 +93,7 @@ struct OmoHeader: View {
                     Text(selected.epithet.uppercased())
                         .font(.caption2.weight(.semibold))
                         .kerning(1.5)
-                        .foregroundStyle(Color.omoClay)
+                        .foregroundStyle(Color.omoLabels)
                 }
                 Text("“\(selected.whisper)”")
                     .font(.system(.body, design: .serif).italic())
@@ -169,7 +169,7 @@ struct OmoPickButton: View {
                     if locked {
                         Image(systemName: companion.kind == .holiday ? "calendar" : "lock.fill")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(.white)
+                            .foregroundStyle(Color.omoPaper)
                             .padding(5)
                             .background(Color.omoInk.opacity(0.8), in: Circle())
                     }
@@ -200,7 +200,7 @@ struct OmoLockedInfo: View {
                 Text(companion.story).font(.subheadline).foregroundStyle(.secondary)
                 Text(companion.requirement)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.omoClay)
+                    .foregroundStyle(Color.omoLabels)
                 if let progress = companion.progress(stats) {
                     Text(progress).font(.caption).foregroundStyle(.secondary)
                 }
@@ -219,38 +219,39 @@ struct OmoCollectionView: View {
     var stats: LifetimeStats
     var onSelect: (OmoCompanion) -> Void
 
+    @State private var kind: OmoCompanion.Kind = .path
     @State private var inspected: OmoCompanion?
     @Environment(\.dismiss) private var dismiss
 
-    private let columns = [GridItem(.adaptive(minimum: 96), spacing: 12)]
+    private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    ForEach(OmoCompanion.Kind.allCases, id: \.self) { kind in
-                        let group = OmoCompanion.allCases.filter { $0.kind == kind }
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text(kind.rawValue).font(.omoSerif(.title3))
-                                Spacer()
-                                Text("\(group.filter { $0.isUnlocked(stats) }.count) of \(group.count)")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Text(caption(for: kind)).font(.caption).foregroundStyle(.secondary)
-                            LazyVGrid(columns: columns, spacing: 16) {
-                                ForEach(group) { companion in
-                                    cell(companion)
-                                }
-                            }
-                        }
+                VStack(alignment: .leading, spacing: 14) {
+                    Picker("Group", selection: $kind) {
+                        ForEach(OmoCompanion.Kind.allCases, id: \.self) { Text($0.rawValue).tag($0) }
                     }
-                    if let inspected {
+                    .pickerStyle(.segmented)
+
+                    let collected = OmoCompanion.allCases.filter { $0.isUnlocked(stats) }.count
+                    Text("\(collected) of \(OmoCompanion.allCases.count) collected · \(caption(for: kind))")
+                        .font(.footnote)
+                        .foregroundStyle(Color.omoLabels)
+
+                    if let inspected, inspected.kind == kind {
                         OmoLockedInfo(companion: inspected, stats: stats)
                     }
+
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(OmoCompanion.allCases.filter { $0.kind == kind }) { companion in
+                            tile(companion)
+                        }
+                    }
                 }
-                .padding()
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+                .animation(.easeInOut(duration: 0.2), value: inspected)
             }
             .background(OmoBackground())
             .navigationTitle("Your OMOs")
@@ -263,14 +264,16 @@ struct OmoCollectionView: View {
 
     private func caption(for kind: OmoCompanion.Kind) -> String {
         switch kind {
-        case .path: return "Earned with lifetime focus hours, one for each title."
+        case .path: return "One for each title, earned with focus hours."
         case .milestone: return "Earned with friends, sessions, streaks and Study Circles."
-        case .holiday: return "Focus for \(OmoHoliday.requiredMinutes) minutes on the day and they're yours to keep."
+        case .holiday: return "Focus \(OmoHoliday.requiredMinutes) minutes on the day to keep one."
         }
     }
 
-    private func cell(_ companion: OmoCompanion) -> some View {
+    /// A tile in the OMO's own colours, like a small painted panel.
+    private func tile(_ companion: OmoCompanion) -> some View {
         let locked = !companion.isUnlocked(stats)
+        let palette = companion.palette
         return Button {
             if locked {
                 inspected = inspected == companion ? nil : companion
@@ -279,19 +282,55 @@ struct OmoCollectionView: View {
             }
         } label: {
             VStack(spacing: 6) {
-                OmoFigure(companion: companion, size: 80, locked: locked, backdrop: true)
-                    .overlay(Circle().stroke(Color.omoPrimary, lineWidth: companion == selected ? 3 : 0).padding(-3))
+                Image(companion.imageName)
+                    .resizable()
+                    .scaledToFit()
+                    .saturation(locked ? 0.25 : 1)
+                    .opacity(locked ? 0.45 : 1)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 14)
+                    .frame(maxHeight: .infinity)
                 Text(companion.name)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(locked ? .secondary : Color.omoInk)
+                    .font(.omoSerif(.headline))
+                    .foregroundStyle(Color(palette.ink))
                     .lineLimit(1)
-                Text(locked ? companion.shortRequirement : companion.epithet)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+                    .padding(.horizontal, 8)
+                    .padding(.bottom, 10)
+            }
+            .frame(maxWidth: .infinity)
+            .aspectRatio(0.92, contentMode: .fit)
+            .background(Color(palette.paper), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(companion == selected ? Color(palette.gold) : Color.omoInk.opacity(0.08),
+                            lineWidth: companion == selected ? 2.5 : 0.75)
+            )
+            .overlay(alignment: .topTrailing) {
+                if companion == selected {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.title3)
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(Color(palette.onPrimary), Color(palette.gold))
+                        .padding(8)
+                }
+            }
+            .overlay(alignment: .bottomTrailing) {
+                if locked {
+                    Label(companion.shortRequirement,
+                          systemImage: companion.kind == .holiday ? "calendar" : "lock.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(Color(palette.paper))
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 4)
+                        .background(Color(palette.ink).opacity(0.85), in: Capsule())
+                        .padding(8)
+                }
             }
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(locked ? "\(companion.name), locked. \(companion.requirement)" : companion.name)
+        .accessibilityAddTraits(companion == selected ? .isSelected : [])
     }
 }
 

@@ -55,7 +55,7 @@ struct ScheduleRow: View {
                 } else if list == nil {
                     Label("Its block list was deleted. Choose another.", systemImage: "exclamationmark.triangle.fill")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(Color.omoClay)
+                        .foregroundStyle(Color.omoLabels)
                         .padding(.top, 2)
                 }
             }
@@ -304,7 +304,7 @@ struct ScheduleEditorView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
                 .background(selected ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Capsule())
-                .foregroundStyle(selected ? .white : .primary)
+                .foregroundStyle(selected ? Color.omoOnPrimary : Color.omoInk)
         }
         .buttonStyle(.plain)
     }
@@ -318,7 +318,7 @@ struct ScheduleEditorView: View {
                 .font(.subheadline.weight(.semibold))
                 .frame(width: 36, height: 36)
                 .background(selected ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Circle())
-                .foregroundStyle(selected ? .white : .primary)
+                .foregroundStyle(selected ? Color.omoOnPrimary : Color.omoInk)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(Calendar.current.weekdaySymbols[weekday - 1])

@@ -42,7 +42,7 @@ struct CompanionTransitionView: View {
                     Text(companion.epithet.uppercased())
                         .font(.caption2.weight(.semibold))
                         .kerning(1.5)
-                        .foregroundStyle(Color(palette.clay))
+                        .foregroundStyle(Color(palette.labels))
                 }
                 .scaleEffect(showFigure ? 1 : 0.92)
                 .opacity(showFigure ? 1 : 0)

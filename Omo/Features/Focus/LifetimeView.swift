@@ -22,7 +22,7 @@ struct LifetimeCard: View {
                 Text("TOTAL FOCUS")
                     .font(.caption2.weight(.semibold))
                     .kerning(1.5)
-                    .foregroundStyle(Color.omoClay)
+                    .foregroundStyle(Color.omoLabels)
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text(LifetimeFormat.hours(lifetime.totalFocusMinutes))
                         .font(.system(size: 34, weight: .semibold, design: .serif).monospacedDigit())
@@ -79,7 +79,7 @@ struct LifetimeView: View {
             Text("SINCE \(lifetime.startedAt.formatted(date: .abbreviated, time: .omitted).uppercased())")
                 .font(.caption2.weight(.semibold))
                 .kerning(1.5)
-                .foregroundStyle(Color.omoClay)
+                .foregroundStyle(Color.omoLabels)
             Text(LifetimeFormat.hours(shownMinutes))
                 .font(.system(size: 72, weight: .semibold, design: .serif).monospacedDigit())
                 .foregroundStyle(Color.omoInk)
@@ -193,7 +193,7 @@ struct LifetimeView: View {
                             let names = step.companions.map(\.name).joined(separator: " & ")
                             Text(step.hours == 0 ? "\(names), from the start" : (reached ? "\(names) joined you" : "\(names) joins you"))
                                 .font(.caption2.weight(.semibold))
-                                .foregroundStyle(reached ? Color.omoGold : .secondary)
+                                .foregroundStyle(reached ? Color.omoPrimary : Color.omoLabels)
                         }
                     }
                     Spacer()

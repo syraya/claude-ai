@@ -13,20 +13,25 @@ struct RGB: Equatable {
 struct ThemePalette: Equatable {
     /// Page background.
     let paper: RGB
-    /// Card and sheet background.
+    /// Cards, sheets and grouped areas.
     let card: RGB
     /// Body text and dark strokes.
     let ink: RGB
+    /// Secondary text and small labels. Readable on paper and card.
+    let labels: RGB
     /// Buttons, rings, selected states.
     let primary: RGB
-    /// Breaks, highlights, capitals.
+    /// Text and icons on a primary-coloured fill.
+    let onPrimary: RGB
+    /// Decorative identity details (laurels, progress, figures). Not for small text.
     let gold: RGB
-    /// Small secondary accents.
+    /// A second decorative colour from the OMO's own artwork.
     let clay: RGB
-    /// Focus time, "back to it" and success states.
+    /// Focus time, "back to it" and success states. Pair it with a label or icon.
     let success: RGB
-    /// Soft background glow.
-    let blush: RGB
+
+    /// Soft background glow: the accent, used faintly.
+    var blush: RGB { clay }
 }
 
 /// How you earn an OMO.
@@ -363,124 +368,126 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// Each OMO's colours, from design reference 02. Every text colour reaches at least
+    /// 4.5:1 against the paper and card it sits on, and on-primary against primary.
     var palette: ThemePalette {
         switch self {
         case .glaux:
-            return ThemePalette(paper: RGB(0.98, 0.955, 0.91), card: RGB(1, 1, 1), ink: RGB(0.16, 0.17, 0.27),
-                                primary: RGB(0.18, 0.29, 0.62), gold: RGB(0.84, 0.63, 0.23), clay: RGB(0.75, 0.38, 0.23),
-                                success: RGB(0.36, 0.61, 0.54), blush: RGB(0.85, 0.55, 0.48))
+            return ThemePalette(paper: RGB(0xF5F0E4), card: RGB(0xFFFCF5), ink: RGB(0x222B3B), labels: RGB(0x63666C),
+                                primary: RGB(0x293F78), onPrimary: RGB(0xFFFDF7), gold: RGB(0xB4975A),
+                                clay: RGB(0x8C733D), success: RGB(0x356653))
         case .selene:
-            return ThemePalette(paper: RGB(0.07, 0.09, 0.17), card: RGB(0.11, 0.14, 0.25), ink: RGB(0.95, 0.92, 0.86),
-                                primary: RGB(0.38, 0.50, 0.90), gold: RGB(0.86, 0.67, 0.29), clay: RGB(0.85, 0.52, 0.38),
-                                success: RGB(0xB5C0E0), blush: RGB(0.55, 0.40, 0.62))
+            return ThemePalette(paper: RGB(0x101A2B), card: RGB(0x18263A), ink: RGB(0xF2F0E7), labels: RGB(0xB7C0CE),
+                                primary: RGB(0xC7D7EC), onPrimary: RGB(0x142035), gold: RGB(0xC8B67E),
+                                clay: RGB(0x9EB6D2), success: RGB(0xA8C7B9))
         case .daphne:
-            return ThemePalette(paper: RGB(0xEEF4EC), card: RGB(0xFBFDF9), ink: RGB(0x17301F),
-                                primary: RGB(0x2F6B45), gold: RGB(0x9BB85A), clay: RGB(0x4F7A3A),
-                                success: RGB(0x3E9A6A), blush: RGB(0xC9E0BC))
+            return ThemePalette(paper: RGB(0xEDF1E7), card: RGB(0xF8FAF3), ink: RGB(0x25382F), labels: RGB(0x59665B),
+                                primary: RGB(0x375C47), onPrimary: RGB(0xFFFDF5), gold: RGB(0xA39658),
+                                clay: RGB(0x81916B), success: RGB(0x3F6C53))
         case .noor:
-            return ThemePalette(paper: RGB(0xFFF2EF), card: RGB(0xFFFBFA), ink: RGB(0x3A1424),
-                                primary: RGB(0xC2264B), gold: RGB(0xE9A23B), clay: RGB(0xB8432F),
-                                success: RGB(0xA8407A), blush: RGB(0xF6BFC9))
+            return ThemePalette(paper: RGB(0xF7EBEE), card: RGB(0xFFF6F7), ink: RGB(0x4B2632), labels: RGB(0x805764),
+                                primary: RGB(0xA43F5C), onPrimary: RGB(0xFFF8F6), gold: RGB(0xC29B58),
+                                clay: RGB(0xD1808D), success: RGB(0x476856))
         case .sphinx:
-            return ThemePalette(paper: RGB(0.955, 0.955, 0.948), card: RGB(1, 1, 1), ink: RGB(0.17, 0.18, 0.20),
-                                primary: RGB(0.22, 0.37, 0.43), gold: RGB(0.76, 0.61, 0.35), clay: RGB(0.55, 0.45, 0.40),
-                                success: RGB(0.38, 0.57, 0.49), blush: RGB(0.78, 0.73, 0.71))
+            return ThemePalette(paper: RGB(0xEDF0F0), card: RGB(0xF9FAF8), ink: RGB(0x28393D), labels: RGB(0x5D6A6D),
+                                primary: RGB(0x465E66), onPrimary: RGB(0xFCFCF7), gold: RGB(0xAC9A6F),
+                                clay: RGB(0x81989E), success: RGB(0x48695E))
         case .nyx:
-            return ThemePalette(paper: RGB(0.04, 0.035, 0.06), card: RGB(0.10, 0.08, 0.15), ink: RGB(0.94, 0.91, 0.98),
-                                primary: RGB(0.55, 0.36, 0.96), gold: RGB(0.77, 0.69, 0.99), clay: RGB(0.93, 0.45, 0.70),
-                                success: RGB(0xD58AF0), blush: RGB(0.43, 0.25, 0.75))
+            return ThemePalette(paper: RGB(0x17111F), card: RGB(0x241A32), ink: RGB(0xF0EAF4), labels: RGB(0xC3B5CF),
+                                primary: RGB(0xB99AD8), onPrimary: RGB(0x24152F), gold: RGB(0xC3A76B),
+                                clay: RGB(0x88719E), success: RGB(0xA4C1B1))
         case .hippocampus:
-            return ThemePalette(paper: RGB(0.94, 0.965, 0.95), card: RGB(1, 1, 1), ink: RGB(0.17, 0.23, 0.26),
-                                primary: RGB(0.78, 0.40, 0.35), gold: RGB(0.86, 0.68, 0.40), clay: RGB(0.28, 0.55, 0.55),
-                                success: RGB(0.33, 0.60, 0.54), blush: RGB(0.93, 0.70, 0.68))
+            return ThemePalette(paper: RGB(0xEAF3F0), card: RGB(0xF7FBF7), ink: RGB(0x203D40), labels: RGB(0x526D6F),
+                                primary: RGB(0x286570), onPrimary: RGB(0xFBFFFB), gold: RGB(0xB09861),
+                                clay: RGB(0xCB8E7B), success: RGB(0x39715D))
         case .phoenix:
-            return ThemePalette(paper: RGB(0.975, 0.94, 0.89), card: RGB(1, 0.995, 0.985), ink: RGB(0.22, 0.18, 0.15),
-                                primary: RGB(0.68, 0.32, 0.19), gold: RGB(0.72, 0.62, 0.28), clay: RGB(0.24, 0.36, 0.27),
-                                success: RGB(0xB23A48), blush: RGB(0.88, 0.62, 0.50))
+            return ThemePalette(paper: RGB(0xF6ECE4), card: RGB(0xFFF7F0), ink: RGB(0x482B26), labels: RGB(0x7B5F55),
+                                primary: RGB(0xA34B35), onPrimary: RGB(0xFFF9F3), gold: RGB(0xB48D4E),
+                                clay: RGB(0xD88349), success: RGB(0x596C4A))
         case .pegasus:
-            return ThemePalette(paper: RGB(0.98, 0.955, 0.875), card: RGB(1, 0.995, 0.97), ink: RGB(0.20, 0.16, 0.10),
-                                primary: RGB(0.55, 0.39, 0.08), gold: RGB(0.85, 0.66, 0.20), clay: RGB(0.55, 0.20, 0.17),
-                                success: RGB(0x4A7BB0), blush: RGB(0.93, 0.80, 0.52))
+            return ThemePalette(paper: RGB(0xF5F0E1), card: RGB(0xFFFCF4), ink: RGB(0x3C3427), labels: RGB(0x73674F),
+                                primary: RGB(0x806133), onPrimary: RGB(0xFFFCF5), gold: RGB(0xB89A5E),
+                                clay: RGB(0xC6AD75), success: RGB(0x5D6B4A))
         case .apollo:
-            return ThemePalette(paper: RGB(0.93, 0.95, 0.98), card: RGB(1, 1, 1), ink: RGB(0.15, 0.20, 0.30),
-                                primary: RGB(0.24, 0.42, 0.71), gold: RGB(0.88, 0.65, 0.31), clay: RGB(0.79, 0.50, 0.48),
-                                success: RGB(0xC9711C), blush: RGB(0.95, 0.80, 0.70))
+            return ThemePalette(paper: RGB(0xEAF0F7), card: RGB(0xF8FBFF), ink: RGB(0x233B55), labels: RGB(0x5B6B7E),
+                                primary: RGB(0x355E91), onPrimary: RGB(0xFCFDFF), gold: RGB(0xB6964D),
+                                clay: RGB(0xD5B969), success: RGB(0x43766F))
         case .athena:
-            return ThemePalette(paper: RGB(0.95, 0.90, 0.80), card: RGB(0.985, 0.955, 0.895), ink: RGB(0.23, 0.16, 0.10),
-                                primary: RGB(0.48, 0.29, 0.14), gold: RGB(0.72, 0.53, 0.18), clay: RGB(0.55, 0.23, 0.17),
-                                success: RGB(0.43, 0.48, 0.27), blush: RGB(0.80, 0.55, 0.42))
+            return ThemePalette(paper: RGB(0xF1E9D9), card: RGB(0xFBF5E9), ink: RGB(0x4D3D2B), labels: RGB(0x79664F),
+                                primary: RGB(0x714C32), onPrimary: RGB(0xFFF9ED), gold: RGB(0xB49361),
+                                clay: RGB(0xA75E4D), success: RGB(0x5E6B4E))
         case .huginnMuninn:
-            return ThemePalette(paper: RGB(0xEEF0F2), card: RGB(0xFFFFFF), ink: RGB(0x1E232B),
-                                primary: RGB(0x2F3A4A), gold: RGB(0x8FA6BC), clay: RGB(0x6B5A48),
-                                success: RGB(0x5A7896), blush: RGB(0xB8C4CF))
+            return ThemePalette(paper: RGB(0xEDF0F1), card: RGB(0xFAFBFA), ink: RGB(0x262E36), labels: RGB(0x616B74),
+                                primary: RGB(0x404E5C), onPrimary: RGB(0xFDFDF8), gold: RGB(0xA59A7B),
+                                clay: RGB(0x8093A6), success: RGB(0x48665E))
         case .anansi:
-            return ThemePalette(paper: RGB(0xF7EFE2), card: RGB(0xFFFDF8), ink: RGB(0x2A2140),
-                                primary: RGB(0x2E3A6E), gold: RGB(0xD9A13B), clay: RGB(0xA4462B),
-                                success: RGB(0x5C8A4E), blush: RGB(0xE3B98A))
+            return ThemePalette(paper: RGB(0xF4EEDF), card: RGB(0xFFF9ED), ink: RGB(0x2D2D49), labels: RGB(0x6B6578),
+                                primary: RGB(0x4D456E), onPrimary: RGB(0xFFF9EF), gold: RGB(0xB69A60),
+                                clay: RGB(0xB69A60), success: RGB(0x57745F))
         case .koi:
-            return ThemePalette(paper: RGB(0xEEF5F7), card: RGB(0xFFFFFF), ink: RGB(0x1F3440),
-                                primary: RGB(0x2C6E8F), gold: RGB(0xE8803A), clay: RGB(0xC4521E),
-                                success: RGB(0x4F9A86), blush: RGB(0xF2B999))
+            return ThemePalette(paper: RGB(0xEAF2F7), card: RGB(0xF8FCFF), ink: RGB(0x243F52), labels: RGB(0x567081),
+                                primary: RGB(0x34627A), onPrimary: RGB(0xF9FCFF), gold: RGB(0xC09B5D),
+                                clay: RGB(0xCA6837), success: RGB(0x416C60))
         case .thoth:
-            return ThemePalette(paper: RGB(0xF4ECDC), card: RGB(0xFFFCF4), ink: RGB(0x1E2A3A),
-                                primary: RGB(0x1F4E79), gold: RGB(0xC9A04A), clay: RGB(0xA65A2E),
-                                success: RGB(0x2F8F86), blush: RGB(0xE2C79A))
+            return ThemePalette(paper: RGB(0xF3ECDC), card: RGB(0xFFF9ED), ink: RGB(0x26384D), labels: RGB(0x626B71),
+                                primary: RGB(0x285372), onPrimary: RGB(0xFFF9EC), gold: RGB(0xC4A259),
+                                clay: RGB(0xC4A259), success: RGB(0x467263))
         case .dragon:
-            return ThemePalette(paper: RGB(0xEEF4EF), card: RGB(0xFFFFFF), ink: RGB(0x1C2B24),
-                                primary: RGB(0x1F6B52), gold: RGB(0xD9A33A), clay: RGB(0xB5302A),
-                                success: RGB(0x3E8E62), blush: RGB(0xE7B9A0))
+            return ThemePalette(paper: RGB(0xE8F1EA), card: RGB(0xF7FBF6), ink: RGB(0x253E34), labels: RGB(0x587064),
+                                primary: RGB(0x2B644D), onPrimary: RGB(0xF6FCF4), gold: RGB(0xB89A59),
+                                clay: RGB(0xAC4B3D), success: RGB(0x346B50))
         case .odin:
-            return ThemePalette(paper: RGB(0x0F1418), card: RGB(0x1A2128), ink: RGB(0xE6ECF2),
-                                primary: RGB(0x5F8DB5), gold: RGB(0xC9A45C), clay: RGB(0xB0644A),
-                                success: RGB(0x6FAF98), blush: RGB(0x3A4A5E))
+            return ThemePalette(paper: RGB(0x111D22), card: RGB(0x1C2B31), ink: RGB(0xEAF1EF), labels: RGB(0xADC1C5),
+                                primary: RGB(0xABC4C9), onPrimary: RGB(0x17292F), gold: RGB(0xB99D62),
+                                clay: RGB(0xB99D62), success: RGB(0xA5C7AC))
         case .salmon:
-            return ThemePalette(paper: RGB(0xEEF3EC), card: RGB(0xFFFFFF), ink: RGB(0x223127),
-                                primary: RGB(0x3D6B4F), gold: RGB(0xE3A94A), clay: RGB(0xD9785B),
-                                success: RGB(0x5C9C6E), blush: RGB(0xF0B8A0))
+            return ThemePalette(paper: RGB(0xECF2EA), card: RGB(0xF8FCF5), ink: RGB(0x2E4035), labels: RGB(0x5E6D5F),
+                                primary: RGB(0x456A56), onPrimary: RGB(0xFDFFF7), gold: RGB(0xAC9567),
+                                clay: RGB(0xC57F6C), success: RGB(0x3E6C4D))
         case .simurgh:
-            return ThemePalette(paper: RGB(0xF2F7F6), card: RGB(0xFFFFFF), ink: RGB(0x17363A),
-                                primary: RGB(0x1E7F86), gold: RGB(0xD4A645), clay: RGB(0x9C3D54),
-                                success: RGB(0x3E9A7A), blush: RGB(0xE6BFC8))
+            return ThemePalette(paper: RGB(0xE8F3F1), card: RGB(0xF5FCFA), ink: RGB(0x21413F), labels: RGB(0x54716C),
+                                primary: RGB(0x1F696A), onPrimary: RGB(0xFAFFF7), gold: RGB(0xBA9C57),
+                                clay: RGB(0xBA9C57), success: RGB(0x3C7560))
         case .quetzalcoatl:
-            return ThemePalette(paper: RGB(0xEFF6F0), card: RGB(0xFFFFFF), ink: RGB(0x1A2F25),
-                                primary: RGB(0x1E7A5A), gold: RGB(0xD9A53A), clay: RGB(0xC2502E),
-                                success: RGB(0x2E9E6E), blush: RGB(0xE8C08A))
+            return ThemePalette(paper: RGB(0xEAF2EB), card: RGB(0xF8FCF6), ink: RGB(0x1F4238), labels: RGB(0x517165),
+                                primary: RGB(0x1F6755), onPrimary: RGB(0xFAFFF6), gold: RGB(0xB49950),
+                                clay: RGB(0x7F9A48), success: RGB(0x2E6C4F))
         case .janus:
-            return ThemePalette(paper: RGB(0x14121C), card: RGB(0x211E2C), ink: RGB(0xF2EAD8),
-                                primary: RGB(0xA8843A), gold: RGB(0xE8CF8A), clay: RGB(0xB07A5A),
-                                success: RGB(0xC7CEDD), blush: RGB(0x4A3F5E))
+            return ThemePalette(paper: RGB(0x19191F), card: RGB(0x26262D), ink: RGB(0xF4F0E4), labels: RGB(0xC4BDAE),
+                                primary: RGB(0xD7C39B), onPrimary: RGB(0x2C2922), gold: RGB(0xBEA46F),
+                                clay: RGB(0xBEA46F), success: RGB(0xB3C4AB))
         case .qilin:
-            return ThemePalette(paper: RGB(0xFBEFE6), card: RGB(0xFFFCF8), ink: RGB(0x3A1A14),
-                                primary: RGB(0xB8322A), gold: RGB(0xD9A23A), clay: RGB(0x7A2E1E),
-                                success: RGB(0xC9622A), blush: RGB(0xF2B8A0))
+            return ThemePalette(paper: RGB(0xF7EDE3), card: RGB(0xFFF9F2), ink: RGB(0x4C2F28), labels: RGB(0x7F6257),
+                                primary: RGB(0xA44332), onPrimary: RGB(0xFFF9F0), gold: RGB(0xC09B54),
+                                clay: RGB(0xD1A24D), success: RGB(0x5F704A))
         case .psyche:
-            return ThemePalette(paper: RGB(0xFBEFF3), card: RGB(0xFFFFFF), ink: RGB(0x3A2238),
-                                primary: RGB(0x8A4B8F), gold: RGB(0xD9A65A), clay: RGB(0xB5566E),
-                                success: RGB(0xC2557F), blush: RGB(0xE6C2E8))
+            return ThemePalette(paper: RGB(0xF6EDF3), card: RGB(0xFFF8FD), ink: RGB(0x4C3150), labels: RGB(0x7B6380),
+                                primary: RGB(0x76517E), onPrimary: RGB(0xFFFAFF), gold: RGB(0xB49B67),
+                                clay: RGB(0xB69CC5), success: RGB(0x5D7868))
         case .gaia:
-            return ThemePalette(paper: RGB(0xF0F5EC), card: RGB(0xFFFFFF), ink: RGB(0x1F2E1E),
-                                primary: RGB(0x2F6B3A), gold: RGB(0xC9A04A), clay: RGB(0x7A5A3A),
-                                success: RGB(0x4F9A5A), blush: RGB(0xBFD9A8))
+            return ThemePalette(paper: RGB(0xECF1E5), card: RGB(0xF8FBF2), ink: RGB(0x2E4131), labels: RGB(0x5D705D),
+                                primary: RGB(0x426849), onPrimary: RGB(0xFDFFF5), gold: RGB(0xB39E60),
+                                clay: RGB(0x82A9B2), success: RGB(0x426C4E))
         case .loon:
-            return ThemePalette(paper: RGB(0xFFFFFF), card: RGB(0xF8F6F3), ink: RGB(0x1A1A1A),
-                                primary: RGB(0xD52B1E), gold: RGB(0xB8862E), clay: RGB(0x1F4E79),
-                                success: RGB(0x36789F), blush: RGB(0xF4C4BE))
+            return ThemePalette(paper: RGB(0xEDF3F6), card: RGB(0xFBFDFF), ink: RGB(0x283B49), labels: RGB(0x5C7180),
+                                primary: RGB(0x3B607D), onPrimary: RGB(0xFCFFFF), gold: RGB(0xADA177),
+                                clay: RGB(0xB44E45), success: RGB(0x4E7368))
         case .chiron:
-            return ThemePalette(paper: RGB(0x22332B), card: RGB(0x2B3F35), ink: RGB(0xF1EEE4),
-                                primary: RGB(0x4E8A6C), gold: RGB(0xE9D58C), clay: RGB(0xE39A7A),
-                                success: RGB(0x8FC9A8), blush: RGB(0x3E5A4A))
+            return ThemePalette(paper: RGB(0x1B2D28), card: RGB(0x283F36), ink: RGB(0xF0F0DF), labels: RGB(0xB7C6B6),
+                                primary: RGB(0xCCD7BE), onPrimary: RGB(0x25382C), gold: RGB(0xBBA571),
+                                clay: RGB(0xBBA571), success: RGB(0xB1D0AC))
         case .hecate:
-            return ThemePalette(paper: RGB(0x140D0A), card: RGB(0x221713), ink: RGB(0xF2E6D8),
-                                primary: RGB(0xC8661C), gold: RGB(0xF2B84B), clay: RGB(0xA04AC9),
-                                success: RGB(0xB48AF0), blush: RGB(0x5A2E1A))
+            return ThemePalette(paper: RGB(0x201714), card: RGB(0x33221D), ink: RGB(0xF5EADD), labels: RGB(0xC7B3A3),
+                                primary: RGB(0xE4A17A), onPrimary: RGB(0x392317), gold: RGB(0xBA965F),
+                                clay: RGB(0xD18654), success: RGB(0xC0C6A2))
         case .demeter:
-            return ThemePalette(paper: RGB(0xFAF1E1), card: RGB(0xFFFCF5), ink: RGB(0x3A2614),
-                                primary: RGB(0x8A5A22), gold: RGB(0xD9A13B), clay: RGB(0xB5432C),
-                                success: RGB(0xA83A3A), blush: RGB(0xE8C79A))
+            return ThemePalette(paper: RGB(0xF5EEDB), card: RGB(0xFFF9E9), ink: RGB(0x4C3824), labels: RGB(0x7B684A),
+                                primary: RGB(0x8D5D2F), onPrimary: RGB(0xFFFBEE), gold: RGB(0xBE9D52),
+                                clay: RGB(0xAD6942), success: RGB(0x697548))
         case .yuleStag:
-            return ThemePalette(paper: RGB(0xF4F7F5), card: RGB(0xFFFFFF), ink: RGB(0x1A2B22),
-                                primary: RGB(0x1F5A3E), gold: RGB(0xD4A23A), clay: RGB(0xB5302A),
-                                success: RGB(0x3E8E62), blush: RGB(0xE8B4B0))
+            return ThemePalette(paper: RGB(0xEFF2E9), card: RGB(0xFAFCF4), ink: RGB(0x2C4035), labels: RGB(0x627064),
+                                primary: RGB(0x315B46), onPrimary: RGB(0xFBFFF4), gold: RGB(0xB29B63),
+                                clay: RGB(0xA3565E), success: RGB(0x42684F))
         }
     }
 

@@ -9,20 +9,24 @@ extension Color {
     static var omoPaper: Color { Color(palette.paper) }
     static var omoCard: Color { Color(palette.card) }
     static var omoInk: Color { Color(palette.ink) }
+    /// Secondary text and small labels.
+    static var omoLabels: Color { Color(palette.labels) }
     static var omoPrimary: Color { Color(palette.primary) }
+    /// Text and icons on a primary-coloured fill.
+    static var omoOnPrimary: Color { Color(palette.onPrimary) }
     static var omoGold: Color { Color(palette.gold) }
     static var omoClay: Color { Color(palette.clay) }
     static var omoSuccess: Color { Color(palette.success) }
     static var omoBlush: Color { Color(palette.blush) }
     /// Text on an `omoSuccess` button. Dark themes use a light success colour, so it gets dark text.
-    static var omoOnSuccess: Color { OmoCompanion.current.isDark ? Color(palette.paper) : .white }
+    static var omoOnSuccess: Color { OmoCompanion.current.isDark ? Color(palette.paper) : Color(palette.onPrimary) }
 }
 
-/// The logo's own colours. They stay the same in every theme.
+/// The logo's own colours (design reference 02). They stay the same in every theme.
 enum Brand {
-    static let lapis = Color(red: 0.18, green: 0.29, blue: 0.62)
-    static let gold = Color(red: 0.84, green: 0.63, blue: 0.23)
-    static let parchment = Color(red: 0.98, green: 0.957, blue: 0.91)
+    static let lapis = Color(RGB(0x293F78))
+    static let gold = Color(RGB(0xB4975A))
+    static let parchment = Color(RGB(0xF5EFE3))
 }
 
 /// UIKit pieces SwiftUI doesn't style for us: serif navigation titles in the theme's ink.
@@ -47,18 +51,11 @@ extension Font {
     }
 }
 
-/// Warm plaster, with ochre light from above and a faint rose glow below, like
-/// the sky behind a fresco's arches.
+/// The theme's paper, flat. Colour and proportion carry the Renaissance feel;
+/// depth is kept for things that really sit above the page.
 struct OmoBackground: View {
     var body: some View {
-        ZStack {
-            Color.omoPaper
-            RadialGradient(colors: [Color.omoGold.opacity(0.20), .clear],
-                           center: .top, startRadius: 10, endRadius: 460)
-            RadialGradient(colors: [Color.omoBlush.opacity(0.14), .clear],
-                           center: .bottomTrailing, startRadius: 10, endRadius: 380)
-        }
-        .ignoresSafeArea()
+        Color.omoPaper.ignoresSafeArea()
     }
 }
 
@@ -67,12 +64,11 @@ struct CardModifier: ViewModifier {
         content
             .padding(18)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.omoCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background(Color.omoCard, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .stroke(Color.omoInk.opacity(0.06), lineWidth: 1)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.omoInk.opacity(0.09), lineWidth: 0.75)
             )
-            .shadow(color: Color.omoInk.opacity(0.06), radius: 12, y: 4)
     }
 }
 
@@ -134,7 +130,7 @@ extension View {
 
 struct PrimaryButtonStyle: ButtonStyle {
     var color: Color = .omoPrimary
-    var textColor: Color = .white
+    var textColor: Color = .omoOnPrimary
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -143,7 +139,7 @@ struct PrimaryButtonStyle: ButtonStyle {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(color.opacity(configuration.isPressed ? 0.7 : 1),
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
@@ -156,8 +152,11 @@ struct SecondaryButtonStyle: ButtonStyle {
             .foregroundStyle(Color.omoPrimary)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(Color.omoPrimary.opacity(configuration.isPressed ? 0.25 : 0.14),
-                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .background(Color.omoPrimary.opacity(configuration.isPressed ? 0.12 : 0),
+                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(Color.omoPrimary, lineWidth: 1.25))
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 

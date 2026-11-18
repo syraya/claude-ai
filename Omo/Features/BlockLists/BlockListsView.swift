@@ -145,7 +145,7 @@ struct BlockListsView: View {
         Text(title.uppercased())
             .font(.caption.weight(.semibold))
             .kerning(1.5)
-            .foregroundStyle(Color.omoClay)
+            .foregroundStyle(Color.omoLabels)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.top, 4)
     }

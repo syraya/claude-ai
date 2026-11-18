@@ -80,7 +80,7 @@ struct StartSessionView: View {
                                 .padding(.horizontal, 14)
                                 .padding(.vertical, 8)
                                 .background(minutes == preset ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Capsule())
-                                .foregroundStyle(minutes == preset ? .white : .primary)
+                                .foregroundStyle(minutes == preset ? Color.omoOnPrimary : Color.omoInk)
                                 .buttonStyle(.plain)
                         }
                     }
@@ -149,7 +149,7 @@ struct StartSessionView: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .background(isSelected ? Color.omoPrimary : Color.omoInk.opacity(0.06), in: Capsule())
-            .foregroundStyle(isSelected ? .white : .primary)
+            .foregroundStyle(isSelected ? Color.omoOnPrimary : Color.omoInk)
         }
         .buttonStyle(.plain)
     }

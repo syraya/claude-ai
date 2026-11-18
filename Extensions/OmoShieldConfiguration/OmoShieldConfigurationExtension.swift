@@ -27,8 +27,9 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
         let palette = companion.palette
         let paper = UIColor(palette.paper)
         let ink = UIColor(palette.ink)
-        let subtle = ink.withAlphaComponent(0.7)
+        let subtle = UIColor(palette.labels)
         let lapis = UIColor(palette.primary)
+        let onLapis = UIColor(palette.onPrimary)
         let blur: UIBlurEffect.Style = companion.isDark ? .systemUltraThinMaterialDark : .systemUltraThinMaterialLight
 
         if let lock = SharedStore.friendLock, !lock.isOnBreak {
@@ -39,7 +40,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
                 title: .init(text: "\(lock.keyholderName) holds your key", color: ink),
                 subtitle: .init(text: "\(name) stays closed until \(lock.keyholderName) unlocks you. Your circle is counting on you.",
                                 color: subtle),
-                primaryButtonLabel: .init(text: "Back to studying", color: .white),
+                primaryButtonLabel: .init(text: "Back to studying", color: onLapis),
                 primaryButtonBackgroundColor: lapis,
                 secondaryButtonLabel: .init(text: "Ask for a break", color: lapis)
             )
@@ -56,7 +57,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
                 icon: UIImage(named: companion.imageName) ?? icon("building.columns.fill", lapis),
                 title: .init(text: "Stay with your thoughts", color: ink),
                 subtitle: .init(text: subtitle, color: subtle),
-                primaryButtonLabel: .init(text: "Back to focus", color: .white),
+                primaryButtonLabel: .init(text: "Back to focus", color: onLapis),
                 primaryButtonBackgroundColor: lapis,
                 secondaryButtonLabel: breakText.map { ShieldConfiguration.Label(text: $0, color: lapis) }
             )
@@ -72,7 +73,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
                 title: .init(text: title, color: ink),
                 subtitle: .init(text: "\(name) is blocked\(until) by your schedule. This time is set aside on purpose.",
                                 color: subtle),
-                primaryButtonLabel: .init(text: "Back to it", color: .white),
+                primaryButtonLabel: .init(text: "Back to it", color: onLapis),
                 primaryButtonBackgroundColor: lapis
             )
         }
@@ -83,7 +84,7 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
             icon: icon("lock.fill", lapis),
             title: .init(text: "Blocked by OMO", color: ink),
             subtitle: .init(text: "Open OMO to see why.", color: subtle),
-            primaryButtonLabel: .init(text: "OK", color: .white),
+            primaryButtonLabel: .init(text: "OK", color: onLapis),
             primaryButtonBackgroundColor: lapis
         )
     }
