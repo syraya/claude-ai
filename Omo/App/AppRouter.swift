@@ -32,6 +32,7 @@ final class AppRouter {
     func consumePendingShieldRequest() {
         guard let raw = SharedStore.pendingShieldRequest else { return }
         SharedStore.pendingShieldRequest = nil
+        LocalNotifier.clearShieldBreak()
         if let route = LocalNotifier.Route(rawValue: raw) { open(route) }
     }
 }

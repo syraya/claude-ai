@@ -43,10 +43,10 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
                 backgroundBlurStyle: blur,
                 backgroundColor: paper,
                 icon: figure,
-                title: .init(text: "Open OMO to take your break", color: ink),
+                title: .init(text: "Tap OMO's notification to take your break", color: ink),
                 subtitle: .init(text: pending == LocalNotifier.Route.together.rawValue
-                                ? "OMO will open to your study session, where you can ask for a break."
-                                : "It starts with a short breath, then you choose how long.",
+                                ? "Or just open OMO. It opens to your study session, where you can ask for a break."
+                                : "Or just open OMO. It starts with a short breath, then you choose how long.",
                                 color: subtle),
                 primaryButtonLabel: .init(text: "Never mind, back to focus", color: onLapis),
                 primaryButtonBackgroundColor: lapis
