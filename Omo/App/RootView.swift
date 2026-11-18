@@ -10,7 +10,8 @@ struct RootView: View {
     @Environment(GroupSessionService.self) private var together
     @Environment(\.scenePhase) private var scenePhase
     /// The opening plays once each time OMO launches (not in screenshot demos).
-    @State private var showIntro = !ScreenshotDemo.isActive
+    /// Skipped when you're opening OMO to take a break from the block screen.
+    @State private var showIntro = !ScreenshotDemo.isActive && SharedStore.pendingShieldRequest == nil
 
     var body: some View {
         @Bindable var router = router
