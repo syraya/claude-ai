@@ -61,7 +61,8 @@ targets:
       properties:
         CFBundleDisplayName: OMO
         AppGroupID: $(APP_GROUP_ID)
-        UILaunchScreen: {}
+        UILaunchScreen:
+          UIColorName: LaunchBackground   # OMO's lapis, the same as the opening
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIBackgroundModes: [remote-notification, fetch]
         BGTaskSchedulerPermittedIdentifiers: [$(APP_BUNDLE_ID).sync]

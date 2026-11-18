@@ -9,6 +9,8 @@ struct RootView: View {
     @Environment(FriendsService.self) private var friends
     @Environment(GroupSessionService.self) private var together
     @Environment(\.scenePhase) private var scenePhase
+    /// The opening plays once each time OMO launches (not in screenshot demos).
+    @State private var showIntro = !ScreenshotDemo.isActive
 
     var body: some View {
         @Bindable var router = router
@@ -48,6 +50,12 @@ struct RootView: View {
                 CompanionTransitionView(companion: arriving,
                                         onCovered: { settings.settings.companion = arriving },
                                         onFinished: { settings.arrivingCompanion = nil })
+            }
+        }
+        .overlay {
+            if showIntro {
+                IntroView { showIntro = false }
+                    .transition(.identity)
             }
         }
         .task { startServices() }

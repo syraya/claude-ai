@@ -18,6 +18,11 @@ enum FocusQuotes {
         ("He who has a why to live can bear almost any how.", "Nietzsche, Twilight of the Idols"),
     ]
 
+    /// A short classical line for the opening screen.
+    static func forIntro() -> (text: String, source: String) {
+        classical.filter { $0.text.count <= 70 }.randomElement() ?? classical[0]
+    }
+
     /// OMO's own reminders. `app` is the blocked app's name.
     static func reminders(app: String) -> [String] {
         [
