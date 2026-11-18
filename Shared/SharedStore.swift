@@ -19,6 +19,7 @@ enum SharedStore {
         static let pendingShieldRequest = "pendingShieldRequest"
         static let lifetime = "lifetime"
         static let schedules = "schedules"
+        static let scheduleRuns = "scheduleRuns"
     }
 
     private static func read<T: Decodable>(_ type: T.Type, _ key: String) -> T? {
@@ -42,6 +43,12 @@ enum SharedStore {
     static var schedules: [BlockSchedule] {
         get { read([BlockSchedule].self, Key.schedules) ?? [] }
         set { write(newValue, Key.schedules) }
+    }
+
+    /// Scheduled blocks running now that count as focus, by schedule ID.
+    static var scheduleRuns: [String: ScheduleRun] {
+        get { read([String: ScheduleRun].self, Key.scheduleRuns) ?? [:] }
+        set { write(newValue, Key.scheduleRuns) }
     }
 
     static var focusSession: FocusSession? {

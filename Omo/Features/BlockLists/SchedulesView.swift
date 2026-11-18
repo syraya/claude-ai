@@ -163,6 +163,16 @@ struct ScheduleEditorView: View {
                 }
 
                 Section {
+                    Toggle("Counts as focus time", isOn: Binding(
+                        get: { schedule.countsTowardFocus },
+                        set: { schedule.countsAsFocus = $0 }
+                    ))
+                    .tint(.omoPrimary)
+                } footer: {
+                    Text("Adds the time this schedule blocks to your focus totals and your progress toward OMOs. Off by default for overnight schedules, so sleep doesn't count.")
+                }
+
+                Section {
                     Toggle("Strict", isOn: $schedule.isStrict)
                         .tint(.omoPrimary)
                 } footer: {

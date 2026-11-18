@@ -73,6 +73,8 @@ enum FocusEngine {
             if completed { $0.sessionsCompleted += 1 }
         }
         recordLifetime(minutes: minutes, completedSession: completed, friendSession: false)
+        // A schedule blocking at the same time doesn't count these minutes again.
+        ScheduleEngine.excludeOverlap(from: now.addingTimeInterval(-TimeInterval(minutes * 60)), to: now)
         SharedStore.focusSession = nil
         ShieldManager.clear(.focus)
         ActivityScheduler.cancelTimer(named: TimerName.focusEnd(session.id))
@@ -113,12 +115,19 @@ enum FocusEngine {
             $0.friendSessions += 1
         }
         recordLifetime(minutes: minutes, completedSession: false, friendSession: true)
+        ScheduleEngine.excludeOverlap(from: state.lockedAt)
         SharedStore.friendLock = nil
         ShieldManager.clear(.friendLock)
         ActivityScheduler.cancelTimer(named: TimerName.friendBreak(state.sessionID))
     }
 
     // MARK: Lifetime
+
+    /// Time a scheduled block spent blocking, added when the block ends.
+    static func recordScheduledFocus(minutes: Int, endedAt: Date) {
+        SharedStore.updateStats(for: endedAt) { $0.focusMinutes += minutes }
+        recordLifetime(minutes: minutes, completedSession: false, friendSession: false)
+    }
 
     /// Adds to the lifetime totals and announces any OMO that just joined you.
     private static func recordLifetime(minutes: Int, completedSession: Bool, friendSession: Bool) {

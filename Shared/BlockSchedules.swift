@@ -18,6 +18,13 @@ struct BlockSchedule: Codable, Identifiable, Equatable {
     var isEnabled = true
     /// A strict schedule can't be turned off, edited or deleted while it's blocking.
     var isStrict = false
+    /// Whether its blocked time adds to your focus totals. Unset means the default:
+    /// yes for daytime schedules, no for overnight ones, so sleep doesn't count.
+    var countsAsFocus: Bool?
+    /// When it was last saved. A block switched on halfway through counts from then.
+    var editedAt: Date?
+
+    var countsTowardFocus: Bool { countsAsFocus ?? !crossesMidnight }
 
     static let everyDay: Set<Int> = [1, 2, 3, 4, 5, 6, 7]
     static let weekdaysOnly: Set<Int> = [2, 3, 4, 5, 6]
@@ -50,6 +57,14 @@ struct BlockSchedule: Codable, Identifiable, Equatable {
                           matchingPolicy: .nextTime)
     }
 
+    /// When the block that's on at `date` started (yesterday, for one past midnight).
+    func occurrenceStart(at date: Date, calendar: Calendar = .current) -> Date? {
+        guard isActive(at: date, calendar: calendar),
+              let today = calendar.date(bySettingHour: startHour, minute: startMinute, second: 0, of: date)
+        else { return nil }
+        return today <= date ? today : calendar.date(byAdding: .day, value: -1, to: today)
+    }
+
     /// Locked: strict and blocking right now.
     func isLocked(at date: Date = Date()) -> Bool { isStrict && isActive(at: date) }
 
@@ -80,6 +95,18 @@ struct BlockSchedule: Codable, Identifiable, Equatable {
         let first = Calendar.current.firstWeekday
         return (0..<7).map { (first - 1 + $0) % 7 + 1 }
     }
+}
+
+/// A scheduled block that's running and counts as focus, so its time can be added up.
+struct ScheduleRun: Codable, Equatable {
+    /// When this occurrence of the schedule began.
+    var occurrence: Date
+    /// When counting began: the occurrence, or later if the schedule was switched on mid-way.
+    var start: Date
+    /// When this occurrence is scheduled to end. Counting never goes past it.
+    var end: Date
+    /// Time a focus session or friend lock already counted while this block ran.
+    var excludedSeconds: TimeInterval = 0
 }
 
 extension ManagedSettingsStore.Name {
@@ -119,11 +146,13 @@ enum ScheduleEngine {
         if let firstError { throw firstError }
     }
 
-    /// Puts every schedule's block in the state it should be in at `date`.
+    /// Puts every schedule's block in the state it should be in at `date`, and adds up
+    /// the focus time of any block that has ended.
     static func reconcile(at date: Date = Date()) {
         let lists = SharedStore.blockLists
         let center = DeviceActivityCenter()
         let monitored = Set(center.activities)
+        trackFocusTime(at: date, lists: lists)
         for schedule in SharedStore.schedules {
             // Re-register anything iOS forgot, e.g. after restoring the phone.
             if schedule.isEnabled, !monitored.contains(activityName(schedule.id)) {
@@ -149,6 +178,70 @@ enum ScheduleEngine {
     static func remove(_ schedule: BlockSchedule) {
         DeviceActivityCenter().stopMonitoring([activityName(schedule.id)])
         ShieldManager.clear(.schedule(schedule.id))
+    }
+
+    // MARK: Focus time
+
+    /// Starts counting blocks that have begun and records the ones that have ended.
+    private static func trackFocusTime(at date: Date, lists: [BlockList]) {
+        let now = Date()
+        let schedules = SharedStore.schedules
+        var runs = SharedStore.scheduleRuns
+        let before = runs
+        for schedule in schedules {
+            let key = schedule.id.uuidString
+            let blocking = schedule.countsTowardFocus
+                && lists.contains { $0.id == schedule.blockListID && !$0.isEmpty }
+            let occurrence = blocking ? schedule.occurrenceStart(at: date) : nil
+            if let run = runs[key], run.occurrence != occurrence {
+                // That block is over (or was switched off): count its time.
+                record(run, until: min(now, run.end))
+                runs[key] = nil
+            }
+            if let occurrence, runs[key] == nil {
+                runs[key] = ScheduleRun(occurrence: occurrence,
+                                        start: max(occurrence, schedule.editedAt ?? .distantPast),
+                                        end: occurrence.addingTimeInterval(TimeInterval(schedule.durationMinutes * 60)))
+            }
+        }
+        // Schedules that were deleted while blocking.
+        for (key, run) in runs where !schedules.contains(where: { $0.id.uuidString == key }) {
+            record(run, until: min(now, run.end))
+            runs[key] = nil
+        }
+        if runs != before { SharedStore.scheduleRuns = runs }
+    }
+
+    private static func record(_ run: ScheduleRun, until end: Date) {
+        let minutes = Int((end.timeIntervalSince(run.start) - run.excludedSeconds) / 60)
+        guard minutes > 0 else { return }
+        FocusEngine.recordScheduledFocus(minutes: minutes, endedAt: end)
+    }
+
+    /// A session or friend lock from `start` to now has already been counted, so the
+    /// schedules blocking at the same time don't count it again.
+    static func excludeOverlap(from start: Date, to end: Date = Date()) {
+        var runs = SharedStore.scheduleRuns
+        guard !runs.isEmpty else { return }
+        for (key, run) in runs {
+            runs[key]?.excludedSeconds += max(0, end.timeIntervalSince(max(run.start, start)))
+        }
+        SharedStore.scheduleRuns = runs
+    }
+
+    /// Focus minutes today from blocks still running. `alsoCounting` is the start of a
+    /// session or friend lock running now, whose overlap shouldn't count twice.
+    static func runningMinutesToday(at now: Date, alsoCounting otherStart: Date?) -> Int {
+        let startOfDay = Calendar.current.startOfDay(for: now)
+        var seconds: TimeInterval = 0
+        for run in SharedStore.scheduleRuns.values {
+            let from = max(run.start, startOfDay)
+            let until = min(now, run.end)
+            var counted = until.timeIntervalSince(from) - run.excludedSeconds
+            if let otherStart { counted -= max(0, until.timeIntervalSince(max(from, otherStart))) }
+            seconds += max(0, counted)
+        }
+        return Int(seconds / 60)
     }
 
     /// The schedules blocking now, for the block screen and the Focus tab.

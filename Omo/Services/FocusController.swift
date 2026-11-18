@@ -31,6 +31,10 @@ final class FocusController {
         if let lock = friendLock, !lock.isOnBreak {
             minutes += Int(now.timeIntervalSince(max(lock.lockedAt, startOfDay)) / 60)
         }
+        // Scheduled blocks that count as focus, minus any overlap with the above.
+        let otherStart = session.map { now.addingTimeInterval(-TimeInterval($0.focusedMinutes(at: now) * 60)) }
+            ?? friendLock?.lockedAt
+        minutes += ScheduleEngine.runningMinutesToday(at: now, alsoCounting: otherStart)
         return max(0, minutes)
     }
 
