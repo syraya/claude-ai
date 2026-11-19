@@ -105,6 +105,12 @@ struct RootView: View {
                 .background(OmoBackground())
                 .navigationTitle("Focus")
             })
+        case "scheduled":
+            return AnyView(NavigationStack {
+                ScrollView { ScheduleFocusView().padding() }
+                    .background(OmoBackground())
+                    .navigationTitle("Focus")
+            })
         case "lifetime":
             return AnyView(NavigationStack { LifetimeView() })
         case "omos":
@@ -119,7 +125,7 @@ struct RootView: View {
         // Break notifications from the block screen need this. Onboarding asks, but
         // it can be skipped; this asks once, and never again after an answer.
         UNUserNotificationCenter.current().getNotificationSettings { current in
-            guard current.authorizationStatus == .notDetermined else { return }
+            guard current.authorizationStatus == .notDetermined, !ScreenshotDemo.isActive else { return }
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
         }
         focus.reconcile()
