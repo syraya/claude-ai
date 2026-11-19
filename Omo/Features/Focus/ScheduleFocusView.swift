@@ -107,9 +107,7 @@ struct ScheduleFocusView: View {
             HStack(spacing: 0) {
                 stat(focusedText(schedule, now: now), "focused in this block")
                 Rectangle().fill(faint.opacity(0.4)).frame(width: 1, height: 34)
-                stat(schedule.isStrict ? "Strict"
-                     : SharedStore.settings.hasUnlimitedBreaks ? "∞" : "\(breaksLeft)",
-                     schedule.isStrict ? "no breaks" : breaksLeft == 1 ? "break left" : "breaks left")
+                stat(Format.minutes(focus.today.focusMinutes + focus.runningMinutesToday(at: now)), "focused today")
             }
             .padding(.vertical, 10)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(faint.opacity(0.35), lineWidth: 1))
@@ -122,7 +120,9 @@ struct ScheduleFocusView: View {
                 Button {
                     showBreakFlow = true
                 } label: {
-                    Text(canBreak ? "Take a break" : "No breaks left")
+                    Text(!canBreak ? "No breaks left"
+                         : SharedStore.settings.hasUnlimitedBreaks ? "Take a break"
+                         : "Take a break · \(breaksLeft) left")
                 }
                 .buttonStyle(SecondaryButtonStyle(color: .omoOnPrimary))
                 .disabled(!canBreak)
