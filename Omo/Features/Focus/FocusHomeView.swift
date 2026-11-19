@@ -45,7 +45,7 @@ struct FocusHomeView: View {
                                 LifetimeCard(lifetime: focus.lifetimeIncluding(runningMinutes: focus.runningMinutesToday(at: context.date)))
                             }
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(PressableCardStyle())
 
                         todayCard
 
@@ -95,7 +95,7 @@ struct FocusHomeView: View {
                     } label: {
                         MiniOmo(companion: settings.settings.companion)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PressableCardStyle())
                     .padding(.trailing, 16)
                     .padding(.top, 6)
                     .scaleEffect(0.4 + 0.6 * collapse, anchor: .topTrailing)
@@ -202,6 +202,6 @@ struct FocusHomeView: View {
             }
             .card()
         }
-        .buttonStyle(.plain)
+        .buttonStyle(PressableCardStyle())
     }
 }

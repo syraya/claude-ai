@@ -8,10 +8,7 @@ struct BlockListsView: View {
 
     @State private var editing: BlockList?
     @State private var creating: BlockList?
-    @State private var editingSchedule: BlockSchedule?
     @State private var creatingSchedule: BlockSchedule?
-    /// A schedule that's blocking now, waiting on the reflection wait before it turns off.
-    @State private var turningOff: BlockSchedule?
 
     var body: some View {
         @Bindable var blockLists = blockLists
@@ -19,7 +16,7 @@ struct BlockListsView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    schedulesSection
+                    SchedulesSection(creatingSchedule: $creatingSchedule)
 
                     sectionTitle("Lists")
                     if blockLists.lists.isEmpty {
@@ -80,76 +77,10 @@ struct BlockListsView: View {
             .sheet(item: $creating) { list in
                 BlockListEditorView(list: list, isNew: true)
             }
-            .sheet(item: $editingSchedule) { schedule in
-                ScheduleEditorView(schedule: schedule, isNew: false)
-            }
             .sheet(item: $creatingSchedule) { schedule in
                 ScheduleEditorView(schedule: schedule, isNew: true)
             }
-            .fullScreenCover(item: $turningOff) { schedule in
-                ReflectionView(seconds: settings.settings.reflectionSeconds,
-                               title: "Turn off “\(schedule.name)” early?",
-                               confirmLabel: "Turn it off",
-                               onConfirm: {
-                                   blockLists.setEnabled(schedule, false)
-                                   turningOff = nil
-                               },
-                               onCancel: { turningOff = nil })
-            }
             .errorAlert($blockLists.scheduleError)
-        }
-    }
-
-    // MARK: Schedules
-
-    private var schedulesSection: some View {
-        VStack(spacing: 14) {
-            sectionTitle("Schedules")
-            if blockLists.schedules.isEmpty {
-                Button {
-                    creatingSchedule = BlockSchedule()
-                } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: "calendar.badge.clock")
-                            .font(.title)
-                            .foregroundStyle(Color.omoPrimary)
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Block on a schedule").font(.headline)
-                            Text("Like 9 to 5 on weekdays, or bedtime every night. It turns on by itself, even with OMO closed.")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer(minLength: 0)
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(Color.omoPrimary)
-                    }
-                    .card()
-                }
-                .buttonStyle(.plain)
-            }
-            if !blockLists.schedules.isEmpty {
-                VStack(spacing: 0) {
-                    ForEach(Array(blockLists.schedules.enumerated()), id: \.element.id) { index, schedule in
-                        if index > 0 { Divider() }
-                        ScheduleRow(schedule: schedule,
-                                    list: blockLists.list(id: schedule.blockListID),
-                                    onOpen: { editingSchedule = schedule },
-                                    onToggle: { isOn in toggle(schedule, isOn) })
-                    }
-                }
-                .groupedCard()
-            }
-        }
-    }
-
-    /// Turning off a schedule that's blocking right now asks for the reflection wait first.
-    private func toggle(_ schedule: BlockSchedule, _ isOn: Bool) {
-        if !isOn, schedule.isActive() {
-            guard !schedule.isStrict else { return }
-            turningOff = schedule
-        } else {
-            blockLists.setEnabled(schedule, isOn)
         }
     }
 

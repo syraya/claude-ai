@@ -175,7 +175,37 @@ struct SecondaryButtonStyle: ButtonStyle {
             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .stroke(color, lineWidth: 1.25))
             .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
     }
+}
+
+/// For cards that open something: they give a little under your finger.
+struct PressableCardStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.975 : 1)
+            .opacity(configuration.isPressed ? 0.85 : 1)
+            .animation(.spring(duration: 0.25, bounce: 0.2), value: configuration.isPressed)
+    }
+}
+
+/// Fades a tab's page in each time you arrive on it, instead of it snapping in.
+private struct TabArrival: ViewModifier {
+    @State private var arrived = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(arrived ? 1 : 0)
+            .offset(y: arrived || reduceMotion ? 0 : 10)
+            .onAppear { withAnimation(.easeOut(duration: 0.3)) { arrived = true } }
+            .onDisappear { arrived = false }
+    }
+}
+
+extension View {
+    func tabArrival() -> some View { modifier(TabArrival()) }
 }
 
 struct ProgressRing: View {

@@ -348,8 +348,8 @@ struct ScheduleStatusCard: View {
                 schedule.isActive(at: context.date) && blockLists.list(id: schedule.blockListID).map { !$0.isEmpty } == true
             }
             if let first = active.first, let list = blockLists.list(id: first.blockListID) {
-                Button {
-                    router.tab = .lists
+                NavigationLink {
+                    SchedulesScreen()
                 } label: {
                     HStack(spacing: 14) {
                         Image(systemName: "calendar.badge.clock")
@@ -367,7 +367,7 @@ struct ScheduleStatusCard: View {
                     }
                     .card()
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(PressableCardStyle())
             }
         }
     }

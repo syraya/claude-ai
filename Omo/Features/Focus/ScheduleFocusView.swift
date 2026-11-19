@@ -53,8 +53,10 @@ struct ScheduleFocusView: View {
         VStack(spacing: 18) {
             if let pause = focus.scheduleBreak, pause.scheduleIDs.contains(schedule.id) {
                 breakContent(schedule, list: list, pause: pause, now: now)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
             } else {
                 blockContent(schedule, list: list, others: others, now: now)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
             }
         }
         .foregroundStyle(Color.omoOnPrimary)
@@ -129,7 +131,7 @@ struct ScheduleFocusView: View {
                 .opacity(canBreak ? 1 : 0.5)
             }
 
-            Button("Edit schedules") { router.tab = .lists }
+            NavigationLink("Edit schedules") { SchedulesScreen() }
                 .font(.subheadline)
                 .foregroundStyle(faint)
         }
@@ -160,7 +162,9 @@ struct ScheduleFocusView: View {
             .frame(width: 230, height: 230)
             .frame(maxWidth: .infinity)
 
-            Button("I'm done, back to focus") { focus.endScheduleBreak() }
+            Button("I'm done, back to focus") {
+                withAnimation(.spring(duration: 0.6, bounce: 0.12)) { focus.endScheduleBreak() }
+            }
                 .buttonStyle(PrimaryButtonStyle(color: .omoOnPrimary, textColor: .omoPrimary))
 
             if let end = schedule.endDate(after: now) {

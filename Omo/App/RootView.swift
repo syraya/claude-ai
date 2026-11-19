@@ -23,18 +23,23 @@ struct RootView: View {
             } else if settings.settings.hasCompletedOnboarding {
                 TabView(selection: $router.tab) {
                     FocusHomeView()
+                        .tabArrival()
                         .tabItem { Label("Focus", systemImage: "building.columns.fill") }
                         .tag(AppTab.focus)
                     BlockListsView()
+                        .tabArrival()
                         .tabItem { Label("Block Lists", systemImage: "square.stack.3d.up.fill") }
                         .tag(AppTab.lists)
                     TogetherView()
+                        .tabArrival()
                         .tabItem { Label("Circle", systemImage: "person.3.fill") }
                         .tag(AppTab.together)
                     FriendsView()
+                        .tabArrival()
                         .tabItem { Label("Friends", systemImage: "heart.fill") }
                         .tag(AppTab.friends)
                     SettingsView()
+                        .tabArrival()
                         .tabItem { Label("Settings", systemImage: "gearshape.fill") }
                         .tag(AppTab.settings)
                 }

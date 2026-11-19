@@ -17,10 +17,14 @@ struct ActiveSessionView: View {
                 VStack(spacing: 22) {
                     if let breakEnd = session.breakEndsAt {
                         breakContent(session: session, breakEnd: breakEnd, now: context.date)
+                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     } else {
                         focusContent(session: session, now: context.date)
+                            .transition(.opacity.combined(with: .scale(scale: 0.96)))
                     }
                 }
+                // A break ending on its own glides back too, not just one you end yourself.
+                .animation(.spring(duration: 0.6, bounce: 0.12), value: session.isOnBreak)
                 // The session is the one thing that matters while it runs, so it gets the
                 // theme's primary colour as a panel of its own.
                 .foregroundStyle(Color.omoOnPrimary)
@@ -146,7 +150,9 @@ struct ActiveSessionView: View {
             .frame(width: 240, height: 240)
             .frame(maxWidth: .infinity)
 
-            Button("I'm done, back to focus") { focus.endBreak() }
+            Button("I'm done, back to focus") {
+                withAnimation(.spring(duration: 0.6, bounce: 0.12)) { focus.endBreak() }
+            }
                 .buttonStyle(PrimaryButtonStyle(color: .omoOnPrimary, textColor: .omoPrimary))
 
             Text("Session ends at \(session.endsAt.formatted(date: .omitted, time: .shortened))")
@@ -195,9 +201,11 @@ struct BreakFlowView: View {
                 VStack(spacing: 10) {
                     ForEach(options, id: \.self) { minutes in
                         Button("\(minutes) minute\(minutes == 1 ? "" : "s")") {
-                            switch kind {
-                            case .session: focus.startBreak(minutes: minutes)
-                            case .schedule: focus.startScheduleBreak(minutes: minutes)
+                            withAnimation(.spring(duration: 0.6, bounce: 0.12)) {
+                                switch kind {
+                                case .session: focus.startBreak(minutes: minutes)
+                                case .schedule: focus.startScheduleBreak(minutes: minutes)
+                                }
                             }
                             onDone()
                         }
