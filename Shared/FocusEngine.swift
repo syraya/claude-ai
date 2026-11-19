@@ -170,6 +170,11 @@ enum FocusEngine {
                   let breakEnd = session.breakEndsAt,
                   now >= breakEnd.addingTimeInterval(-tolerance) else { return }
             endBreak(notify: true)
+        } else if name.hasPrefix(ScheduleEngine.breakTimerPrefix) {
+            guard let pause = SharedStore.scheduleBreak,
+                  name == ScheduleEngine.breakTimerPrefix + pause.id.uuidString,
+                  now >= pause.endsAt.addingTimeInterval(-tolerance) else { return }
+            ScheduleEngine.endBreak(notify: true)
         } else if name.hasPrefix(TimerName.friendBreakPrefix) {
             guard var state = SharedStore.friendLock,
                   name == TimerName.friendBreak(state.sessionID),

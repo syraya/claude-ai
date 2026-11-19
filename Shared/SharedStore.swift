@@ -20,6 +20,8 @@ enum SharedStore {
         static let lifetime = "lifetime"
         static let schedules = "schedules"
         static let scheduleRuns = "scheduleRuns"
+        static let scheduleBreak = "scheduleBreak"
+        static let scheduleBreaksTaken = "scheduleBreaksTaken"
     }
 
     private static func read<T: Decodable>(_ type: T.Type, _ key: String) -> T? {
@@ -49,6 +51,18 @@ enum SharedStore {
     static var scheduleRuns: [String: ScheduleRun] {
         get { read([String: ScheduleRun].self, Key.scheduleRuns) ?? [:] }
         set { write(newValue, Key.scheduleRuns) }
+    }
+
+    /// A break from the schedules blocking now, while it lasts.
+    static var scheduleBreak: ScheduleBreak? {
+        get { read(ScheduleBreak.self, Key.scheduleBreak) }
+        set { write(newValue, Key.scheduleBreak) }
+    }
+
+    /// Breaks taken from each running schedule, keyed by `ScheduleEngine.breakKey`.
+    static var scheduleBreaksTaken: [String: Int] {
+        get { read([String: Int].self, Key.scheduleBreaksTaken) ?? [:] }
+        set { write(newValue, Key.scheduleBreaksTaken) }
     }
 
     static var focusSession: FocusSession? {

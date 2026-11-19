@@ -156,14 +156,18 @@ struct ActiveSessionView: View {
     }
 
     private func openBreakIfRequested() {
-        guard router.wantsBreak else { return }
+        // A request this session can't take may be for a schedule's break instead.
+        guard router.wantsBreak, focus.session?.canTakeBreak == true else { return }
         router.wantsBreak = false
-        if focus.session?.canTakeBreak == true { showBreakFlow = true }
+        showBreakFlow = true
     }
 }
 
 /// Reflection countdown first, then pick how long.
 struct BreakFlowView: View {
+    enum Kind { case session, schedule }
+
+    var kind: Kind = .session
     var onDone: () -> Void
 
     @Environment(FocusController.self) private var focus
@@ -186,12 +190,15 @@ struct BreakFlowView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
 
-                let remaining = Int((focus.session?.remaining() ?? 0) / 60)
+                let remaining = Int(remainingSeconds / 60)
                 let options = AppSettings.breakOptions.filter { $0 <= max(1, remaining) }
                 VStack(spacing: 10) {
                     ForEach(options, id: \.self) { minutes in
                         Button("\(minutes) minute\(minutes == 1 ? "" : "s")") {
-                            focus.startBreak(minutes: minutes)
+                            switch kind {
+                            case .session: focus.startBreak(minutes: minutes)
+                            case .schedule: focus.startScheduleBreak(minutes: minutes)
+                            }
                             onDone()
                         }
                         .buttonStyle(minutes == settings.settings.defaultBreakMinutes
@@ -205,6 +212,18 @@ struct BreakFlowView: View {
             }
             .padding(24)
             .background(OmoBackground())
+        }
+    }
+
+    /// Time left in what you're taking a break from; longer breaks aren't offered.
+    private var remainingSeconds: TimeInterval {
+        switch kind {
+        case .session:
+            return focus.session?.remaining() ?? 0
+        case .schedule:
+            let now = Date()
+            let ends = ScheduleEngine.breakableSchedules(at: now).compactMap { $0.endDate(after: now) }
+            return ends.max()?.timeIntervalSince(now) ?? 0
         }
     }
 }

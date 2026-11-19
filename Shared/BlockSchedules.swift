@@ -112,6 +112,15 @@ struct ScheduleRun: Codable, Equatable {
     var startsWhenSeen: Bool?
 }
 
+/// A short break from the schedules blocking now. Strict schedules stay on.
+struct ScheduleBreak: Codable, Equatable {
+    var id = UUID()
+    /// The schedules this break lifted.
+    var scheduleIDs: [UUID]
+    var startedAt: Date
+    var endsAt: Date
+}
+
 extension ManagedSettingsStore.Name {
     /// Each schedule has its own store, so one ending never lifts another.
     static func schedule(_ id: UUID) -> Self { Self("omo.schedule." + id.uuidString) }
@@ -155,13 +164,15 @@ enum ScheduleEngine {
         let lists = SharedStore.blockLists
         let center = DeviceActivityCenter()
         let monitored = Set(center.activities)
+        if let pause = SharedStore.scheduleBreak, date >= pause.endsAt { closeBreak(pause, at: Date()) }
         trackFocusTime(at: date, lists: lists)
+        let lifted = Set(SharedStore.scheduleBreak?.scheduleIDs ?? [])
         for schedule in SharedStore.schedules {
             // Re-register anything iOS forgot, e.g. after restoring the phone.
             if schedule.isEnabled, !monitored.contains(activityName(schedule.id)) {
                 try? center.startMonitoring(activityName(schedule.id), during: deviceSchedule(for: schedule))
             }
-            if schedule.isActive(at: date),
+            if schedule.isActive(at: date), !lifted.contains(schedule.id),
                let list = lists.first(where: { $0.id == schedule.blockListID }), !list.isEmpty {
                 ShieldManager.shield(list.selection, in: .schedule(schedule.id))
             } else {
@@ -199,8 +210,10 @@ enum ScheduleEngine {
             let blocking = schedule.countsTowardFocus
                 && lists.contains { $0.id == schedule.blockListID && !$0.isEmpty }
             let occurrence = blocking ? schedule.occurrenceStart(at: date) : nil
-            if let run = runs[key], run.occurrence != occurrence {
-                // That block is over (or was switched off): count its time.
+            if var run = runs[key], run.occurrence != occurrence {
+                // That block is over (or was switched off): count its time, minus any
+                // break that's still going.
+                run.excludedSeconds += breakSeconds(in: run, key: key, until: now)
                 record(run, until: min(now, run.end))
                 runs[key] = nil
             }
@@ -237,13 +250,110 @@ enum ScheduleEngine {
 
     /// A session or friend lock from `start` to now has already been counted, so the
     /// schedules blocking at the same time don't count it again.
-    static func excludeOverlap(from start: Date, to end: Date = Date()) {
+    static func excludeOverlap(from start: Date, to end: Date = Date(), only ids: [UUID]? = nil) {
         var runs = SharedStore.scheduleRuns
         guard !runs.isEmpty else { return }
-        for (key, run) in runs {
-            runs[key]?.excludedSeconds += max(0, end.timeIntervalSince(max(run.start, start)))
+        for (key, run) in runs where ids?.contains(where: { $0.uuidString == key }) ?? true {
+            runs[key]?.excludedSeconds += max(0, min(end, run.end).timeIntervalSince(max(run.start, start)))
         }
         SharedStore.scheduleRuns = runs
+    }
+
+    /// Seconds of the current break that fall inside `run`, up to `now`.
+    private static func breakSeconds(in run: ScheduleRun, key: String, until now: Date) -> TimeInterval {
+        guard let pause = SharedStore.scheduleBreak,
+              pause.scheduleIDs.contains(where: { $0.uuidString == key }) else { return 0 }
+        let end = min(now, pause.endsAt, run.end)
+        return max(0, end.timeIntervalSince(max(run.start, pause.startedAt)))
+    }
+
+    /// Focus minutes counted so far in the block `schedule` is running now, or nil if
+    /// it isn't counting (it doesn't count as focus, or isn't on).
+    static func focusedSeconds(in schedule: BlockSchedule, at now: Date = Date()) -> TimeInterval? {
+        let key = schedule.id.uuidString
+        guard let run = SharedStore.scheduleRuns[key] else { return nil }
+        let counted = min(now, run.end).timeIntervalSince(run.start) - run.excludedSeconds
+            - breakSeconds(in: run, key: key, until: now)
+        return max(0, counted)
+    }
+
+    // MARK: Breaks
+
+    static let breakTimerPrefix = "omo.scheduleBreak."
+
+    /// Identifies one occurrence of a schedule, so breaks reset each time it starts.
+    static func breakKey(_ schedule: BlockSchedule, at date: Date) -> String? {
+        schedule.occurrenceStart(at: date).map { schedule.id.uuidString + "@" + String(Int($0.timeIntervalSince1970)) }
+    }
+
+    /// Breaks left in the block `schedule` is running now. Strict schedules have none.
+    static func breaksLeft(_ schedule: BlockSchedule, at date: Date = Date()) -> Int {
+        guard !schedule.isStrict, let key = breakKey(schedule, at: date) else { return 0 }
+        let allowed = SharedStore.settings.maxBreaksPerSession
+        return max(0, allowed - (SharedStore.scheduleBreaksTaken[key] ?? 0))
+    }
+
+    /// The break running now, if any.
+    static func currentBreak(at date: Date = Date()) -> ScheduleBreak? {
+        SharedStore.scheduleBreak.flatMap { $0.endsAt > date ? $0 : nil }
+    }
+
+    /// Schedules a break would lift right now.
+    static func breakableSchedules(at date: Date = Date()) -> [BlockSchedule] {
+        guard currentBreak(at: date) == nil else { return [] }
+        return activeSchedules(at: date).filter { breaksLeft($0, at: date) > 0 }
+    }
+
+    static func canTakeBreak(at date: Date = Date()) -> Bool { !breakableSchedules(at: date).isEmpty }
+
+    /// Schedules actually blocking now: on, and not lifted by a break.
+    static func blockingSchedules(at date: Date = Date()) -> [BlockSchedule] {
+        let lifted = currentBreak(at: date)?.scheduleIDs ?? []
+        return activeSchedules(at: date).filter { !lifted.contains($0.id) }
+    }
+
+    /// Lifts every running schedule that has breaks left, for `minutes`. Call this only
+    /// after the reflection countdown. Throws if iOS won't schedule the end timer; the
+    /// break still starts, and ends whenever OMO is next opened after it's due.
+    static func startBreak(minutes: Int) throws {
+        let now = Date()
+        let lifted = breakableSchedules(at: now)
+        guard !lifted.isEmpty else { return }
+        var taken = SharedStore.scheduleBreaksTaken
+        for schedule in lifted {
+            if let key = breakKey(schedule, at: now) { taken[key, default: 0] += 1 }
+        }
+        // Forget blocks that have finished.
+        let current = Set(activeSchedules(at: now).compactMap { breakKey($0, at: now) })
+        SharedStore.scheduleBreaksTaken = taken.filter { current.contains($0.key) }
+
+        let pause = ScheduleBreak(scheduleIDs: lifted.map(\.id), startedAt: now,
+                                  endsAt: now.addingTimeInterval(TimeInterval(minutes * 60)))
+        SharedStore.scheduleBreak = pause
+        SharedStore.updateStats { $0.breaksTaken += 1 }
+        for schedule in lifted { ShieldManager.clear(.schedule(schedule.id)) }
+        try ActivityScheduler.scheduleTimer(named: breakTimerPrefix + pause.id.uuidString, firingAt: pause.endsAt)
+    }
+
+    /// Ends the break and turns the schedules back on.
+    static func endBreak(notify: Bool = false) {
+        guard let pause = SharedStore.scheduleBreak else { return }
+        let now = Date()
+        closeBreak(pause, at: now)
+        reconcile(at: now)
+        if notify, let schedule = blockingSchedules(at: now).first {
+            let name = schedule.name.isEmpty ? "Your schedule" : schedule.name
+            LocalNotifier.post(title: "Break's over",
+                               body: "\(name) is blocking again. Back to it 💪",
+                               route: .focus)
+        }
+    }
+
+    /// Clears the break. Its time doesn't count as focus.
+    private static func closeBreak(_ pause: ScheduleBreak, at now: Date) {
+        SharedStore.scheduleBreak = nil
+        ActivityScheduler.cancelTimer(named: breakTimerPrefix + pause.id.uuidString)
+        excludeOverlap(from: pause.startedAt, to: min(now, pause.endsAt), only: pause.scheduleIDs)
     }
 
     /// Focus minutes today from blocks still running. `alsoCounting` is the start of a
@@ -251,10 +361,10 @@ enum ScheduleEngine {
     static func runningMinutesToday(at now: Date, alsoCounting otherStart: Date?) -> Int {
         let startOfDay = Calendar.current.startOfDay(for: now)
         var seconds: TimeInterval = 0
-        for run in SharedStore.scheduleRuns.values {
+        for (key, run) in SharedStore.scheduleRuns {
             let from = max(run.start, startOfDay)
             let until = min(now, run.end)
-            var counted = until.timeIntervalSince(from) - run.excludedSeconds
+            var counted = until.timeIntervalSince(from) - run.excludedSeconds - breakSeconds(in: run, key: key, until: now)
             if let otherStart { counted -= max(0, until.timeIntervalSince(max(from, otherStart))) }
             seconds += max(0, counted)
         }

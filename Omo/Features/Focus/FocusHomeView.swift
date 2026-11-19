@@ -61,7 +61,7 @@ struct FocusHomeView: View {
                             friendLockCard(lock)
                         }
 
-                        ScheduleStatusCard()
+                        ScheduleFocusView()
 
                         // The timer settles into a summary, then the start card, rather than
                         // snapping from one to the next.

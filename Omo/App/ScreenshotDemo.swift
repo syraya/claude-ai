@@ -66,6 +66,25 @@ enum ScreenshotDemo {
         ]
 
         SharedStore.friendLock = nil
+        if screen == "scheduled" {
+            // A schedule halfway through, to show its timer on the Focus tab.
+            let calendar = Calendar.current
+            let start = now.addingTimeInterval(-95 * 60)
+            let end = now.addingTimeInterval(70 * 60)
+            let s = calendar.dateComponents([.hour, .minute], from: start)
+            let e = calendar.dateComponents([.hour, .minute], from: end)
+            let deepWork = BlockSchedule(name: "Deep work", blockListID: social.id,
+                                         startHour: s.hour ?? 9, startMinute: s.minute ?? 0,
+                                         endHour: e.hour ?? 17, endMinute: e.minute ?? 0,
+                                         weekdays: BlockSchedule.everyDay)
+            SharedStore.schedules = [deepWork] + SharedStore.schedules
+            if let occurrence = deepWork.occurrenceStart(at: now) {
+                SharedStore.scheduleRuns = [deepWork.id.uuidString: ScheduleRun(
+                    occurrence: occurrence, start: occurrence,
+                    end: occurrence.addingTimeInterval(TimeInterval(deepWork.durationMinutes * 60)),
+                    startsWhenSeen: true)]
+            }
+        }
         if screen == "session" || screen == "break" {
             SharedStore.focusSession = FocusSession(
                 blockListName: social.name, selection: FamilyActivitySelection(),

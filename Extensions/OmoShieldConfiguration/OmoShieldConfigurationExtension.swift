@@ -37,7 +37,8 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
 
         // After "Take a break" or "Ask for a break": opening OMO picks up from here.
         if let pending = SharedStore.pendingShieldRequest,
-           (pending == LocalNotifier.Route.takeBreak.rawValue && SharedStore.focusSession?.canTakeBreak == true)
+           (pending == LocalNotifier.Route.takeBreak.rawValue
+                && (SharedStore.focusSession?.canTakeBreak == true || ScheduleEngine.canTakeBreak()))
             || (pending == LocalNotifier.Route.together.rawValue && SharedStore.friendLock != nil) {
             return ShieldConfiguration(
                 backgroundBlurStyle: blur,
@@ -84,9 +85,10 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
             )
         }
 
-        if let schedule = ScheduleEngine.activeSchedules().first {
+        if let schedule = ScheduleEngine.blockingSchedules().first {
             let until = schedule.endDate().map { " until \($0.formatted(date: .omitted, time: .shortened))" } ?? ""
             let title = schedule.name.isEmpty ? "Scheduled block" : schedule.name
+            let canBreak = ScheduleEngine.canTakeBreak()
             return ShieldConfiguration(
                 backgroundBlurStyle: blur,
                 backgroundColor: paper,
@@ -94,7 +96,8 @@ final class OmoShieldConfigurationExtension: ShieldConfigurationDataSource {
                 title: .init(text: title, color: ink),
                 subtitle: .init(text: "\(name) is blocked\(until) by your schedule.\n\n\(quote)", color: subtle),
                 primaryButtonLabel: .init(text: "Back to it", color: onLapis),
-                primaryButtonBackgroundColor: lapis
+                primaryButtonBackgroundColor: lapis,
+                secondaryButtonLabel: canBreak ? .init(text: "Take a break", color: lapis) : nil
             )
         }
 

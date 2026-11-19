@@ -10,6 +10,8 @@ final class FocusController {
     private(set) var friendLock: FriendLockState?
     private(set) var today = DailyStats(day: DailyStats.key(for: Date()))
     private(set) var lifetime = LifetimeStats()
+    /// A break from the schedules blocking now.
+    private(set) var scheduleBreak: ScheduleBreak?
     /// The session that just ended, shown as a summary card until you start another.
     private(set) var lastFinished: FinishedSession?
     var errorMessage: String?
@@ -62,6 +64,7 @@ final class FocusController {
         friendLock = SharedStore.friendLock
         today = SharedStore.stats()
         lifetime = SharedStore.lifetime
+        scheduleBreak = ScheduleEngine.currentBreak()
         if let previous, session == nil { noteFinished(previous) }
     }
 
@@ -126,6 +129,20 @@ final class FocusController {
         refresh()
     }
 
+    func startScheduleBreak(minutes: Int) {
+        do {
+            try ScheduleEngine.startBreak(minutes: minutes)
+        } catch {
+            errorMessage = "Your break started, but iOS wouldn't schedule its end. Open OMO when it's over to block again."
+        }
+        refresh()
+    }
+
+    func endScheduleBreak() {
+        ScheduleEngine.endBreak()
+        refresh()
+    }
+
     func endEarly() {
         FocusEngine.finish(completed: false)
         refresh()
@@ -163,11 +180,12 @@ final class FocusController {
         return nil
     }
 
-    /// Called every second while a session is on screen.
+    /// Called every second while a session or schedule is on screen.
     func tick() {
-        guard let session else { return }
         let now = Date()
-        if now >= session.endsAt || (session.breakEndsAt.map { now >= $0 } ?? false) {
+        if let session, now >= session.endsAt || (session.breakEndsAt.map { now >= $0 } ?? false) {
+            reconcile()
+        } else if let scheduleBreak, now >= scheduleBreak.endsAt {
             reconcile()
         }
     }
