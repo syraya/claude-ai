@@ -49,10 +49,12 @@ struct OmoCollectionView: View {
                     .id(kind)
                     .transition(.opacity)
 
+                // Words and controls keep their size; the panel above takes what's left,
+                // so everything fits however tall the sheet is.
                 details
                     .padding(.top, 12)
-
-                Spacer(minLength: 8)
+                    .padding(.bottom, 12)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 thumbnails
 
@@ -100,14 +102,15 @@ struct OmoCollectionView: View {
         }
         .foregroundStyle(Color(palette.ink))
         .padding(.horizontal, 20)
-        .padding(.top, 14)
+        .padding(.top, 22)
     }
 
     // MARK: Carousel
 
     private var carousel: some View {
         GeometryReader { proxy in
-            let width = max(160, proxy.size.width - 112)
+            // Narrower when the sheet is short, so the arch keeps its proportions.
+            let width = min(max(160, proxy.size.width - 112), proxy.size.height * 0.85)
             ScrollViewReader { reader in
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 14) {
@@ -135,7 +138,7 @@ struct OmoCollectionView: View {
             }
             }
         }
-        .frame(height: 350)
+        .frame(minHeight: 160, maxHeight: 350)
         .padding(.top, 6)
     }
 
@@ -152,13 +155,9 @@ struct OmoCollectionView: View {
             Text(locked ? shown.requirement : shown.story)
                 .font(.body)
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
+                .lineLimit(2, reservesSpace: true)
+                .minimumScaleFactor(0.85)
                 .padding(.top, 4)
-            if locked, let progress = shown.progress(stats) {
-                Text(progress)
-                    .font(.footnote)
-                    .foregroundStyle(Color(palette.labels))
-            }
         }
         .foregroundStyle(Color(palette.ink))
         .padding(.horizontal, 28)
@@ -206,7 +205,7 @@ struct OmoCollectionView: View {
                 Button {} label: { Label(shown.lockText, systemImage: "lock.fill") }
                     .buttonStyle(SecondaryButtonStyle(color: Color(palette.labels)))
                     .allowsHitTesting(false)
-                Text("Previewing · \(selected.name) is still selected")
+                Text(shown.progress(stats).map { "So far: \($0)" } ?? "Previewing · \(selected.name) is still selected")
             } else {
                 Button("Choose \(shown.name)") { onSelect(shown) }
                     .buttonStyle(PrimaryButtonStyle(color: Color(palette.primary), textColor: Color(palette.onPrimary)))
