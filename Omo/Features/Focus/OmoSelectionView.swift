@@ -115,7 +115,7 @@ struct OmoCollectionView: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 14) {
                     ForEach(members) { companion in
-                        OmoArchPanel(companion: companion, locked: !companion.isUnlocked(stats))
+                        OmoArchPanel(companion: companion, locked: companion != selected && !companion.isUnlocked(stats))
                             .frame(width: width, height: proxy.size.height)
                             .scrollTransition(.interactive, axis: .horizontal) { content, phase in
                                 content
@@ -143,7 +143,7 @@ struct OmoCollectionView: View {
     }
 
     private var details: some View {
-        let locked = !shown.isUnlocked(stats)
+        let locked = shown != selected && !shown.isUnlocked(stats)
         return VStack(spacing: 4) {
             Text(shown.name)
                 .font(.omoSerif(.largeTitle, weight: .bold))
@@ -173,7 +173,7 @@ struct OmoCollectionView: View {
                             withAnimation(.spring(duration: 0.5, bounce: 0.1)) { focused = companion }
                         } label: {
                             OmoThumb(companion: companion,
-                                     locked: !companion.isUnlocked(stats),
+                                     locked: companion != selected && !companion.isUnlocked(stats),
                                      isCurrent: companion == selected,
                                      isFocused: companion == shown,
                                      palette: palette)
