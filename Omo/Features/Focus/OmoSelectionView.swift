@@ -108,6 +108,7 @@ struct OmoCollectionView: View {
     private var carousel: some View {
         GeometryReader { proxy in
             let width = max(160, proxy.size.width - 112)
+            ScrollViewReader { reader in
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 14) {
                     ForEach(members) { companion in
@@ -126,6 +127,13 @@ struct OmoCollectionView: View {
             .contentMargins(.horizontal, (proxy.size.width - width) / 2, for: .scrollContent)
             .scrollTargetBehavior(.viewAligned)
             .scrollPosition(id: $focused, anchor: .center)
+            // Opening (or switching collection) lands on the right panel, and so does
+            // tapping a thumbnail; swiping updates `focused` the other way.
+            .onAppear { reader.scrollTo(shown, anchor: .center) }
+            .onChange(of: shown) { _, companion in
+                withAnimation(.spring(duration: 0.5, bounce: 0.1)) { reader.scrollTo(companion, anchor: .center) }
+            }
+            }
         }
         .frame(height: 350)
         .padding(.top, 6)
