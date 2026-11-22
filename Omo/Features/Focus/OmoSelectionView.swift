@@ -89,6 +89,12 @@ struct OmoCollectionView: View {
                              })
             }
         }
+        .task {
+            // Simulator demo: press Choose by itself, to record the animation.
+            guard ScreenshotDemo.screen == "omos-choose" else { return }
+            try? await Task.sleep(for: .seconds(2))
+            choose(shown)
+        }
         .onChange(of: kind) { _, newKind in
             // A new collection starts on your OMO if it's in it, else on its first.
             guard shown.kind != newKind else { return }

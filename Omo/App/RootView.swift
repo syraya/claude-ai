@@ -129,6 +129,11 @@ struct RootView: View {
             return AnyView(OmoBackground().sheet(isPresented: .constant(true)) {
                 OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime) { _ in }
             })
+        case "omos-choose":
+            return AnyView(OmoBackground().sheet(isPresented: .constant(true)) {
+                OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
+                                  previewing: .selene) { companion in settings.settings.companion = companion }
+            })
         case "omos-preview":
             return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
                                              previewing: .selene) { _ in })

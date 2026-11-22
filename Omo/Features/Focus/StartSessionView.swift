@@ -35,18 +35,7 @@ struct StartSessionView: View {
                 .scaleEffect(starting ? 0.98 : 1, anchor: .top)
                 .allowsHitTesting(!starting)
 
-            Button {
-                guard let list = selectedList, !starting else { return }
-                // Put the keyboard away first. Starting while it's up swaps this card
-                // out from under it, and it lingers on screen before iOS notices.
-                let typing = typingIntention
-                typingIntention = false
-                withAnimation(.easeInOut(duration: 0.45)) { starting = true }
-                Task {
-                    try? await Task.sleep(for: .milliseconds(typing ? 650 : 550))
-                    start(list)
-                }
-            } label: {
+            Button(action: begin) {
                 HStack(spacing: 10) {
                     if starting {
                         ProgressView().tint(Color.omoOnPrimary)
@@ -72,6 +61,26 @@ struct StartSessionView: View {
             guard !didLoadDefaults else { return }
             didLoadDefaults = true
             minutes = settings.settings.defaultSessionMinutes
+        }
+        .task {
+            // Simulator demo: press Start focus by itself, to record the animation.
+            guard ScreenshotDemo.screen == "start-anim" else { return }
+            try? await Task.sleep(for: .seconds(2))
+            intention = "Finish chapter 4 of biology"
+            begin()
+        }
+    }
+
+    private func begin() {
+        guard let list = selectedList, !starting else { return }
+        // Put the keyboard away first. Starting while it's up swaps this card
+        // out from under it, and it lingers on screen before iOS notices.
+        let typing = typingIntention
+        typingIntention = false
+        withAnimation(.easeInOut(duration: 0.45)) { starting = true }
+        Task {
+            try? await Task.sleep(for: .milliseconds(typing ? 650 : 550))
+            start(list)
         }
     }
 
