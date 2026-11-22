@@ -206,6 +206,26 @@ private struct TabArrival: ViewModifier {
 
 extension View {
     func tabArrival() -> some View { modifier(TabArrival()) }
+
+    /// Fades a piece in (rising by `rise` points) once `shown` turns true, `delay`
+    /// seconds after the others, so a screen can build itself in order.
+    func entrance(_ shown: Bool, delay: Double, rise: CGFloat = 14) -> some View {
+        modifier(Entrance(shown: shown, delay: delay, rise: rise))
+    }
+}
+
+private struct Entrance: ViewModifier {
+    var shown: Bool
+    var delay: Double
+    var rise: CGFloat
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown ? 1 : 0)
+            .offset(y: shown || reduceMotion ? 0 : rise)
+            .animation(.spring(duration: 0.6, bounce: 0.15).delay(delay), value: shown)
+    }
 }
 
 struct ProgressRing: View {

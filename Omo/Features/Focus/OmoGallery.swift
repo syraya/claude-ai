@@ -59,13 +59,11 @@ struct OmoHeader: View {
     var selected: OmoCompanion
     var stats: LifetimeStats
     var collapse: CGFloat
-    var onSelect: (OmoCompanion) -> Void
-
-    @State private var showCollection = false
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         Button {
-            showCollection = true
+            router.showOmoGallery = true
         } label: {
             HStack(alignment: .center, spacing: 18) {
                 OmoFigure(companion: selected, size: 128)
@@ -101,12 +99,6 @@ struct OmoHeader: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(selected.name), \(selected.epithet). Show all OMOs")
-        .sheet(isPresented: $showCollection) {
-            OmoCollectionView(selected: selected, stats: stats) { companion in
-                onSelect(companion)
-                showCollection = false
-            }
-        }
     }
 }
 

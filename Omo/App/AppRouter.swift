@@ -13,6 +13,9 @@ final class AppRouter {
 
     var tab: AppTab = .focus
     var wantsBreak = false
+    /// The OMO gallery. Presented from the app's root so it stays open while a newly
+    /// chosen OMO's theme rebuilds every screen underneath.
+    var showOmoGallery = false
 
     func open(_ route: LocalNotifier.Route) {
         switch route {

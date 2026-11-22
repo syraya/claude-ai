@@ -32,9 +32,7 @@ struct FocusHomeView: View {
 
                         OmoHeader(selected: settings.settings.companion,
                                   stats: focus.lifetime,
-                                  collapse: collapse) { companion in
-                            settings.switchCompanion(to: companion)
-                        }
+                                  collapse: collapse)
 
                         // Your total focus is the headline, with today's numbers right under it.
                         NavigationLink {

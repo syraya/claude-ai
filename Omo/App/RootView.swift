@@ -50,6 +50,13 @@ struct RootView: View {
         }
         // Colours come from your OMO, so rebuild everything when you pick a different one.
         .id(settings.settings.companion)
+        // Outside the .id above, so choosing an OMO doesn't close it: the gallery plays
+        // its own transition and the new theme lands underneath.
+        .sheet(isPresented: $router.showOmoGallery) {
+            OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime) { companion in
+                settings.settings.companion = companion
+            }
+        }
         .preferredColorScheme(settings.settings.companion.isDark ? .dark : .light)
         .overlay {
             // Sits outside the .id above, so it keeps playing while the screens are rebuilt.

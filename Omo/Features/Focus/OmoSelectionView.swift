@@ -11,6 +11,12 @@ struct OmoCollectionView: View {
     @State private var kind: OmoCompanion.Kind
     @State private var focused: OmoCompanion?
     @State private var showIndex = false
+    /// Choosing: the OMO whose panel is zooming up to fill the sheet and back.
+    @State private var hero: OmoCompanion?
+    @State private var heroExpanded = false
+    @State private var panelFrame: CGRect = .zero
+    /// The OMO you just chose here, for "Selene is now selected".
+    @State private var justChose: OmoCompanion?
     @Namespace private var tabs
     @Environment(\.dismiss) private var dismiss
 
@@ -63,6 +69,11 @@ struct OmoCollectionView: View {
                     .padding(.top, 14)
                     .padding(.bottom, 8)
             }
+            // Everything steps back while the chosen OMO fills the sheet.
+            .opacity(heroExpanded ? 0 : 1)
+            .coordinateSpace(name: "gallery")
+            .onPreferenceChange(PanelFrameKey.self) { panelFrame = $0 }
+            .overlay { heroOverlay }
             .background(Color(palette.paper).ignoresSafeArea())
             .animation(.easeInOut(duration: 0.35), value: shown)
             .toolbar(.hidden, for: .navigationBar)
@@ -137,6 +148,13 @@ struct OmoCollectionView: View {
                 withAnimation(.spring(duration: 0.5, bounce: 0.1)) { reader.scrollTo(companion, anchor: .center) }
             }
             }
+            .background {
+                // Where the centred panel sits, for the zoom to start from.
+                let frame = proxy.frame(in: .named("gallery"))
+                Color.clear.preference(key: PanelFrameKey.self,
+                                       value: CGRect(x: frame.midX - width / 2, y: frame.minY,
+                                                     width: width, height: frame.height))
+            }
         }
         .frame(minHeight: 160, maxHeight: 350)
         .padding(.top, 6)
@@ -200,20 +218,66 @@ struct OmoCollectionView: View {
                 Button {} label: { Label("Current OMO", systemImage: "checkmark") }
                     .buttonStyle(PrimaryButtonStyle(color: Color(palette.primary), textColor: Color(palette.onPrimary)))
                     .allowsHitTesting(false)
-                Text("Changes your app and breathing scene")
+                Text(justChose == selected ? "\(selected.name) is now selected" : "Changes your app and breathing scene")
             } else if locked {
                 Button {} label: { Label(shown.lockText, systemImage: "lock.fill") }
                     .buttonStyle(SecondaryButtonStyle(color: Color(palette.labels)))
                     .allowsHitTesting(false)
                 Text(shown.progress(stats).map { "So far: \($0)" } ?? "Previewing · \(selected.name) is still selected")
             } else {
-                Button("Choose \(shown.name)") { onSelect(shown) }
+                Button("Choose \(shown.name)") { choose(shown) }
                     .buttonStyle(PrimaryButtonStyle(color: Color(palette.primary), textColor: Color(palette.onPrimary)))
                 Text("Previewing · \(selected.name) is still selected")
             }
         }
         .font(.footnote)
         .foregroundStyle(Color(palette.labels))
+    }
+}
+
+// MARK: - Choosing
+
+extension OmoCollectionView {
+    /// The chosen OMO's panel grows to fill the sheet, the new theme lands underneath
+    /// while it's covered, then it settles back into its place.
+    private func choose(_ companion: OmoCompanion) {
+        guard hero == nil else { return }
+        hero = companion
+        Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(20))
+            withAnimation(.spring(duration: 0.65, bounce: 0.06)) { heroExpanded = true }
+            try? await Task.sleep(for: .milliseconds(750))
+            onSelect(companion)
+            justChose = companion
+            try? await Task.sleep(for: .milliseconds(450))
+            withAnimation(.spring(duration: 0.7, bounce: 0.1)) { heroExpanded = false }
+            try? await Task.sleep(for: .milliseconds(750))
+            hero = nil
+        }
+    }
+
+    @ViewBuilder
+    var heroOverlay: some View {
+        if let hero {
+            GeometryReader { geo in
+                // A little past every edge, so no sheet corner peeks through.
+                let full = CGRect(x: -2, y: -90, width: geo.size.width + 4, height: geo.size.height + 180)
+                let rect = heroExpanded ? full : panelFrame
+                OmoArchPanel(companion: hero, locked: false, arched: !heroExpanded)
+                    .frame(width: rect.width, height: rect.height)
+                    .position(x: rect.midX, y: rect.midY)
+            }
+            .allowsHitTesting(true)
+            .sensoryFeedback(.success, trigger: justChose)
+        }
+    }
+}
+
+private struct PanelFrameKey: PreferenceKey {
+    static var defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        let next = nextValue()
+        if next != .zero { value = next }
     }
 }
 
@@ -260,10 +324,12 @@ struct OmoKindTabs: View {
 private struct OmoArchPanel: View {
     var companion: OmoCompanion
     var locked: Bool
+    /// Off while it fills the sheet during the choose animation.
+    var arched = true
 
     var body: some View {
         GeometryReader { proxy in
-            let radius = proxy.size.width / 2
+            let radius = arched ? proxy.size.width / 2 : 0
             let arch = UnevenRoundedRectangle(topLeadingRadius: radius, topTrailingRadius: radius, style: .circular)
             let scene = BreathingScene(for: companion)
             ZStack {

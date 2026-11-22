@@ -14,6 +14,8 @@ struct StartSessionView: View {
     @State private var editingList: BlockList?
     @State private var didLoadDefaults = false
     @FocusState private var typingIntention: Bool
+    /// Between tapping Start focus and the session appearing: the setup fades away.
+    @State private var starting = false
 
     private let presets = [15, 25, 45, 60, 90, 120]
 
@@ -26,6 +28,55 @@ struct StartSessionView: View {
     }
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            setup
+                .opacity(starting ? 0.15 : 1)
+                .blur(radius: starting ? 2 : 0)
+                .scaleEffect(starting ? 0.98 : 1, anchor: .top)
+                .allowsHitTesting(!starting)
+
+            Button {
+                guard let list = selectedList, !starting else { return }
+                // Put the keyboard away first. Starting while it's up swaps this card
+                // out from under it, and it lingers on screen before iOS notices.
+                let typing = typingIntention
+                typingIntention = false
+                withAnimation(.easeInOut(duration: 0.45)) { starting = true }
+                Task {
+                    try? await Task.sleep(for: .milliseconds(typing ? 650 : 550))
+                    start(list)
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    if starting {
+                        ProgressView().tint(Color.omoOnPrimary)
+                        Text("Starting focus…")
+                    } else {
+                        Text("Start focus")
+                        Image(systemName: "arrow.right").font(.subheadline.weight(.semibold))
+                    }
+                }
+                .contentTransition(.opacity)
+            }
+            .buttonStyle(PrimaryButtonStyle())
+            .disabled(!canStart)
+            .opacity(canStart ? (starting ? 0.85 : 1) : 0.5)
+        }
+        .card()
+        .sheet(item: $editingList) { list in
+            BlockListEditorView(list: list, isNew: true) { saved in
+                selectedListID = saved.id
+            }
+        }
+        .onAppear {
+            guard !didLoadDefaults else { return }
+            didLoadDefaults = true
+            minutes = settings.settings.defaultSessionMinutes
+        }
+    }
+
+    /// Everything you set before starting.
+    private var setup: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("What will you focus on?")
                 .font(.omoSerif(.title3))
@@ -99,37 +150,6 @@ struct StartSessionView: View {
                 }
             }
             .tint(.omoPrimary)
-
-            Button {
-                guard let list = selectedList else { return }
-                // Put the keyboard away first. Starting while it's up swaps this card
-                // out from under it, and it lingers on screen before iOS notices.
-                if typingIntention {
-                    typingIntention = false
-                    Task {
-                        try? await Task.sleep(for: .milliseconds(250))
-                        start(list)
-                    }
-                } else {
-                    start(list)
-                }
-            } label: {
-                Text("Start focus")
-            }
-            .buttonStyle(PrimaryButtonStyle())
-            .disabled(!canStart)
-            .opacity(canStart ? 1 : 0.5)
-        }
-        .card()
-        .sheet(item: $editingList) { list in
-            BlockListEditorView(list: list, isNew: true) { saved in
-                selectedListID = saved.id
-            }
-        }
-        .onAppear {
-            guard !didLoadDefaults else { return }
-            didLoadDefaults = true
-            minutes = settings.settings.defaultSessionMinutes
         }
     }
 
@@ -142,6 +162,7 @@ struct StartSessionView: View {
                     intention: intention.trimmingCharacters(in: .whitespacesAndNewlines))
         intention = ""
         settings.settings.defaultSessionMinutes = minutes
+        starting = false
     }
 
     /// One row for what gets blocked: tap to switch lists or make a new one.

@@ -8,6 +8,8 @@ struct ActiveSessionView: View {
     @State private var showBreakFlow = false
     @State private var showEndFlow = false
     @State private var endConfirmed = false
+    /// Plays the panel building itself in, for a session that has only just started.
+    @State private var entered = false
 
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -33,7 +35,16 @@ struct ActiveSessionView: View {
                 .background(Color.omoPrimary, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
             .onReceive(ticker) { _ in focus.tick() }
-            .onAppear(perform: openBreakIfRequested)
+            .onAppear {
+                if Date().timeIntervalSince(session.startedAt) < 4 {
+                    withAnimation { entered = true }
+                } else {
+                    var quiet = Transaction()
+                    quiet.disablesAnimations = true
+                    withTransaction(quiet) { entered = true }
+                }
+                openBreakIfRequested()
+            }
             .onChange(of: router.wantsBreak) { _, _ in openBreakIfRequested() }
             .fullScreenCover(isPresented: $showBreakFlow) {
                 BreakFlowView { showBreakFlow = false }
@@ -68,11 +79,24 @@ struct ActiveSessionView: View {
                     .font(.subheadline)
                     .foregroundStyle(faint)
             }
+            .entrance(entered, delay: 0.05)
 
             ZStack(alignment: .top) {
                 RingArches(color: .omoOnPrimary, ringSize: 230)
+                    .entrance(entered, delay: 0.1, rise: 0)
                 ZStack {
-                    ProgressRing(progress: session.progress(at: now), color: .omoGold, lineWidth: 8)
+                    // The ring draws itself in around the timer.
+                    Circle()
+                        .stroke(Color.omoOnPrimary.opacity(0.12), lineWidth: 8)
+                        .opacity(entered ? 0 : 1)
+                    ProgressRing(progress: entered ? session.progress(at: now) : 0, color: .omoGold, lineWidth: 8)
+                        .mask(
+                            Circle()
+                                .trim(from: 0, to: entered ? 1 : 0)
+                                .stroke(style: StrokeStyle(lineWidth: 12))
+                                .rotationEffect(.degrees(-90))
+                        )
+                        .animation(.easeInOut(duration: 1.0).delay(0.15), value: entered)
                     VStack(spacing: 4) {
                         Text(Format.clock(session.remaining(at: now)))
                             .font(.system(size: 52, weight: .semibold, design: .serif).monospacedDigit())
@@ -80,6 +104,8 @@ struct ActiveSessionView: View {
                             .font(.subheadline)
                             .foregroundStyle(faint)
                     }
+                    .scaleEffect(entered ? 1 : 0.9)
+                    .entrance(entered, delay: 0.3, rise: 0)
                 }
                 .frame(width: 230, height: 230)
             }
@@ -94,6 +120,7 @@ struct ActiveSessionView: View {
                     .padding(.vertical, 8)
                     .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.omoGold, lineWidth: 1.25))
                     .accessibilityLabel("Intention: \(intention)")
+                    .entrance(entered, delay: 0.45)
             }
 
             VStack(spacing: 6) {
@@ -104,6 +131,10 @@ struct ActiveSessionView: View {
                     .foregroundStyle(faint)
             }
             .padding(.vertical, 4)
+            // Your OMO settles in from above.
+            .entrance(entered, delay: 0.55, rise: -18)
+
+            VStack(spacing: 18) {
 
             if session.allowsBreaks {
                 Button {
@@ -127,6 +158,8 @@ struct ActiveSessionView: View {
                     .font(.footnote)
                     .foregroundStyle(faint)
             }
+            }
+            .entrance(entered, delay: 0.75)
         }
     }
 
