@@ -66,7 +66,6 @@ struct ReflectionView: View {
                 .accessibilityElement(children: .combine)
 
                 sceneArt(inhaling: inhaling)
-                    .layoutPriority(-1)
 
                 VStack(spacing: 4) {
                     Text("“\(scene.quote.text)”")
@@ -95,7 +94,7 @@ struct ReflectionView: View {
                     }
                     .accessibilityHint("Tap for another question")
 
-                Spacer(minLength: 16)
+                Spacer(minLength: 12)
 
                 VStack(spacing: 12) {
                     Button("Back to focus", action: onCancel)
@@ -136,7 +135,7 @@ struct ReflectionView: View {
         Image(scene.imageName)
             .resizable()
             .scaledToFit()
-            .frame(maxWidth: .infinity, minHeight: 110, maxHeight: 280)
+            .frame(maxWidth: .infinity, minHeight: 110, maxHeight: 380)
             .mask(
                 LinearGradient(stops: [
                     .init(color: .clear, location: 0),
