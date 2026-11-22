@@ -109,6 +109,7 @@ enum ScreenshotDemo {
         switch screen {
         case "schedules": router.tab = .lists
         case "break": router.tab = .focus; router.wantsBreak = true
+        case "omos-choose": router.tab = .focus; router.showOmoGallery = true
         case .some: router.tab = .focus
         case nil: break
         }

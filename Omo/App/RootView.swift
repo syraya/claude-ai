@@ -53,7 +53,8 @@ struct RootView: View {
         // Outside the .id above, so choosing an OMO doesn't close it: the gallery plays
         // its own transition and the new theme lands underneath.
         .sheet(isPresented: $router.showOmoGallery) {
-            OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime) { companion in
+            OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
+                              previewing: ScreenshotDemo.screen == "omos-choose" ? .selene : nil) { companion in
                 settings.settings.companion = companion
             }
         }
@@ -128,11 +129,6 @@ struct RootView: View {
         case "omos-sheet":
             return AnyView(OmoBackground().sheet(isPresented: .constant(true)) {
                 OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime) { _ in }
-            })
-        case "omos-choose":
-            return AnyView(OmoBackground().sheet(isPresented: .constant(true)) {
-                OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
-                                  previewing: .selene) { companion in settings.settings.companion = companion }
             })
         case "omos-preview":
             return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
