@@ -118,6 +118,14 @@ struct RootView: View {
             })
         case "lifetime":
             return AnyView(NavigationStack { LifetimeView() })
+        case "omos-preview":
+            return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
+                                             previewing: .selene) { _ in })
+        case "omo-index":
+            return AnyView(NavigationStack {
+                OmoIndexView(selected: settings.settings.companion, stats: focus.lifetime,
+                             palette: settings.settings.companion.palette, onClose: {}, onOpen: { _ in })
+            })
         case "omos":
             return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime) { _ in })
         default:

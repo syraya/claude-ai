@@ -14,12 +14,14 @@ struct OmoCollectionView: View {
     @Namespace private var tabs
     @Environment(\.dismiss) private var dismiss
 
-    init(selected: OmoCompanion, stats: LifetimeStats, onSelect: @escaping (OmoCompanion) -> Void) {
+    /// `previewing` opens on another OMO than yours (used for screenshots).
+    init(selected: OmoCompanion, stats: LifetimeStats, previewing: OmoCompanion? = nil,
+         onSelect: @escaping (OmoCompanion) -> Void) {
         self.selected = selected
         self.stats = stats
         self.onSelect = onSelect
-        _kind = State(initialValue: selected.kind)
-        _focused = State(initialValue: selected)
+        _kind = State(initialValue: (previewing ?? selected).kind)
+        _focused = State(initialValue: previewing ?? selected)
     }
 
     private var shown: OmoCompanion { focused ?? selected }
@@ -31,7 +33,7 @@ struct OmoCollectionView: View {
             VStack(spacing: 0) {
                 header
                 OmoKindTabs(kind: $kind, palette: palette, namespace: tabs)
-                    .padding(.top, 6)
+                    .padding(.top, 16)
 
                 HStack {
                     Spacer()
@@ -125,7 +127,7 @@ struct OmoCollectionView: View {
             .scrollTargetBehavior(.viewAligned)
             .scrollPosition(id: $focused, anchor: .center)
         }
-        .frame(height: 330)
+        .frame(height: 350)
         .padding(.top, 6)
     }
 
@@ -348,7 +350,7 @@ struct OmoArchTile: View {
 // MARK: - Index
 
 /// Every OMO as a list, by collection, with a search.
-private struct OmoIndexView: View {
+struct OmoIndexView: View {
     var selected: OmoCompanion
     var stats: LifetimeStats
     var palette: ThemePalette
