@@ -65,6 +65,8 @@ struct ReflectionView: View {
                 .foregroundStyle(Color.omoInk)
                 .accessibilityElement(children: .combine)
 
+                Spacer(minLength: 0)
+
                 sceneArt(inhaling: inhaling)
 
                 VStack(spacing: 4) {
@@ -135,7 +137,7 @@ struct ReflectionView: View {
         Image(scene.imageName)
             .resizable()
             .scaledToFit()
-            .frame(maxWidth: .infinity, minHeight: 110, maxHeight: 380)
+            .frame(maxWidth: .infinity)
             .mask(
                 LinearGradient(stops: [
                     .init(color: .clear, location: 0),
@@ -146,7 +148,7 @@ struct ReflectionView: View {
             )
             .scaleEffect(reduceMotion ? 1 : (inhaling ? 1.04 : 1))
             .animation(reduceMotion ? nil : .easeInOut(duration: Double(Self.phaseLength)), value: inhaling)
-            .padding(.vertical, 8)
+            .padding(.bottom, 4)
             .accessibilityHidden(true)
     }
 
