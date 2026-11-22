@@ -84,6 +84,7 @@ struct FocusHomeView: View {
                     .padding()
                 }
                 .coordinateSpace(name: "focusScroll")
+                .scrollDismissesKeyboard(.interactively)
                 .onPreferenceChange(HeaderOffsetKey.self) { minY in
                     // The figure has fully shrunk away after about 180 points of scrolling.
                     collapse = min(1, max(0, (16 - minY) / 180))

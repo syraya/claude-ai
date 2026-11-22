@@ -13,6 +13,7 @@ struct StartSessionView: View {
     @State private var intention = ""
     @State private var editingList: BlockList?
     @State private var didLoadDefaults = false
+    @FocusState private var typingIntention: Bool
 
     private let presets = [15, 25, 45, 60, 90, 120]
 
@@ -31,6 +32,9 @@ struct StartSessionView: View {
 
             VStack(alignment: .leading, spacing: 6) {
                 TextField("e.g. Finish chapter 4", text: $intention)
+                    .focused($typingIntention)
+                    .submitLabel(.done)
+                    .onSubmit { typingIntention = false }
                     .font(.system(.body, design: .serif))
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
@@ -98,14 +102,17 @@ struct StartSessionView: View {
 
             Button {
                 guard let list = selectedList else { return }
-                focus.start(blockList: list,
-                            minutes: minutes,
-                            allowsBreaks: allowsBreaks,
-                            allowsEndingEarly: !strictMode,
-                            maxBreaks: settings.settings.maxBreaksPerSession,
-                            intention: intention.trimmingCharacters(in: .whitespacesAndNewlines))
-                intention = ""
-                settings.settings.defaultSessionMinutes = minutes
+                // Put the keyboard away first. Starting while it's up swaps this card
+                // out from under it, and it lingers on screen before iOS notices.
+                if typingIntention {
+                    typingIntention = false
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(250))
+                        start(list)
+                    }
+                } else {
+                    start(list)
+                }
             } label: {
                 Text("Start focus")
             }
@@ -124,6 +131,17 @@ struct StartSessionView: View {
             didLoadDefaults = true
             minutes = settings.settings.defaultSessionMinutes
         }
+    }
+
+    private func start(_ list: BlockList) {
+        focus.start(blockList: list,
+                    minutes: minutes,
+                    allowsBreaks: allowsBreaks,
+                    allowsEndingEarly: !strictMode,
+                    maxBreaks: settings.settings.maxBreaksPerSession,
+                    intention: intention.trimmingCharacters(in: .whitespacesAndNewlines))
+        intention = ""
+        settings.settings.defaultSessionMinutes = minutes
     }
 
     /// One row for what gets blocked: tap to switch lists or make a new one.

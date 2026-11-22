@@ -183,8 +183,8 @@ struct BreakFlowView: View {
     var body: some View {
         if !reflected {
             ReflectionView(seconds: settings.settings.reflectionSeconds,
-                           title: "Before you take a break…",
-                           confirmLabel: "I still want a break",
+                           title: "Take a moment",
+                           confirmLabel: "Take a break",
                            onConfirm: { reflected = true },
                            onCancel: onDone)
         } else {

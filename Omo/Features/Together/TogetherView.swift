@@ -15,22 +15,36 @@ struct TogetherView: View {
                     } else if let session = together.current {
                         if session.isLobby {
                             LobbyView(session: session)
+                                .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.96)),
+                                                        removal: .opacity.combined(with: .move(edge: .top))))
                         } else {
                             ActiveGroupSessionView(session: session)
+                                .transition(.opacity.combined(with: .scale(scale: 0.96)))
                         }
                     } else {
                         if let ended = together.justEnded {
                             endedCard(ended)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                         NewGroupSessionView()
+                            .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
                 }
                 .padding()
+                // The session arrives from the server, so animate whenever the stage changes
+                // rather than only on the tap that started it.
+                .animation(.spring(duration: 0.6, bounce: 0.12), value: stage)
             }
             .background(OmoBackground())
             .navigationTitle("Study Circle")
             .errorAlert($together.errorMessage)
         }
+    }
+
+    /// Which part of the flow is showing: start, lobby or a running session.
+    private var stage: String {
+        guard let session = together.current else { return together.justEnded == nil ? "new" : "ended" }
+        return (session.isLobby ? "lobby-" : "active-") + (session.id ?? "")
     }
 
     private func endedCard(_ session: GroupSession) -> some View {
@@ -43,7 +57,7 @@ struct TogetherView: View {
             }
             Spacer()
             Button {
-                together.justEnded = nil
+                withAnimation(.spring(duration: 0.5, bounce: 0.1)) { together.justEnded = nil }
             } label: {
                 Image(systemName: "xmark").foregroundStyle(.secondary)
             }
