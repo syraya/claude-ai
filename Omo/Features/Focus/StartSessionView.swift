@@ -134,7 +134,7 @@ struct StartSessionView: View {
 
             blockListRow
 
-            if let list = selectedList, list.isEmpty {
+            if let list = selectedList, list.isEmpty, !ScreenshotDemo.isActive {
                 Text("“\(list.name)” has no apps yet. Add some in Block Lists.")
                     .font(.footnote)
                     .foregroundStyle(Color.omoLabels)
