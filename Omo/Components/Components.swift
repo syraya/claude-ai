@@ -190,16 +190,15 @@ struct PressableCardStyle: ButtonStyle {
     }
 }
 
-/// Fades a tab's page in each time you arrive on it, instead of it snapping in.
+/// Softens a tab's page in each time you arrive on it, instead of it snapping in.
+/// Quick and slight on purpose: the page is mostly there from the first frame.
 private struct TabArrival: ViewModifier {
-    @State private var arrived = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var arrived = true
 
     func body(content: Content) -> some View {
         content
-            .opacity(arrived ? 1 : 0)
-            .offset(y: arrived || reduceMotion ? 0 : 10)
-            .onAppear { withAnimation(.easeOut(duration: 0.3)) { arrived = true } }
+            .opacity(arrived ? 1 : 0.7)
+            .onAppear { withAnimation(.easeOut(duration: 0.15)) { arrived = true } }
             .onDisappear { arrived = false }
     }
 }
