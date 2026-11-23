@@ -144,6 +144,7 @@ struct RootView: View {
 
     private func becameActive() {
         screenTime.refresh()
+        ScheduleEngine.registerMissingInBackground()
         // Break notifications from the block screen need this. Onboarding asks, but
         // it can be skipped; this asks once, and never again after an answer.
         UNUserNotificationCenter.current().getNotificationSettings { current in

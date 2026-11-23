@@ -104,22 +104,18 @@ final class FocusController {
             maxBreaks: allowsBreaks ? maxBreaks : 0,
             intention: intention.isEmpty ? nil : String(intention.prefix(80))
         )
-        do {
-            try FocusEngine.start(session)
-        } catch {
+        FocusEngine.start(session) { [weak self] in
             // Blocking is already on; only the background "end" timer failed.
             // The app still ends the session on time whenever it's opened.
-            errorMessage = "Your session started, but iOS wouldn't schedule the end timer. Open OMO when time's up to unlock."
+            self?.errorMessage = "Your session started, but iOS wouldn't schedule the end timer. Open OMO when time's up to unlock."
         }
         lastFinished = nil
         refresh()
     }
 
     func startBreak(minutes: Int) {
-        do {
-            try FocusEngine.startBreak(minutes: minutes)
-        } catch {
-            errorMessage = "Your break started, but the reminder to come back couldn't be scheduled. Open OMO to end it."
+        FocusEngine.startBreak(minutes: minutes) { [weak self] in
+            self?.errorMessage = "Your break started, but the reminder to come back couldn't be scheduled. Open OMO to end it."
         }
         refresh()
     }
@@ -130,10 +126,8 @@ final class FocusController {
     }
 
     func startScheduleBreak(minutes: Int) {
-        do {
-            try ScheduleEngine.startBreak(minutes: minutes)
-        } catch {
-            errorMessage = "Your break started, but iOS wouldn't schedule its end. Open OMO when it's over to block again."
+        ScheduleEngine.startBreak(minutes: minutes) { [weak self] in
+            self?.errorMessage = "Your break started, but iOS wouldn't schedule its end. Open OMO when it's over to block again."
         }
         refresh()
     }

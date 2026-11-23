@@ -22,10 +22,30 @@ enum TimerName {
 /// Wraps DeviceActivityCenter, which wakes the monitor extension at a given time even
 /// when OMO isn't running. That's how sessions and breaks end on time.
 enum ActivityScheduler {
+    /// DeviceActivityCenter asks iOS's Screen Time service and waits for its answer,
+    /// which can take many seconds when the service is busy (say, a schedule has just
+    /// started). Waiting like that on the main thread froze OMO until iOS killed it, so
+    /// every request goes through this queue, one at a time and in order.
+    static let queue = DispatchQueue(label: "com.hserieh.omo.monitoring", qos: .userInitiated)
+
+    /// `scheduleTimer`, without waiting for iOS. `failed` runs on the main thread if
+    /// iOS refuses it.
+    static func scheduleTimerSoon(named name: String, firingAt date: Date,
+                                  failed: (@MainActor @Sendable () -> Void)? = nil) {
+        queue.async {
+            do {
+                try scheduleTimer(named: name, firingAt: date)
+            } catch {
+                guard let failed else { return }
+                DispatchQueue.main.async { MainActor.assumeIsolated { failed() } }
+            }
+        }
+    }
+
     /// iOS refuses schedules shorter than 15 minutes.
     private static let minimumInterval: TimeInterval = 15 * 60
 
-    /// Wakes the monitor extension at `date`.
+    /// Wakes the monitor extension at `date`. Slow: use `scheduleTimerSoon` from the app.
     ///
     /// For anything shorter than 15 minutes (most breaks), we schedule a longer
     /// interval and ask for an "ending soon" warning that lands on the real time.
@@ -54,8 +74,9 @@ enum ActivityScheduler {
         try center.startMonitoring(activity, during: schedule)
     }
 
+    /// Stops a timer, without waiting for iOS.
     static func cancelTimer(named name: String) {
-        DeviceActivityCenter().stopMonitoring([DeviceActivityName(name)])
+        queue.async { DeviceActivityCenter().stopMonitoring([DeviceActivityName(name)]) }
     }
 
     /// Counts how long you spend in `selection` each day, in 15-minute steps, so

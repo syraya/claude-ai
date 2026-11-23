@@ -16,9 +16,11 @@ struct ReflectionView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private let scene = BreathingScene(for: .current)
-    /// Seconds in each breath, in and out. The numeral counts these down, separately
-    /// from the wait before the confirm button unlocks.
+    /// Seconds in each breath; "Breathe in" and "Breathe out" take turns.
     private static let phaseLength = 5
+    /// The numeral counts the wait down from at least 15 seconds; the confirm button
+    /// unlocks when it reaches the end.
+    private var wait: Int { max(15, seconds) }
 
     static let prompts = [
         "What were you about to open, and why?",
@@ -35,11 +37,11 @@ struct ReflectionView: View {
     var body: some View {
         TimelineView(.periodic(from: startedAt, by: 0.25)) { context in
             let elapsed = max(0, context.date.timeIntervalSince(startedAt))
-            let remaining = max(0, Double(seconds) - elapsed)
+            let remaining = max(0, Double(wait) - elapsed)
             let done = remaining <= 0
             let phase = Int(elapsed) / Self.phaseLength
             let inhaling = phase % 2 == 0
-            let count = Self.phaseLength - Int(elapsed) % Self.phaseLength
+            let count = Int(remaining.rounded(.up))
 
             VStack(spacing: 0) {
                 topBar
@@ -53,14 +55,25 @@ struct ReflectionView: View {
                     .padding(.top, 4)
 
                 VStack(spacing: -6) {
-                    Text("\(count)")
-                        .font(.system(size: 112, weight: .semibold, design: .serif).monospacedDigit())
-                        .contentTransition(.numericText(countsDown: true))
-                        .animation(.easeInOut(duration: 0.35), value: count)
-                    Text(inhaling ? "Breathe in" : "Breathe out")
+                    ZStack {
+                        if done {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 72, weight: .semibold))
+                                .frame(height: 134)
+                                .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                        } else {
+                            Text("\(count)")
+                                .font(.system(size: 112, weight: .semibold, design: .serif).monospacedDigit())
+                                .contentTransition(.numericText(countsDown: true))
+                                .transition(.opacity)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.35), value: count)
+                    Text(done ? "Your call" : inhaling ? "Breathe in" : "Breathe out")
                         .font(.omoSerif(.largeTitle, weight: .bold))
                         .contentTransition(.opacity)
                         .animation(.easeInOut(duration: 0.5), value: inhaling)
+                        .animation(.easeInOut(duration: 0.5), value: done)
                 }
                 .foregroundStyle(Color.omoInk)
                 .accessibilityElement(children: .combine)
@@ -101,7 +114,7 @@ struct ReflectionView: View {
                 VStack(spacing: 12) {
                     Button("Back to focus", action: onCancel)
                         .buttonStyle(PrimaryButtonStyle())
-                    confirmButton(done: done, progress: 1 - remaining / Double(max(1, seconds)), remaining: remaining)
+                    confirmButton(done: done, progress: 1 - remaining / Double(wait), remaining: remaining)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 12)

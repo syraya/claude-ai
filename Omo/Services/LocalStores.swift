@@ -85,10 +85,9 @@ final class BlockListStore {
 
     private func syncSchedules() {
         SharedStore.schedules = schedules
-        do {
-            try ScheduleEngine.sync()
-        } catch {
-            scheduleError = "iOS wouldn't set up one of your schedules, so it may not turn on by itself. Opening OMO during the block still turns it on."
+        ScheduleEngine.sync { [weak self] error in
+            guard error != nil else { return }
+            self?.scheduleError = "iOS wouldn't set up one of your schedules, so it may not turn on by itself. Opening OMO during the block still turns it on."
         }
     }
 }
@@ -135,6 +134,7 @@ final class SettingsStore {
     }
 
     func restartUsageTracking() {
-        try? ActivityScheduler.startUsageTracking(for: trackedSelection)
+        let selection = trackedSelection
+        ActivityScheduler.queue.async { try? ActivityScheduler.startUsageTracking(for: selection) }
     }
 }

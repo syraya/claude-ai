@@ -10,18 +10,20 @@ enum FocusEngine {
 
     // MARK: Solo sessions
 
-    static func start(_ session: FocusSession) throws {
+    /// `timerFailed` runs if iOS won't schedule the end timer; blocking is already on.
+    static func start(_ session: FocusSession, timerFailed: (@MainActor @Sendable () -> Void)? = nil) {
         if let old = SharedStore.focusSession {
             ActivityScheduler.cancelTimer(named: TimerName.focusEnd(old.id))
             ActivityScheduler.cancelTimer(named: TimerName.focusBreak(old.id))
         }
         SharedStore.focusSession = session
         ShieldManager.shield(session.selection, in: .focus)
-        try ActivityScheduler.scheduleTimer(named: TimerName.focusEnd(session.id), firingAt: session.endsAt)
+        ActivityScheduler.scheduleTimerSoon(named: TimerName.focusEnd(session.id), firingAt: session.endsAt,
+                                            failed: timerFailed)
     }
 
     /// Starts a break. Call this only after the reflection countdown has finished.
-    static func startBreak(minutes: Int) throws {
+    static func startBreak(minutes: Int, timerFailed: (@MainActor @Sendable () -> Void)? = nil) {
         guard var session = SharedStore.focusSession, session.canTakeBreak else { return }
         let now = Date()
         let end = min(now.addingTimeInterval(TimeInterval(minutes * 60)), session.endsAt)
@@ -32,7 +34,8 @@ enum FocusEngine {
         SharedStore.updateStats { $0.breaksTaken += 1 }
         ShieldManager.clear(.focus)
         if end < session.endsAt {
-            try ActivityScheduler.scheduleTimer(named: TimerName.focusBreak(session.id), firingAt: end)
+            ActivityScheduler.scheduleTimerSoon(named: TimerName.focusBreak(session.id), firingAt: end,
+                                                failed: timerFailed)
         }
     }
 
@@ -95,7 +98,7 @@ enum FocusEngine {
         if state.isOnBreak {
             ShieldManager.clear(.friendLock)
             if let end = state.breakEndsAt, previous?.breakEndsAt != end {
-                try? ActivityScheduler.scheduleTimer(named: TimerName.friendBreak(state.sessionID), firingAt: end)
+                ActivityScheduler.scheduleTimerSoon(named: TimerName.friendBreak(state.sessionID), firingAt: end)
             }
         } else {
             ShieldManager.shield(state.selection, in: .friendLock,

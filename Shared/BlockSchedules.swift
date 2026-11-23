@@ -138,40 +138,57 @@ enum ScheduleEngine {
         DeviceActivityName(activityPrefix + id.uuidString)
     }
 
-    /// Registers the schedules with iOS after one was added, changed or removed.
-    /// Throws if iOS refuses one (e.g. too short, or too many).
-    static func sync() throws {
+    /// After a schedule was added, changed or removed: blocks update right away, and the
+    /// schedules are registered with iOS in the background. `done` runs on the main
+    /// thread with an error if iOS refused one (e.g. too short, or too many).
+    static func sync(done: @escaping @MainActor (Error?) -> Void = { _ in }) {
+        reconcile()
+        ActivityScheduler.queue.async {
+            let error = registerMonitoring()
+            DispatchQueue.main.async {
+                reconcile()
+                MainActor.assumeIsolated { done(error) }
+            }
+        }
+    }
+
+    /// Re-registers schedules iOS has forgotten (e.g. after restoring the phone), in the
+    /// background. Safe to call whenever OMO opens.
+    static func registerMissingInBackground() {
+        ActivityScheduler.queue.async { _ = registerMonitoring(onlyMissing: true) }
+    }
+
+    /// Tells iOS which schedules to wake the monitor for. Slow: call on `ActivityScheduler.queue`.
+    private static func registerMonitoring(onlyMissing: Bool = false) -> Error? {
         let center = DeviceActivityCenter()
         let schedules = SharedStore.schedules
+        let monitored = Set(center.activities)
         let wanted = Set(schedules.filter(\.isEnabled).map { activityName($0.id) })
-        center.stopMonitoring(center.activities.filter { $0.rawValue.hasPrefix(activityPrefix) && !wanted.contains($0) })
+        let stale = monitored.filter { $0.rawValue.hasPrefix(activityPrefix) && !wanted.contains($0) }
+        if !stale.isEmpty { center.stopMonitoring(Array(stale)) }
 
         var firstError: Error?
         for schedule in schedules where schedule.isEnabled {
+            let name = activityName(schedule.id)
+            if onlyMissing, monitored.contains(name) { continue }
             do {
-                try center.startMonitoring(activityName(schedule.id), during: deviceSchedule(for: schedule))
+                try center.startMonitoring(name, during: deviceSchedule(for: schedule))
             } catch {
                 firstError = firstError ?? error
             }
         }
-        reconcile()
-        if let firstError { throw firstError }
+        return firstError
     }
 
     /// Puts every schedule's block in the state it should be in at `date`, and adds up
-    /// the focus time of any block that has ended.
+    /// the focus time of any block that has ended. Quick: it never waits on iOS's
+    /// Screen Time service, so it's fine on the main thread.
     static func reconcile(at date: Date = Date()) {
         let lists = SharedStore.blockLists
-        let center = DeviceActivityCenter()
-        let monitored = Set(center.activities)
         if let pause = SharedStore.scheduleBreak, date >= pause.endsAt { closeBreak(pause, at: Date()) }
         trackFocusTime(at: date, lists: lists)
         let lifted = Set(SharedStore.scheduleBreak?.scheduleIDs ?? [])
         for schedule in SharedStore.schedules {
-            // Re-register anything iOS forgot, e.g. after restoring the phone.
-            if schedule.isEnabled, !monitored.contains(activityName(schedule.id)) {
-                try? center.startMonitoring(activityName(schedule.id), during: deviceSchedule(for: schedule))
-            }
             if schedule.isActive(at: date), !lifted.contains(schedule.id),
                let list = lists.first(where: { $0.id == schedule.blockListID }), !list.isEmpty {
                 ShieldManager.shield(list.selection, in: .schedule(schedule.id))
@@ -188,9 +205,8 @@ enum ScheduleEngine {
         reconcile(at: Date().addingTimeInterval(30))
     }
 
-    /// Stops a deleted schedule and lifts its block.
+    /// Lifts a deleted schedule's block. `sync` stops iOS watching it.
     static func remove(_ schedule: BlockSchedule) {
-        DeviceActivityCenter().stopMonitoring([activityName(schedule.id)])
         ShieldManager.clear(.schedule(schedule.id))
     }
 
@@ -313,9 +329,9 @@ enum ScheduleEngine {
     }
 
     /// Lifts every running schedule that has breaks left, for `minutes`. Call this only
-    /// after the reflection countdown. Throws if iOS won't schedule the end timer; the
-    /// break still starts, and ends whenever OMO is next opened after it's due.
-    static func startBreak(minutes: Int) throws {
+    /// after the reflection countdown. `timerFailed` runs if iOS won't schedule the end
+    /// timer; the break still starts, and ends whenever OMO is next opened after it's due.
+    static func startBreak(minutes: Int, timerFailed: (@MainActor @Sendable () -> Void)? = nil) {
         let now = Date()
         let lifted = breakableSchedules(at: now)
         guard !lifted.isEmpty else { return }
@@ -332,7 +348,8 @@ enum ScheduleEngine {
         SharedStore.scheduleBreak = pause
         SharedStore.updateStats { $0.breaksTaken += 1 }
         for schedule in lifted { ShieldManager.clear(.schedule(schedule.id)) }
-        try ActivityScheduler.scheduleTimer(named: breakTimerPrefix + pause.id.uuidString, firingAt: pause.endsAt)
+        ActivityScheduler.scheduleTimerSoon(named: breakTimerPrefix + pause.id.uuidString, firingAt: pause.endsAt,
+                                            failed: timerFailed)
     }
 
     /// Ends the break and turns the schedules back on.
