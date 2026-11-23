@@ -20,7 +20,7 @@ If "OMO: Focus Together" is taken, try "OMO: Focus with Friends" or "OMO – Tho
 
 ## Promotional text (170, can change any time without review)
 
-New: scheduled blocking. Lock your apps 9 to 5 on weekdays or every night at bedtime, and OMO turns the block on by itself, even when it's closed.
+Block the apps that pull you away, breathe for 15 seconds before any break, and study with friends who hold your key. 29 mythic OMOs to earn along the way.
 
 ## Description (4000)
 
