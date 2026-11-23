@@ -84,6 +84,17 @@ struct FocusHomeView: View {
                     .padding()
                 }
                 .coordinateSpace(name: "focusScroll")
+                .task {
+                    // Simulator demo: scroll to the timer, end the session, then start
+                    // another, to record the hand-offs.
+                    guard ScreenshotDemo.screen == "end-anim" else { return }
+                    try? await Task.sleep(for: .seconds(1.5))
+                    withAnimation(.smooth(duration: 0.6)) { proxy.scrollTo("sessionCard", anchor: .bottom) }
+                    try? await Task.sleep(for: .seconds(1.5))
+                    withAnimation(.smooth(duration: 0.55)) { focus.endEarly() }
+                    try? await Task.sleep(for: .seconds(3))
+                    withAnimation(.smooth(duration: 0.55)) { focus.dismissFinished() }
+                }
                 .onChange(of: sessionPhase) { _, phase in
                     // After a session ends (or you start another), glide to the new card
                     // rather than leaving the page wherever the taller timer had it.

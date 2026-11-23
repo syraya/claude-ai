@@ -85,7 +85,7 @@ enum ScreenshotDemo {
                     startsWhenSeen: true)]
             }
         }
-        if screen == "session" || screen == "break" {
+        if screen == "session" || screen == "break" || screen == "end-anim" {
             SharedStore.focusSession = FocusSession(
                 blockListName: social.name, selection: FamilyActivitySelection(),
                 startedAt: now.addingTimeInterval(-17 * 60), endsAt: now.addingTimeInterval(28 * 60),
