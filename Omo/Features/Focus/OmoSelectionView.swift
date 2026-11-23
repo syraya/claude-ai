@@ -135,7 +135,7 @@ struct OmoCollectionView: View {
             .contentMargins(.horizontal, (proxy.size.width - width) / 2, for: .scrollContent)
             // Follows your finger, so you can hold it halfway; letting go settles on the
             // nearest panel, and a flick moves one at a time.
-            .scrollTargetBehavior(.viewAligned(limitBehavior: .alwaysByOne))
+            .modifier(OnePanelPerFlick())
             .scrollPosition(id: $focused, anchor: .center)
             // Opening (or switching collection) lands on the right panel. Swiping only
             // reports back through `focused`; it's never scrolled for you mid-drag.
@@ -231,6 +231,17 @@ struct OmoCollectionView: View {
 }
 
 // MARK: - Pieces
+
+/// Snaps to panels; on iOS 18 and later a hard flick still moves just one.
+private struct OnePanelPerFlick: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content.scrollTargetBehavior(.viewAligned(limitBehavior: .alwaysByOne))
+        } else {
+            content.scrollTargetBehavior(.viewAligned)
+        }
+    }
+}
 
 /// The three collections, with a gold rule under the one you're in.
 struct OmoKindTabs: View {
