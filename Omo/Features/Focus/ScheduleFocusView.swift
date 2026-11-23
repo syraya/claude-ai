@@ -10,6 +10,8 @@ struct ScheduleFocusView: View {
     @Environment(AppRouter.self) private var router
 
     @State private var showBreakFlow = false
+    /// Plays the panel building itself in when a schedule has only just begun.
+    @State private var entered = false
     private let ticker = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -63,6 +65,18 @@ struct ScheduleFocusView: View {
         .padding(22)
         .frame(maxWidth: .infinity)
         .background(Color.omoPrimary, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .onAppear {
+            // Fresh from its start time: build in like a new session. Otherwise just show it.
+            let fresh = schedule.occurrenceStart(at: now).map { now.timeIntervalSince($0) < 120 } ?? false
+            if fresh {
+                withAnimation { entered = true }
+            } else {
+                var quiet = Transaction()
+                quiet.disablesAnimations = true
+                withTransaction(quiet) { entered = true }
+            }
+        }
+        .onDisappear { entered = false }
     }
 
     private func blockContent(_ schedule: BlockSchedule, list: BlockList, others: Int, now: Date) -> some View {
@@ -87,11 +101,21 @@ struct ScheduleFocusView: View {
                     .font(.subheadline)
                     .foregroundStyle(faint)
             }
+            .entrance(entered, delay: 0.05)
 
             ZStack(alignment: .top) {
                 RingArches(color: .omoOnPrimary, ringSize: 220)
+                    .entrance(entered, delay: 0.1, rise: 0)
                 ZStack {
-                    ProgressRing(progress: progress, color: .omoGold, lineWidth: 8)
+                    // The ring draws itself in around the timer.
+                    ProgressRing(progress: entered ? progress : 0, color: .omoGold, lineWidth: 8)
+                        .mask(
+                            Circle()
+                                .trim(from: 0, to: entered ? 1 : 0)
+                                .stroke(style: StrokeStyle(lineWidth: 12))
+                                .rotationEffect(.degrees(-90))
+                        )
+                        .animation(.easeInOut(duration: 1.0).delay(0.15), value: entered)
                     VStack(spacing: 4) {
                         Text(Format.clock(left))
                             .font(.system(size: left >= 3600 ? 44 : 52, weight: .semibold, design: .serif).monospacedDigit())
@@ -99,6 +123,8 @@ struct ScheduleFocusView: View {
                             .font(.subheadline)
                             .foregroundStyle(faint)
                     }
+                    .scaleEffect(entered ? 1 : 0.9)
+                    .entrance(entered, delay: 0.3, rise: 0)
                 }
                 .frame(width: 220, height: 220)
             }
@@ -113,7 +139,9 @@ struct ScheduleFocusView: View {
             }
             .padding(.vertical, 10)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(faint.opacity(0.35), lineWidth: 1))
+            .entrance(entered, delay: 0.5)
 
+            VStack(spacing: 18) {
             if schedule.isStrict {
                 Label("Strict schedule: no breaks until it ends", systemImage: "lock.fill")
                     .font(.footnote)
@@ -134,6 +162,8 @@ struct ScheduleFocusView: View {
             NavigationLink("Edit schedules") { SchedulesScreen() }
                 .font(.subheadline)
                 .foregroundStyle(faint)
+            }
+            .entrance(entered, delay: 0.7)
         }
     }
 

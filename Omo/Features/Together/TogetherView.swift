@@ -284,15 +284,30 @@ struct ActiveGroupSessionView: View {
 
     @State private var showEmergency = false
     @State private var unlockTarget: SessionLock?
+    /// The cards arrive one after another when the session has only just begun.
+    @State private var entered = false
 
     var body: some View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             VStack(spacing: 18) {
                 myPhoneCard(now: context.date)
+                    .entrance(entered, delay: 0.05)
                 if !together.keysIHold.isEmpty {
                     keysCard(now: context.date)
+                        .entrance(entered, delay: 0.25)
                 }
                 everyoneCard(now: context.date)
+                    .entrance(entered, delay: 0.45)
+            }
+        }
+        .onAppear {
+            let fresh = session.startedAt.map { Date().timeIntervalSince($0) < 20 } ?? true
+            if fresh {
+                withAnimation { entered = true }
+            } else {
+                var quiet = Transaction()
+                quiet.disablesAnimations = true
+                withTransaction(quiet) { entered = true }
             }
         }
         .fullScreenCover(isPresented: $showEmergency) {

@@ -327,7 +327,7 @@ struct OmoKindTabs: View {
 }
 
 /// An arched panel holding the OMO in its landscape.
-private struct OmoArchPanel: View {
+struct OmoArchPanel: View {
     var companion: OmoCompanion
     var locked: Bool
     /// Off while it fills the sheet during the choose animation.
