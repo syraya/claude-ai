@@ -101,3 +101,44 @@ Six screenshots for the "iPhone with Dynamic Island (medium display)" slot, 1206
 6. Earn mythic companions (the OMO collection, Selene)
 
 To make them again after the app changes, in the simulator, launch OMO with `-OMODemo <screen>` and `-OMODemoOMO <omo>` (screens: focus, session, break, schedules, lifetime, omos). The demo data exists only in simulator builds (`Omo/App/ScreenshotDemo.swift`). Save the captures as `raw/1-focus.png` … `raw/6-omos.png`, then run `swift make-frames.swift` (from `docs/app-store/`) in the folder that holds `raw/` to add the captions.
+
+## App Review Information
+
+**Sign-in required:** leave it **unchecked**. Focus sessions, schedules and block lists work without an account. Friends and Study Circle use Sign in with Apple, which the reviewer can do with their own Apple ID, so no demo account is needed.
+
+**Contact:** your name, phone number and omoikaneapp@gmail.com.
+
+**Notes** (paste into the Notes box):
+
+> OMO helps students stay off distracting apps while they study. It uses Apple's Screen Time APIs (FamilyControls, ManagedSettings and DeviceActivity) with individual authorization, and we have been granted the Family Controls distribution entitlement.
+>
+> To test:
+> 1. Open OMO and allow Screen Time access when asked (Settings > Screen Time must be on for the device).
+> 2. Go to Block Lists, tap +, make a list and choose one or two apps (for example Safari).
+> 3. On the Focus tab, type an intention, pick 15 minutes and tap Start focus.
+> 4. Open a blocked app: OMO's themed block screen appears. Tap Take a break to get a notification that opens OMO to a 15-second breathing pause before the break unlocks.
+> 5. Schedules (Block Lists > +) block the same way at set times, even with OMO closed.
+>
+> Friends and Study Circle (optional) need Sign in with Apple. In a Study Circle each person's phone stays locked until a friend unlocks it; an emergency unlock is always available after a 60-second pause, so nobody can be locked out indefinitely.
+>
+> Screen Time selections stay on the device. Apple gives OMO only opaque tokens and OMO never sees which apps you use. Signed-in users can delete their account in Settings > Delete account.
+
+## App Privacy answers
+
+**Privacy Policy URL:** https://syraya.github.io/claude-ai/privacy.html
+
+**Do you or your third-party partners collect data from this app?** Yes. (Only when someone signs in to use Friends or Study Circle. Everything else stays on the phone.)
+
+Declare these data types. For **every one**, answer: used for **App Functionality** only; **Linked to the user: Yes**; **Used for tracking: No**.
+
+| Category | Type | What OMO stores |
+|---|---|---|
+| Contact Info | **Name** | The display name from Sign in with Apple, which you can change |
+| Identifiers | **User ID** | Your account ID and friend code, so friends can add you |
+| Usage Data | **Product Interaction** | Daily focus minutes, sessions and breaks, shown to your friends |
+| Usage Data | **Other Usage Data** | Rough daily time in apps you chose to share (15-minute steps), shown to friends |
+| User Content | **Other User Content** | Your friends list and Study Circle sessions (who's in them, who holds whose key) |
+
+**Do not declare:** email (OMO asks Apple for your name only), location, contacts, browsing history, health, financial info, photos, purchases, diagnostics or crash data (no analytics or crash reporting SDK). Screen Time app choices are not collected: they are device-only tokens.
+
+**Tracking:** No. OMO has no ads, no analytics and no data brokers.

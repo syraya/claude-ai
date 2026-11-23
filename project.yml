@@ -22,8 +22,8 @@ settings:
     DEVELOPMENT_TEAM: "3S8BF927L9"             # your 10-character Apple Team ID
     APP_BUNDLE_ID: com.hserieh.omo        # must be unique on the App Store
     APP_GROUP_ID: group.com.hserieh.omo   # "group." + something unique
-    MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0"           # the version people see; matches App Store Connect
+    CURRENT_PROJECT_VERSION: "2"       # raise by 1 for every upload (build 1 is taken)
     SWIFT_VERSION: "5.0"
     TARGETED_DEVICE_FAMILY: "1"
     CODE_SIGN_STYLE: Automatic
@@ -61,6 +61,8 @@ targets:
       path: Omo/Info.plist
       properties:
         CFBundleDisplayName: OMO
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
         UILaunchScreen:
           UIColorName: LaunchBackground   # OMO's lapis, the same as the opening
@@ -93,6 +95,8 @@ targets:
       path: Extensions/OmoMonitor/Info.plist
       properties:
         CFBundleDisplayName: OMO Monitor
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
@@ -118,6 +122,8 @@ targets:
       path: Extensions/OmoShieldConfiguration/Info.plist
       properties:
         CFBundleDisplayName: OMO Shield
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
@@ -143,6 +149,8 @@ targets:
       path: Extensions/OmoShieldAction/Info.plist
       properties:
         CFBundleDisplayName: OMO Shield Action
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         AppGroupID: $(APP_GROUP_ID)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
