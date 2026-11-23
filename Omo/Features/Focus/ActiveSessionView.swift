@@ -54,7 +54,7 @@ struct ActiveSessionView: View {
                 // timer settle into its summary instead of it vanishing underneath.
                 guard endConfirmed else { return }
                 endConfirmed = false
-                focus.endEarly()
+                withAnimation(.smooth(duration: 0.55)) { focus.endEarly() }
             }) {
                 ReflectionView(seconds: max(15, SharedStore.settings.reflectionSeconds),
                                title: "End your session early?",

@@ -63,25 +63,35 @@ struct FocusHomeView: View {
 
                         // The timer settles into a summary, then the start card, rather than
                         // snapping from one to the next.
-                        Group {
+                        // Stacked, not listed: while one card fades out and the next fades in
+                        // they share the same spot, so nothing lands below and jumps up.
+                        ZStack(alignment: .top) {
                             if focus.session != nil {
                                 ActiveSessionView()
-                                    .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.96)),
-                                                            removal: .opacity.combined(with: .scale(scale: 0.92))))
+                                    .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.97, anchor: .top)),
+                                                            removal: .opacity.combined(with: .scale(scale: 0.97, anchor: .top))))
                             } else if let finished = focus.lastFinished {
                                 SessionSummaryCard(finished: finished)
-                                    .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 1.04)),
-                                                            removal: .opacity.combined(with: .move(edge: .top))))
+                                    .transition(.opacity.combined(with: .scale(scale: 0.97, anchor: .top)))
                             } else {
                                 StartSessionView()
-                                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                                    .transition(.opacity.combined(with: .offset(y: 16)))
                             }
                         }
-                        .animation(.spring(duration: 0.7, bounce: 0.12), value: sessionPhase)
+                        .id("sessionCard")
+                        .animation(.smooth(duration: 0.55), value: sessionPhase)
                     }
                     .padding()
                 }
                 .coordinateSpace(name: "focusScroll")
+                .onChange(of: sessionPhase) { _, phase in
+                    // After a session ends (or you start another), glide to the new card
+                    // rather than leaving the page wherever the taller timer had it.
+                    guard !phase.hasPrefix("active") else { return }
+                    withAnimation(.smooth(duration: 0.6)) {
+                        proxy.scrollTo("sessionCard", anchor: phase == "start" ? .top : .center)
+                    }
+                }
                 .scrollDismissesKeyboard(.interactively)
                 .onPreferenceChange(HeaderOffsetKey.self) { minY in
                     // The figure has fully shrunk away after about 180 points of scrolling.

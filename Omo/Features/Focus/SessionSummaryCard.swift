@@ -65,7 +65,9 @@ struct SessionSummaryCard: View {
                 .foregroundStyle(faint)
                 .opacity(shown ? 1 : 0)
 
-            Button("Start another") { focus.dismissFinished() }
+            Button("Start another") {
+                withAnimation(.smooth(duration: 0.55)) { focus.dismissFinished() }
+            }
                 .buttonStyle(PrimaryButtonStyle(color: .omoOnPrimary, textColor: .omoPrimary))
         }
         .foregroundStyle(Color.omoOnPrimary)
