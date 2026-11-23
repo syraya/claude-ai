@@ -12,6 +12,9 @@ struct OmoCollectionView: View {
     @State private var kind: OmoCompanion.Kind
     @State private var focused: OmoCompanion?
     @State private var showIndex = false
+    /// An OMO picked from the thumbnails or the index, for the carousel to glide to.
+    /// Swiping never sets this, so the carousel never moves under your finger.
+    @State private var jumpTo: OmoCompanion?
     @Namespace private var tabs
     @Environment(\.dismiss) private var dismiss
 
@@ -75,6 +78,7 @@ struct OmoCollectionView: View {
                                      kind = companion.kind
                                      focused = companion
                                  }
+                                 jumpTo = companion
                                  showIndex = false
                              })
             }
@@ -129,13 +133,17 @@ struct OmoCollectionView: View {
                 .scrollTargetLayout()
             }
             .contentMargins(.horizontal, (proxy.size.width - width) / 2, for: .scrollContent)
-            .scrollTargetBehavior(.viewAligned)
+            // Follows your finger, so you can hold it halfway; letting go settles on the
+            // nearest panel, and a flick moves one at a time.
+            .scrollTargetBehavior(.viewAligned(limitBehavior: .alwaysByOne))
             .scrollPosition(id: $focused, anchor: .center)
-            // Opening (or switching collection) lands on the right panel, and so does
-            // tapping a thumbnail; swiping updates `focused` the other way.
+            // Opening (or switching collection) lands on the right panel. Swiping only
+            // reports back through `focused`; it's never scrolled for you mid-drag.
             .onAppear { reader.scrollTo(shown, anchor: .center) }
-            .onChange(of: shown) { _, companion in
+            .onChange(of: jumpTo) { _, companion in
+                guard let companion else { return }
                 withAnimation(.spring(duration: 0.5, bounce: 0.1)) { reader.scrollTo(companion, anchor: .center) }
+                jumpTo = nil
             }
             }
         }
@@ -172,6 +180,7 @@ struct OmoCollectionView: View {
                     ForEach(members) { companion in
                         Button {
                             withAnimation(.spring(duration: 0.5, bounce: 0.1)) { focused = companion }
+                            jumpTo = companion
                         } label: {
                             OmoThumb(companion: companion,
                                      locked: companion != selected && !companion.isUnlocked(stats),
@@ -271,12 +280,20 @@ struct OmoArchPanel: View {
             let arch = UnevenRoundedRectangle(topLeadingRadius: radius, topTrailingRadius: radius, style: .circular)
             let scene = BreathingScene(for: companion)
             ZStack {
-                Color(scene.background)
+                // The painting's own sky fills the arch above it, and the painting's top
+                // fades into that sky, so there's no line where the art begins.
+                Color(scene.sky)
                 Image(scene.imageName)
                     .resizable()
                     .scaledToFill()
                     .frame(width: proxy.size.width, height: proxy.size.height * 0.82)
                     .clipped()
+                    .mask(
+                        LinearGradient(stops: [
+                            .init(color: .clear, location: 0),
+                            .init(color: .black, location: 0.18),
+                        ], startPoint: .top, endPoint: .bottom)
+                    )
                     .frame(maxHeight: .infinity, alignment: .bottom)
                     .saturation(locked ? 0.2 : 1)
                     .opacity(locked ? 0.55 : 1)

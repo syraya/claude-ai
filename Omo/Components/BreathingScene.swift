@@ -13,6 +13,8 @@ struct BreathingScene {
     let imageName: String
     /// The scene's own paper colour, so the art melts into the screen.
     let background: RGB
+    /// The colour along the top edge of the art, for extending its sky upward.
+    let sky: RGB
     let quote: Quote
 
     static let quotes: [String: Quote] = [
@@ -60,10 +62,43 @@ struct BreathingScene {
         .yuleStag: (0xF1F3EB, "q03"),
     ]
 
+    private static let skies: [OmoCompanion: UInt32] = [
+        .anansi: 0xFAF0E4,
+        .apollo: 0xE3EDF7,
+        .athena: 0xFAEFDF,
+        .chiron: 0x182F29,
+        .daphne: 0xEFF2E7,
+        .demeter: 0xF9EDDD,
+        .dragon: 0xEFF6EE,
+        .gaia: 0xEEF2E5,
+        .glaux: 0xF5EDE2,
+        .hecate: 0x231514,
+        .hippocampus: 0xEAF6F2,
+        .huginnMuninn: 0xEBEFF2,
+        .janus: 0x191821,
+        .koi: 0xE6F3FA,
+        .loon: 0xEAF2F9,
+        .noor: 0xFDECEF,
+        .nyx: 0x180F22,
+        .odin: 0x112128,
+        .pegasus: 0xFAF2E3,
+        .phoenix: 0xFEF1E9,
+        .psyche: 0xF9EBF5,
+        .qilin: 0xFCEEE5,
+        .quetzalcoatl: 0xECF6EE,
+        .salmon: 0xEFF4ED,
+        .selene: 0x122037,
+        .simurgh: 0xE4F7F5,
+        .sphinx: 0xEBF1F2,
+        .thoth: 0xFCF1E5,
+        .yuleStag: 0xF2F4EB,
+    ]
+
     init(for companion: OmoCompanion) {
         let pairing = Self.pairings[companion] ?? (0xF5F0E4, "q01")
         imageName = "breath-\(companion.rawValue)"
         background = RGB(pairing.background)
+        sky = RGB(Self.skies[companion] ?? pairing.background)
         quote = Self.quotes[pairing.quote] ?? Self.quotes["q01"]!
     }
 }
