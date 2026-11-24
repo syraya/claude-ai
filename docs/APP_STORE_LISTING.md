@@ -134,11 +134,12 @@ Declare these data types. For **every one**, answer: used for **App Functionalit
 | Category | Type | What OMO stores |
 |---|---|---|
 | Contact Info | **Name** | The display name from Sign in with Apple, which you can change |
+| Contacts | **Contacts** | Your friends list in OMO (Apple's definition includes a "social graph") |
 | Identifiers | **User ID** | Your account ID and friend code, so friends can add you |
 | Usage Data | **Product Interaction** | Daily focus minutes, sessions and breaks, shown to your friends |
 | Usage Data | **Other Usage Data** | Rough daily time in apps you chose to share (15-minute steps), shown to friends |
-| User Content | **Other User Content** | Your friends list and Study Circle sessions (who's in them, who holds whose key) |
+| User Content | **Other User Content** | Study Circle sessions (who's in them, who holds whose key) |
 
-**Do not declare:** email (OMO asks Apple for your name only), location, contacts, browsing history, health, financial info, photos, purchases, diagnostics or crash data (no analytics or crash reporting SDK). Screen Time app choices are not collected: they are device-only tokens.
+**Do not declare:** email (OMO asks Apple for your name only), location, phone contacts or address book (only the in-app friends list, above), browsing history, health, financial info, photos, purchases, diagnostics or crash data (no analytics or crash reporting SDK). Screen Time app choices are not collected: they are device-only tokens.
 
 **Tracking:** No. OMO has no ads, no analytics and no data brokers.
