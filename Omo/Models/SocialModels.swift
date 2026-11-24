@@ -81,14 +81,17 @@ extension DailyStats {
         distractingMinutes = data["distractingMinutes"] as? Int ?? -1
     }
 
+    /// What friends see. Kept within what one day can hold, which is also what the
+    /// server accepts (firebase/firestore.rules), so a sync is never refused.
     var firestoreData: [String: Any] {
-        [
+        func count(_ value: Int) -> Int { min(max(value, 0), 500) }
+        return [
             "day": day,
-            "focusMinutes": focusMinutes,
-            "sessionsCompleted": sessionsCompleted,
-            "breaksTaken": breaksTaken,
-            "friendSessions": friendSessions,
-            "distractingMinutes": distractingMinutes,
+            "focusMinutes": min(max(focusMinutes, 0), 1440),
+            "sessionsCompleted": count(sessionsCompleted),
+            "breaksTaken": count(breaksTaken),
+            "friendSessions": count(friendSessions),
+            "distractingMinutes": distractingMinutes < 0 ? -1 : min(distractingMinutes, 1440),
         ]
     }
 

@@ -49,6 +49,15 @@ describe("profiles and friend codes", () => {
     await assertFails(setDoc(doc(db("alice"), "users/bob"), { displayName: "Bob", friendCode: "BBBBBB" }));
   });
 
+  test("nobody can list every profile or friend code", async () => {
+    await seed("users/bob", { displayName: "Bob", friendCode: "BBBBBB" });
+    await seed("friendCodes/BBBBBB", { uid: "bob" });
+    await assertSucceeds(getDoc(doc(db("alice"), "users/bob")));
+    await assertSucceeds(getDoc(doc(db("alice"), "friendCodes/BBBBBB")));
+    await assertFails(getDocs(collection(db("alice"), "users")));
+    await assertFails(getDocs(collection(db("alice"), "friendCodes")));
+  });
+
   test("friend codes can't be taken over", async () => {
     await assertSucceeds(setDoc(doc(db("alice"), "friendCodes/AAAAAA"), { uid: "alice" }));
     await assertFails(setDoc(doc(db("bob"), "friendCodes/AAAAAA"), { uid: "bob" }));
@@ -88,6 +97,19 @@ describe("friendships and stats", () => {
     await assertSucceeds(getDoc(doc(db("alice"), "users/bob/stats/2026-10-20")));
     await assertFails(getDoc(doc(db("carol"), "users/bob/stats/2026-10-20")));
     await assertFails(setDoc(doc(db("alice"), "users/bob/stats/2026-10-20"), { focusMinutes: 0 }));
+  });
+
+  test("your own stats must be numbers a real day can hold", async () => {
+    const day = { day: "2026-10-20", focusMinutes: 95, sessionsCompleted: 2, breaksTaken: 1, friendSessions: 0, distractingMinutes: 45 };
+    const mine = doc(db("alice"), "users/alice/stats/2026-10-20");
+    await assertSucceeds(setDoc(mine, day));
+    await assertSucceeds(setDoc(mine, { ...day, distractingMinutes: -1 }));
+    await assertFails(setDoc(mine, { ...day, focusMinutes: 600000 }));
+    await assertFails(setDoc(mine, { ...day, focusMinutes: -5 }));
+    await assertFails(setDoc(mine, { ...day, sessionsCompleted: 99999 }));
+    await assertFails(setDoc(mine, { ...day, focusMinutes: "lots" }));
+    await assertFails(setDoc(mine, { ...day, isAdmin: true }));
+    await assertFails(setDoc(doc(db("alice"), "users/alice/stats/2026-10-21"), day));
   });
 
   test("push tokens are private", async () => {

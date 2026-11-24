@@ -14,6 +14,15 @@ service cloud.firestore {
       return request.auth.uid;
     }
 
+    // Minutes in one day, and a sensible count of things done in one day.
+    function minutes(value) {
+      return value is int && value >= 0 && value <= 1440;
+    }
+
+    function count(value) {
+      return value is int && value >= 0 && value <= 500;
+    }
+
     function changedOnly(keys) {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
@@ -28,9 +37,10 @@ service cloud.firestore {
           || (b < a && acceptedFriendship(b + '_' + a));
     }
 
-    // Public profile: just a display name and friend code.
+    // Public profile: just a display name and friend code. One at a time: nobody can
+    // list every user.
     match /users/{uid} {
-      allow read: if signedIn();
+      allow get: if signedIn();
       allow create: if me() == uid
         && request.resource.data.keys().hasOnly(['displayName', 'friendCode', 'createdAt'])
         && request.resource.data.displayName is string
@@ -43,10 +53,21 @@ service cloud.firestore {
         && request.resource.data.displayName.size() <= 30;
       allow delete: if me() == uid;
 
-      // Daily stats, visible to you and your friends.
+      // Daily stats, visible to you and your friends. Only these numbers, and only
+      // what a real day can hold, so nobody can post 10,000 hours to the leaderboard.
       match /stats/{day} {
         allow read: if signedIn() && (me() == uid || areFriends(me(), uid));
-        allow write: if me() == uid;
+        allow create, update: if me() == uid
+          && request.resource.data.keys().hasOnly(['day', 'focusMinutes', 'sessionsCompleted',
+                                                   'breaksTaken', 'friendSessions', 'distractingMinutes'])
+          && request.resource.data.day == day
+          && minutes(request.resource.data.focusMinutes)
+          && (request.resource.data.distractingMinutes == -1
+              || minutes(request.resource.data.distractingMinutes))
+          && count(request.resource.data.sessionsCompleted)
+          && count(request.resource.data.breaksTaken)
+          && count(request.resource.data.friendSessions);
+        allow delete: if me() == uid;
       }
 
       // Push tokens. Only you (and the Cloud Functions) can see them.
@@ -55,9 +76,10 @@ service cloud.firestore {
       }
     }
 
-    // friendCodes/{CODE} -> { uid }. Create-only, so codes can't be stolen.
+    // friendCodes/{CODE} -> { uid }. Create-only, so codes can't be stolen. Looked up
+    // one at a time, so nobody can collect every code.
     match /friendCodes/{code} {
-      allow read: if signedIn();
+      allow get: if signedIn();
       allow create: if signedIn()
         && request.resource.data.keys().hasOnly(['uid'])
         && request.resource.data.uid == me();
