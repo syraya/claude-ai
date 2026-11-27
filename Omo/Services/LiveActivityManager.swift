@@ -43,7 +43,9 @@ enum LiveActivityManager {
             primary: hex(palette.primary),
             onPrimary: hex(palette.onPrimary),
             paper: hex(palette.paper),
-            gold: hex(palette.gold)
+            gold: hex(palette.gold),
+            ink: hex(palette.ink),
+            labels: hex(palette.labels)
         )
         _ = try? Activity.request(attributes: attributes, content: content, pushType: nil)
     }
@@ -54,7 +56,7 @@ enum LiveActivityManager {
         }
     }
 
-    private static func hex(_ rgb: RGB) -> UInt32 {
+    static func hex(_ rgb: RGB) -> UInt32 {
         func channel(_ value: Double) -> UInt32 { UInt32((min(max(value, 0), 1) * 255).rounded()) }
         return channel(rgb.r) << 16 | channel(rgb.g) << 8 | channel(rgb.b)
     }

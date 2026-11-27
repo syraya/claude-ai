@@ -130,6 +130,8 @@ struct RootView: View {
             })
         case "demo-mode":
             return AnyView(DemoModeView())
+        case "live":
+            return AnyView(LiveActivityPreview(companion: settings.settings.companion))
         case "omos-preview":
             return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
                                              previewing: .selene) { _ in })

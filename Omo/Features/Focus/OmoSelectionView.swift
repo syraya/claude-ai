@@ -365,12 +365,11 @@ private struct SceneArt: View {
             .init(color: .black, location: 0.86),
             .init(color: .clear, location: 1),
         ], startPoint: .top, endPoint: .bottom)
-        if let focus = scene.focus, let art = UIImage(named: scene.imageName), art.size.width > 0 {
-            let frame = Self.layout(art: art.size, focus: focus, in: size, topInset: topInset)
-            Image(uiImage: art)
-                .resizable()
+        if let focus = scene.focus {
+            let art = CGSize(width: 1000 * scene.aspectRatio, height: 1000)
+            let frame = Self.layout(art: art, focus: focus, in: size, topInset: topInset)
+            SceneCanvas(scene: scene, fade: fade)
                 .frame(width: frame.width, height: frame.height)
-                .mask(fade)
                 .offset(x: frame.minX, y: frame.minY)
                 .frame(width: size.width, height: size.height, alignment: .topLeading)
         } else {

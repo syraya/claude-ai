@@ -38,4 +38,6 @@ struct FocusActivityAttributes: ActivityAttributes {
     var onPrimary: UInt32
     var paper: UInt32
     var gold: UInt32
+    var ink: UInt32
+    var labels: UInt32
 }

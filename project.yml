@@ -90,6 +90,7 @@ targets:
     sources:
       - path: Extensions/OmoWidgets
       - path: Shared/FocusActivity.swift
+      - path: Shared/FocusActivityViews.swift
       - path: Shared/Figures.xcassets
     settings:
       base:

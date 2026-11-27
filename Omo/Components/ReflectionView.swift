@@ -147,18 +147,14 @@ struct ReflectionView: View {
     /// The landscape, fading into the paper at its edges and swelling a little with
     /// each breath in. Still with Reduce Motion.
     private func sceneArt(inhaling: Bool) -> some View {
-        Image(scene.imageName)
-            .resizable()
-            .scaledToFit()
+        SceneCanvas(scene: scene, fade: LinearGradient(stops: [
+            .init(color: .clear, location: 0),
+            .init(color: .black, location: 0.14),
+            .init(color: .black, location: 0.8),
+            .init(color: .clear, location: 1),
+        ], startPoint: .top, endPoint: .bottom))
+            .aspectRatio(scene.aspectRatio, contentMode: .fit)
             .frame(maxWidth: .infinity)
-            .mask(
-                LinearGradient(stops: [
-                    .init(color: .clear, location: 0),
-                    .init(color: .black, location: 0.14),
-                    .init(color: .black, location: 0.8),
-                    .init(color: .clear, location: 1),
-                ], startPoint: .top, endPoint: .bottom)
-            )
             .scaleEffect(reduceMotion ? 1 : (inhaling ? 1.04 : 1))
             .animation(reduceMotion ? nil : .easeInOut(duration: Double(Self.phaseLength)), value: inhaling)
             .padding(.bottom, 4)

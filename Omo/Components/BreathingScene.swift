@@ -2,7 +2,7 @@ import SwiftUI
 import CoreGraphics
 
 /// The breathing screen's art and words for each OMO: a faint landscape with the
-/// companion in it, and a credited line from a philosopher (or, for a few holiday
+/// companion standing in it, and a credited line from a philosopher (or, for a few holiday
 /// OMOs, a reflection of OMO's own).
 struct BreathingScene {
     struct Quote {
@@ -21,6 +21,12 @@ struct BreathingScene {
     /// Where the OMO's figure sits in the art, as fractions of its width and height,
     /// so the gallery's arch can frame the figure whole.
     let focus: CGRect?
+    /// The frame the OMO's figure is drawn in over the landscape, as fractions of its
+    /// size. The figure is vector artwork, so it stays sharp at any size.
+    let figure: CGRect?
+    let figureImage: String
+    /// The landscape's width over its height.
+    let aspectRatio: CGFloat
 
     static let quotes: [String: Quote] = [
         "q01": Quote(text: "Confine thyself to the present.", author: "Marcus Aurelius", source: "Meditations, Book VII, section 29, tr. George Long"),
@@ -92,7 +98,7 @@ struct BreathingScene {
         .koi: 0xE6F3FA,
         .loon: 0xEAF2F9,
         .noor: 0xFDECEF,
-        .asteria: 0x2A2B46,
+        .asteria: 0x282A44,
         .nyx: 0x180F22,
         .odin: 0x112128,
         .pegasus: 0xFAF2E3,
@@ -106,45 +112,80 @@ struct BreathingScene {
         .sphinx: 0xEBF1F2,
         .thoth: 0xFCF1E5,
         .yuleStag: 0xF2F4EB,
-        .hestia: 0xF0D8C2,
-        .turtleIsland: 0xFADFC1,
-        .mnemosyne: 0xEDE8E0,
+        .hestia: 0xF1DAC5,
+        .turtleIsland: 0xFAE0C4,
+        .mnemosyne: 0xEEE9E1,
     ]
 
-    private static let focuses: [OmoCompanion: CGRect] = [
-        .glaux: CGRect(x: 0.309, y: 0.158, width: 0.395, height: 0.717),
-        .selene: CGRect(x: 0.369, y: 0.073, width: 0.255, height: 0.807),
-        .daphne: CGRect(x: 0.301, y: 0.087, width: 0.402, height: 0.838),
-        .noor: CGRect(x: 0.329, y: 0.074, width: 0.288, height: 0.819),
-        .sphinx: CGRect(x: 0.347, y: 0.119, width: 0.360, height: 0.756),
-        .nyx: CGRect(x: 0.281, y: 0.070, width: 0.307, height: 0.846),
-        .hippocampus: CGRect(x: 0.300, y: 0.073, width: 0.407, height: 0.854),
-        .phoenix: CGRect(x: 0.273, y: 0.098, width: 0.466, height: 0.831),
-        .pegasus: CGRect(x: 0.277, y: 0.084, width: 0.463, height: 0.863),
-        .apollo: CGRect(x: 0.348, y: 0.074, width: 0.323, height: 0.842),
-        .athena: CGRect(x: 0.344, y: 0.091, width: 0.271, height: 0.837),
-        .huginnMuninn: CGRect(x: 0.198, y: 0.125, width: 0.578, height: 0.781),
-        .anansi: CGRect(x: 0.273, y: 0.097, width: 0.529, height: 0.804),
-        .koi: CGRect(x: 0.198, y: 0.119, width: 0.538, height: 0.758),
-        .thoth: CGRect(x: 0.342, y: 0.080, width: 0.333, height: 0.860),
-        .dragon: CGRect(x: 0.230, y: 0.112, width: 0.508, height: 0.816),
-        .odin: CGRect(x: 0.367, y: 0.053, width: 0.350, height: 0.840),
-        .salmon: CGRect(x: 0.228, y: 0.168, width: 0.490, height: 0.650),
-        .simurgh: CGRect(x: 0.237, y: 0.094, width: 0.537, height: 0.805),
-        .quetzalcoatl: CGRect(x: 0.277, y: 0.125, width: 0.557, height: 0.793),
-        .janus: CGRect(x: 0.366, y: 0.117, width: 0.270, height: 0.784),
-        .qilin: CGRect(x: 0.313, y: 0.100, width: 0.442, height: 0.781),
-        .psyche: CGRect(x: 0.245, y: 0.085, width: 0.510, height: 0.827),
-        .gaia: CGRect(x: 0.277, y: 0.091, width: 0.424, height: 0.811),
-        .loon: CGRect(x: 0.244, y: 0.247, width: 0.531, height: 0.714),
-        .chiron: CGRect(x: 0.273, y: 0.096, width: 0.456, height: 0.809),
-        .hecate: CGRect(x: 0.345, y: 0.076, width: 0.313, height: 0.836),
-        .demeter: CGRect(x: 0.331, y: 0.067, width: 0.329, height: 0.847),
-        .yuleStag: CGRect(x: 0.321, y: 0.112, width: 0.374, height: 0.803),
-        .mnemosyne: CGRect(x: 0.309, y: 0.246, width: 0.38, height: 0.694),
-        .hestia: CGRect(x: 0.3, y: 0.306, width: 0.4, height: 0.634),
-        .turtleIsland: CGRect(x: 0.228, y: 0.3, width: 0.543, height: 0.67),
-        .asteria: CGRect(x: 0.299, y: 0.349, width: 0.402, height: 0.59),
+    /// For each OMO: where its figure stands in the landscape (`focus`), and the frame
+    /// its figure artwork is drawn in (`figure`), both as fractions of the landscape.
+    private static let placements: [OmoCompanion: (focus: CGRect, figure: CGRect)] = [
+        .glaux: (CGRect(x: 0.3093, y: 0.1583, width: 0.3953, height: 0.7167),
+                  CGRect(x: 0.2913, y: 0.1277, width: 0.4328, height: 0.7754)),
+        .selene: (CGRect(x: 0.3686, y: 0.0730, width: 0.2547, height: 0.8069),
+                  CGRect(x: 0.2597, y: 0.0411, width: 0.4725, height: 0.8719)),
+        .daphne: (CGRect(x: 0.3012, y: 0.0870, width: 0.4023, height: 0.8379),
+                  CGRect(x: 0.2360, y: 0.0535, width: 0.5322, height: 0.9045)),
+        .noor: (CGRect(x: 0.3291, y: 0.0741, width: 0.2884, height: 0.8189),
+                  CGRect(x: 0.2254, y: 0.0414, width: 0.4985, height: 0.8821)),
+        .sphinx: (CGRect(x: 0.3465, y: 0.1186, width: 0.3605, height: 0.7558),
+                  CGRect(x: 0.3225, y: 0.0885, width: 0.4071, height: 0.8142)),
+        .nyx: (CGRect(x: 0.2814, y: 0.0696, width: 0.3070, height: 0.8460),
+                  CGRect(x: 0.1816, y: 0.0359, width: 0.5028, height: 0.9123)),
+        .hippocampus: (CGRect(x: 0.3000, y: 0.0731, width: 0.4070, height: 0.8539),
+                  CGRect(x: 0.2679, y: 0.0390, width: 0.4691, height: 0.9211)),
+        .phoenix: (CGRect(x: 0.2733, y: 0.0976, width: 0.4663, height: 0.8308),
+                  CGRect(x: 0.2541, y: 0.0365, width: 0.5038, height: 0.9399)),
+        .pegasus: (CGRect(x: 0.2767, y: 0.0839, width: 0.4628, height: 0.8631),
+                  CGRect(x: 0.2585, y: 0.0427, width: 0.4987, height: 0.9468)),
+        .apollo: (CGRect(x: 0.3477, y: 0.0741, width: 0.3233, height: 0.8417),
+                  CGRect(x: 0.2425, y: 0.0344, width: 0.5299, height: 0.9133)),
+        .athena: (CGRect(x: 0.3442, y: 0.0907, width: 0.2709, height: 0.8371),
+                  CGRect(x: 0.2261, y: 0.0579, width: 0.5069, height: 0.8988)),
+        .huginnMuninn: (CGRect(x: 0.1977, y: 0.1247, width: 0.5779, height: 0.7805),
+                  CGRect(x: 0.1735, y: -0.1549, width: 0.6268, height: 1.3443)),
+        .anansi: (CGRect(x: 0.2733, y: 0.0966, width: 0.5291, height: 0.8045),
+                  CGRect(x: 0.2519, y: -0.0636, width: 0.5840, height: 1.1286)),
+        .koi: (CGRect(x: 0.1977, y: 0.1190, width: 0.5384, height: 0.7576),
+                  CGRect(x: 0.1707, y: -0.0498, width: 0.5871, height: 1.0929)),
+        .thoth: (CGRect(x: 0.3419, y: 0.0797, width: 0.3326, height: 0.8599),
+                  CGRect(x: 0.2577, y: 0.0459, width: 0.5008, height: 0.9283)),
+        .dragon: (CGRect(x: 0.2302, y: 0.1118, width: 0.5081, height: 0.8165),
+                  CGRect(x: 0.2076, y: 0.0188, width: 0.5511, height: 0.9999)),
+        .odin: (CGRect(x: 0.3674, y: 0.0535, width: 0.3500, height: 0.8396),
+                  CGRect(x: 0.3056, y: 0.0199, width: 0.4739, height: 0.9078)),
+        .salmon: (CGRect(x: 0.2279, y: 0.1678, width: 0.4895, height: 0.6503),
+                  CGRect(x: 0.2081, y: -0.0371, width: 0.5284, height: 1.0592)),
+        .simurgh: (CGRect(x: 0.2372, y: 0.0942, width: 0.5372, height: 0.8051),
+                  CGRect(x: 0.2158, y: -0.0366, width: 0.5798, height: 1.0678)),
+        .quetzalcoatl: (CGRect(x: 0.2767, y: 0.1255, width: 0.5570, height: 0.7934),
+                  CGRect(x: 0.2507, y: 0.0184, width: 0.6054, height: 1.0051)),
+        .janus: (CGRect(x: 0.3663, y: 0.1171, width: 0.2698, height: 0.7838),
+                  CGRect(x: 0.2823, y: 0.0858, width: 0.4372, height: 0.8469)),
+        .qilin: (CGRect(x: 0.3128, y: 0.0998, width: 0.4419, height: 0.7815),
+                  CGRect(x: 0.2951, y: 0.0004, width: 0.4769, height: 0.9742)),
+        .psyche: (CGRect(x: 0.2453, y: 0.0846, width: 0.5105, height: 0.8269),
+                  CGRect(x: 0.2250, y: 0.0418, width: 0.5510, height: 0.9112)),
+        .gaia: (CGRect(x: 0.2767, y: 0.0915, width: 0.4244, height: 0.8110),
+                  CGRect(x: 0.2405, y: 0.0592, width: 0.4993, height: 0.8728)),
+        .loon: (CGRect(x: 0.2442, y: 0.2471, width: 0.5314, height: 0.7140),
+                  CGRect(x: 0.2118, y: 0.0202, width: 0.5944, height: 1.1698)),
+        .chiron: (CGRect(x: 0.2733, y: 0.0957, width: 0.4558, height: 0.8087),
+                  CGRect(x: 0.2544, y: 0.0373, width: 0.4952, height: 0.9258)),
+        .hecate: (CGRect(x: 0.3453, y: 0.0758, width: 0.3128, height: 0.8363),
+                  CGRect(x: 0.2385, y: 0.0415, width: 0.5261, height: 0.9032)),
+        .demeter: (CGRect(x: 0.3314, y: 0.0669, width: 0.3291, height: 0.8473),
+                  CGRect(x: 0.2416, y: 0.0332, width: 0.5074, height: 0.9130)),
+        .yuleStag: (CGRect(x: 0.3209, y: 0.1121, width: 0.3744, height: 0.8034),
+                  CGRect(x: 0.2705, y: 0.0801, width: 0.4755, height: 0.8645)),
+        .mnemosyne: (CGRect(x: 0.3093, y: 0.2460, width: 0.3802, height: 0.6940),
+                  CGRect(x: 0.2792, y: 0.2102, width: 0.4426, height: 0.7614)),
+        .hestia: (CGRect(x: 0.3000, y: 0.3060, width: 0.4000, height: 0.6340),
+                  CGRect(x: 0.2779, y: 0.2420, width: 0.4427, height: 0.7615)),
+        .turtleIsland: (CGRect(x: 0.2279, y: 0.3000, width: 0.5430, height: 0.6700),
+                  CGRect(x: 0.2088, y: -0.0364, width: 0.5795, height: 1.2460)),
+        .asteria: (CGRect(x: 0.2977, y: 0.3469, width: 0.4035, height: 0.5923),
+                  CGRect(x: 0.2735, y: 0.2514, width: 0.4483, height: 0.7821)),
     ]
 
     init(for companion: OmoCompanion) {
@@ -153,6 +194,38 @@ struct BreathingScene {
         background = RGB(pairing.background)
         sky = RGB(Self.skies[companion] ?? pairing.background)
         quote = Self.quotes[pairing.quote] ?? Self.quotes["q01"]!
-        focus = Self.focuses[companion]
+        focus = Self.placements[companion]?.focus
+        figure = Self.placements[companion]?.figure
+        figureImage = companion.imageName
+        let size = UIImage(named: imageName)?.size ?? CGSize(width: 16, height: 9)
+        aspectRatio = size.height > 0 ? size.width / size.height : 16 / 9
     }
 }
+
+/// An OMO's landscape with its figure on top. The landscape is a soft painting; the
+/// figure is drawn from its vector artwork, so it's crisp at any size. `fade` softens
+/// the landscape's edges into the page without touching the figure.
+struct SceneCanvas: View {
+    let scene: BreathingScene
+    var fade: LinearGradient? = nil
+
+    var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+            ZStack(alignment: .topLeading) {
+                Image(scene.imageName)
+                    .resizable()
+                    .frame(width: size.width, height: size.height)
+                    .mask { fade ?? LinearGradient(colors: [.black], startPoint: .top, endPoint: .bottom) }
+                if let frame = scene.figure {
+                    Image(scene.figureImage)
+                        .resizable()
+                        .frame(width: frame.width * size.width, height: frame.height * size.height)
+                        .offset(x: frame.minX * size.width, y: frame.minY * size.height)
+                }
+            }
+            .frame(width: size.width, height: size.height, alignment: .topLeading)
+        }
+    }
+}
+

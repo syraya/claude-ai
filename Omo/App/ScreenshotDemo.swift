@@ -127,3 +127,61 @@ enum ScreenshotDemo {
 }
 
 #endif
+
+/// The focus Live Activity drawn in the app, for checking its look in the simulator,
+/// whose screenshots can't capture the real Lock Screen or Dynamic Island.
+struct LiveActivityPreview: View {
+    let companion: OmoCompanion
+
+    private var looks: [FocusActivityLook] {
+        let palette = companion.palette
+        let hex = LiveActivityManager.hex
+        let attributes = FocusActivityAttributes(
+            sessionID: "preview", intention: "Finish the biology lab report", blockListName: "Social",
+            companionName: companion.name, figureImage: companion.imageName,
+            primary: hex(palette.primary), onPrimary: hex(palette.onPrimary), paper: hex(palette.paper),
+            gold: hex(palette.gold), ink: hex(palette.ink), labels: hex(palette.labels))
+        let now = Date()
+        let focusing = FocusActivityAttributes.ContentState(startedAt: now.addingTimeInterval(-18 * 60),
+                                                            endsAt: now.addingTimeInterval(32 * 60))
+        let onBreak = FocusActivityAttributes.ContentState(startedAt: now.addingTimeInterval(-30 * 60),
+                                                           endsAt: now.addingTimeInterval(20 * 60),
+                                                           breakStartedAt: now.addingTimeInterval(-60),
+                                                           breakEndsAt: now.addingTimeInterval(4 * 60))
+        return [FocusActivityLook(attributes: attributes, state: focusing, finished: false),
+                FocusActivityLook(attributes: attributes, state: onBreak, finished: false)]
+    }
+
+    var body: some View {
+        let look = looks[0]
+        ScrollView {
+            VStack(spacing: 18) {
+                // Compact Dynamic Island
+                HStack {
+                    FigureTile(name: look.attributes.figureImage, background: look.paper, size: 24)
+                    Spacer()
+                    FocusCountdown(state: look.state, finished: false)
+                        .font(.system(.caption, design: .serif).weight(.semibold).monospacedDigit())
+                        .foregroundStyle(look.gold)
+                }
+                .padding(.horizontal, 10).padding(.vertical, 6)
+                .frame(width: 250)
+                .background(.black, in: Capsule())
+                // Expanded Dynamic Island
+                FocusIslandExpandedView(look: look)
+                    .padding(18)
+                    .background(.black, in: RoundedRectangle(cornerRadius: 42, style: .continuous))
+                    .padding(.horizontal, 10)
+                // Lock Screen banners
+                ForEach(Array(looks.enumerated()), id: \.offset) { _, look in
+                    FocusBannerView(look: look)
+                        .background(look.paper, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .padding(.horizontal, 14)
+                }
+            }
+            .padding(.top, 70)
+        }
+        .background(LinearGradient(colors: [Color(red: 0.16, green: 0.2, blue: 0.3), Color(red: 0.36, green: 0.3, blue: 0.4)],
+                                   startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+    }
+}
