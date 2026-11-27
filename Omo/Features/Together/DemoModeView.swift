@@ -339,7 +339,7 @@ private struct DemoCircle: View {
                     status: leoStatus(now: now), id: "leo")
             }
             if !demo.isBlocked("sam") {
-                row(icon: "lock.fill", locked: true, name: "Sam", status: "Locked · key: You", id: "sam")
+                row(icon: "lock.fill", locked: true, name: "Sam", status: "Locked · key: Leo", id: "sam")
             }
             Text("Each person's key is held by someone else. Only the keyholder can unlock them; the emergency unlock is always there but flagged to their keyholder.")
                 .font(.caption).foregroundStyle(.secondary)
