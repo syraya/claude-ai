@@ -128,6 +128,8 @@ struct RootView: View {
             return AnyView(OmoBackground().sheet(isPresented: .constant(true)) {
                 OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime) { _ in }
             })
+        case "demo-mode":
+            return AnyView(DemoModeView())
         case "omos-preview":
             return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
                                              previewing: .selene) { _ in })
