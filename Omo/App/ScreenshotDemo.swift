@@ -179,7 +179,7 @@ struct LiveActivityPreview: View {
                         .padding(.horizontal, 14)
                 }
             }
-            .padding(.top, 70)
+            .padding(.top, 8)
         }
         .background(LinearGradient(colors: [Color(red: 0.16, green: 0.2, blue: 0.3), Color(red: 0.36, green: 0.3, blue: 0.4)],
                                    startPoint: .top, endPoint: .bottom).ignoresSafeArea())
