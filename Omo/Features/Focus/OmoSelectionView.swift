@@ -386,10 +386,10 @@ private struct SceneArt: View {
     /// The painting's frame in the panel.
     static func layout(art: CGSize, focus: CGRect, in panel: CGSize, topInset: CGFloat) -> CGRect {
         let W = panel.width, H = panel.height
-        // The figure stands in a box 78% of the width, from just below the header to
-        // 88% of the way down, clear of the fade into the page.
-        let box = CGRect(x: W * 0.11, y: topInset + 8, width: W * 0.78,
-                         height: max(80, H * 0.88 - topInset - 8))
+        // The figure stands in a box 62% of the width, from a little below the header
+        // to 84% of the way down, with landscape around it and clear of the fade.
+        let box = CGRect(x: W * 0.19, y: topInset + 24, width: W * 0.62,
+                         height: max(80, H * 0.84 - topInset - 24))
         let fitWidth = box.width / max(focus.width * art.width, 1)
         let fitHeight = box.height / max(focus.height * art.height, 1)
         let cover = W / art.width
