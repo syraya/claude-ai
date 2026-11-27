@@ -294,18 +294,7 @@ struct OmoArchPanel: View {
                 // The painting's own sky fills the arch above it, and the painting's top
                 // fades into that sky, so there's no line where the art begins.
                 Color(scene.sky)
-                Image(scene.imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: proxy.size.width, height: proxy.size.height * 0.82)
-                    .clipped()
-                    .mask(
-                        LinearGradient(stops: [
-                            .init(color: .clear, location: 0),
-                            .init(color: .black, location: 0.18),
-                        ], startPoint: .top, endPoint: .bottom)
-                    )
-                    .frame(maxHeight: .infinity, alignment: .bottom)
+                SceneInArch(scene: scene, size: proxy.size)
                     .saturation(locked ? 0.2 : 1)
                     .opacity(locked ? 0.55 : 1)
                 if locked {
@@ -362,6 +351,56 @@ private struct OmoThumb: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(companion.name + (isCurrent ? ", current" : "") + (locked ? ", locked" : ""))
+    }
+}
+
+/// The OMO's painting placed in the arch so its figure is always whole: scaled until
+/// the figure fills a safe box below the curve, centred on the figure, and never
+/// leaving a gap at the sides or bottom. The painting's top fades into the sky.
+private struct SceneInArch: View {
+    var scene: BreathingScene
+    var size: CGSize
+
+    var body: some View {
+        let fade = LinearGradient(stops: [
+            .init(color: .clear, location: 0),
+            .init(color: .black, location: 0.18),
+        ], startPoint: .top, endPoint: .bottom)
+        if let focus = scene.focus, let art = UIImage(named: scene.imageName), art.size.width > 0 {
+            let layout = Self.layout(art: art.size, focus: focus, in: size)
+            Image(uiImage: art)
+                .resizable()
+                .frame(width: layout.size.width, height: layout.size.height)
+                .mask(fade)
+                .offset(x: layout.origin.x, y: layout.origin.y)
+                .frame(width: size.width, height: size.height, alignment: .topLeading)
+                .clipped()
+        } else {
+            Image(scene.imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size.width, height: size.height * 0.82)
+                .clipped()
+                .mask(fade)
+                .frame(maxHeight: .infinity, alignment: .bottom)
+        }
+    }
+
+    /// The painting's frame inside the arch.
+    static func layout(art: CGSize, focus: CGRect, in panel: CGSize) -> CGRect {
+        let W = panel.width, H = panel.height
+        // The figure fits a box 80% of the arch's width and 60% of its height,
+        // standing 5% above the bottom, below where the arch starts to curve in.
+        let fitWidth = 0.80 * W / max(focus.width * art.width, 1)
+        let fitHeight = 0.60 * H / max(focus.height * art.height, 1)
+        let cover = W / art.width
+        let scale = max(min(fitWidth, fitHeight), cover)
+        let w = art.width * scale, h = art.height * scale
+        var x = W / 2 - focus.midX * w
+        x = min(0, max(W - w, x))
+        var y = 0.95 * H - focus.maxY * h
+        y = max(H - h, y)
+        return CGRect(x: x, y: y, width: w, height: h)
     }
 }
 
