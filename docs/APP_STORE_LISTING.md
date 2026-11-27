@@ -20,13 +20,13 @@ If "OMO: Focus Together" is taken, try "OMO: Focus with Friends" or "OMO – Tho
 
 ## Promotional text (170, can change any time without review)
 
-Block the apps that pull you away, breathe for 15 seconds before any break, and study with friends who hold your key. 29 mythic OMOs to earn along the way.
+Block the apps that pull you away, breathe for 15 seconds before any break, and study with friends who hold your key. 33 mythic OMOs to earn along the way.
 
 ## Description (4000)
 
 OMO blocks the apps that pull you away, and asks you to pause before you give in.
 
-Pick the apps, categories and websites that distract you, choose how long to focus, and they stay locked until time's up. Write down what the session is for, and your intention shows on the timer and on the screen you see when you try to open a blocked app.
+Pick the apps, categories and websites that distract you, choose how long to focus, and they stay locked until time's up. Write down what the session is for, and your intention shows on the timer and on the screen you see when you try to open a blocked app. The countdown follows you onto the Lock Screen and into the Dynamic Island, so you can check it without opening anything.
 
 PAUSE BEFORE EVERY BREAK
 Need a break? First you sit through a short reflection: a breathing circle and a question like "Will this make the next hour better or worse?" Often that's enough to change your mind. If not, pick a break length and your apps lock again on their own when it's over.
@@ -44,7 +44,7 @@ WATCH YOUR FOCUS GROW
 OMO keeps a running total of every hour you've focused since you started, with a chart over time, streaks, your longest session, and titles to earn on the way to 10,000 hours: Apprentice, Scholar, Master, Sage, Polymath.
 
 EARN YOUR OMOs
-29 companions from myths around the world: Athena's owl, the phoenix, Odin's ravens, the Salmon of Knowledge, the Simurgh and more. Each one brings its own color theme. Earn them with focus hours, streaks, friends and Study Circles, and some only on holidays.
+33 companions from myths around the world: Athena's owl, the phoenix, Odin's ravens, the Salmon of Knowledge, the Simurgh and more. Each one brings its own color theme. Earn them with focus hours, streaks, friends and Study Circles, and some only on holidays.
 
 PRIVATE BY DESIGN
 OMO uses Apple's Screen Time framework. Apple never tells OMO which apps you picked; it only gets anonymous tokens. Your block lists and schedules stay on your phone. No ads, and no selling your data.
