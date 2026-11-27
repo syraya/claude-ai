@@ -353,6 +353,7 @@ private struct OmoThumb: View {
                 .font(.system(.footnote, design: .serif).weight(isFocused ? .semibold : .regular))
                 .foregroundStyle(Color(palette.ink))
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .frame(width: 72)
             Capsule()
                 .fill(Color(palette.gold))
