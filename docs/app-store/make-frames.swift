@@ -16,7 +16,7 @@ let shots: [(file: String, title: String, subtitle: String)] = [
     ("1-focus", "Think before you scroll", "Block the apps that pull you away, and focus on what matters."),
     ("2-session", "Focus with intention", "Your goal stays in view, even when you reach for a blocked app."),
     ("3-breathe", "Every break starts with a breath", "Fifteen seconds and a line to think about before anything unlocks."),
-    ("4-omos", "Earn mythic companions", "29 OMOs from myths around the world, each in its own landscape."),
+    ("4-omos", "Earn mythic companions", "33 OMOs from myths around the world, each in its own landscape."),
     ("5-preview", "Make it yours", "Each OMO changes the whole app, down to the breathing scene."),
     ("6-schedules", "Blocks that run themselves", "Weekdays 9 to 5, bedtime every night. Set it once."),
     ("7-lifetime", "Watch your focus grow", "Every hour since day one, with titles to earn along the way."),
