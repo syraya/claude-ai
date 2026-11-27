@@ -28,6 +28,7 @@ struct BreathingScene {
         "q08": Quote(text: "Learning without thought is labor lost; thought without learning is perilous.", author: "Confucius", source: "Analects, Book II, section 15, tr. James Legge"),
         "q09": Quote(text: "The process is mutual; for men learn while they teach.", author: "Seneca", source: "Moral Letters to Lucilius, Letter VII, 'On Crowds', section 8, tr. Richard M. Gummere"),
         "q10": Quote(text: "Direct thy attention to what is said.", author: "Marcus Aurelius", source: "Meditations, Book VII, section 30, tr. George Long"),
+        "q11": Quote(text: "The cosmos is within us. We are made of star-stuff.", author: "Carl Sagan", source: "Cosmos, episode 1, \u{201C}The Shores of the Cosmic Ocean\u{201D} (1980)"),
     ]
 
     private static let pairings: [OmoCompanion: (background: UInt32, quote: String)] = [
@@ -35,6 +36,7 @@ struct BreathingScene {
         .selene: (0x121E32, "q03"),
         .daphne: (0xEFF2E7, "q05"),
         .noor: (0xFCEBEE, "q07"),
+        .asteria: (0x141B30, "q11"),
         .sphinx: (0xEAEFF2, "q08"),
         .nyx: (0x170E1F, "q03"),
         .hippocampus: (0xE9F5F2, "q04"),
@@ -79,6 +81,7 @@ struct BreathingScene {
         .koi: 0xE6F3FA,
         .loon: 0xEAF2F9,
         .noor: 0xFDECEF,
+        .asteria: 0x2D2949,
         .nyx: 0x180F22,
         .odin: 0x112128,
         .pegasus: 0xFAF2E3,

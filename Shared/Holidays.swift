@@ -29,7 +29,7 @@ enum OmoHoliday: String, CaseIterable, Codable {
         case .canadaDay: return "July 1"
         case .teachersDay: return "October 5"
         case .halloween: return "October 31"
-        case .thanksgiving: return "Canadian or American Thanksgiving weekend"
+        case .thanksgiving: return "Canadian Thanksgiving weekend (the second Monday of October)"
         case .christmas: return "December 24 to 26"
         }
     }
@@ -61,7 +61,7 @@ enum OmoHoliday: String, CaseIterable, Codable {
                                                      to: calendar.startOfDay(for: date)).day else { return false }
             return (0...2).contains(days)
         case .thanksgiving:
-            return Self.isCanadianThanksgivingWeekend(date, calendar) || Self.isAmericanThanksgivingWeekend(date, calendar)
+            return Self.isCanadianThanksgivingWeekend(date, calendar)
         }
     }
 
@@ -71,15 +71,6 @@ enum OmoHoliday: String, CaseIterable, Codable {
             guard let d = calendar.date(byAdding: .day, value: offset, to: date) else { return false }
             let c = calendar.dateComponents([.month, .day, .weekday], from: d)
             return c.month == 10 && c.weekday == 2 && (8...14).contains(c.day ?? 0)
-        }
-    }
-
-    /// Thursday to Sunday, where Thursday is the fourth Thursday of November.
-    private static func isAmericanThanksgivingWeekend(_ date: Date, _ calendar: Calendar) -> Bool {
-        (0...3).contains { offset in
-            guard let d = calendar.date(byAdding: .day, value: -offset, to: date) else { return false }
-            let c = calendar.dateComponents([.month, .day, .weekday], from: d)
-            return c.month == 11 && c.weekday == 5 && (22...28).contains(c.day ?? 0)
         }
     }
 

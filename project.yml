@@ -42,6 +42,7 @@ targets:
       - path: Omo
       - path: Shared
     dependencies:
+      - target: OmoWidgets
       - target: OmoMonitor
       - target: OmoShieldConfiguration
       - target: OmoShieldAction
@@ -70,6 +71,7 @@ targets:
         UIBackgroundModes: [remote-notification, fetch]
         BGTaskSchedulerPermittedIdentifiers: [$(APP_BUNDLE_ID).sync]
         FirebaseAppDelegateProxyEnabled: false
+        NSSupportsLiveActivities: true
         ITSAppUsesNonExemptEncryption: false
     entitlements:
       path: Omo/Omo.entitlements
@@ -78,6 +80,29 @@ targets:
         com.apple.security.application-groups: [$(APP_GROUP_ID)]
         com.apple.developer.applesignin: [Default]
         aps-environment: development
+
+  # The live session timer on the Lock Screen, in Notification Centre and in the
+  # Dynamic Island. It compiles only FocusActivity.swift from Shared, so it carries
+  # no Screen Time code and needs no Family Controls entitlement.
+  OmoWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Extensions/OmoWidgets
+      - path: Shared/FocusActivity.swift
+      - path: Shared/Figures.xcassets
+    settings:
+      base:
+        TARGETED_DEVICE_FAMILY: "1"   # iPhone only (XcodeGen defaults targets to iPhone + iPad)
+        PRODUCT_BUNDLE_IDENTIFIER: $(APP_BUNDLE_ID).widgets
+    info:
+      path: Extensions/OmoWidgets/Info.plist
+      properties:
+        CFBundleDisplayName: OMO
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
 
   # Runs in the background when a session or break timer ends, and counts
   # screen time on the apps you choose to share with friends.

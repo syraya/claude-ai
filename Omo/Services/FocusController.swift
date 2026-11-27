@@ -66,6 +66,7 @@ final class FocusController {
         lifetime = SharedStore.lifetime
         scheduleBreak = ScheduleEngine.currentBreak()
         if let previous, session == nil { noteFinished(previous) }
+        LiveActivityManager.sync(session: session)
     }
 
     /// Keeps a summary of a session that just ended, so the timer can settle into it

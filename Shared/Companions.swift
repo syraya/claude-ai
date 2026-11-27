@@ -50,7 +50,7 @@ enum OmoUnlock: Equatable {
 /// Some are earned with focus hours, some with other milestones, and some only on holidays.
 enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
     // The path (focus hours), then milestones, then holidays in calendar order.
-    case glaux, selene, daphne, noor, sphinx, nyx, hippocampus, phoenix, pegasus, apollo, athena, huginnMuninn, anansi, koi, thoth, dragon, odin, salmon, simurgh, quetzalcoatl, janus, qilin, psyche, gaia, loon, chiron, hecate, demeter, yuleStag
+    case glaux, selene, daphne, noor, asteria, sphinx, nyx, hippocampus, phoenix, pegasus, apollo, athena, huginnMuninn, anansi, koi, thoth, dragon, odin, salmon, simurgh, quetzalcoatl, janus, qilin, psyche, gaia, loon, chiron, hecate, demeter, yuleStag
 
     enum Kind: String, CaseIterable {
         case path = "The Path"
@@ -66,6 +66,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .selene: return "Selene"
         case .daphne: return "Daphne"
         case .noor: return "Noor"
+        case .asteria: return "Asteria"
         case .sphinx: return "Sphinx"
         case .nyx: return "Nyx"
         case .hippocampus: return "Hippocampus"
@@ -100,6 +101,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .selene: return "The moon"
         case .daphne: return "The laurel"
         case .noor: return "The light"
+        case .asteria: return "The falling star"
         case .sphinx: return "Keeper of riddles"
         case .nyx: return "Goddess of night"
         case .hippocampus: return "The sea-horse"
@@ -135,6 +137,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .selene: return "She lights the night for anyone still studying."
         case .daphne: return "The nymph who became the laurel tree. Scholars are still crowned with her leaves, and \"baccalaureate\" comes from the laurel berry."
         case .noor: return "Noor means light. The hibiscus opens at dawn, turns toward the sun, and lasts a single day, so it spends every hour of it in the light."
+        case .asteria: return "The Titaness of the stars and falling stars, a guide in the quiet hours of night. The Greeks tied her to dreams, wishes and finding your way."
         case .sphinx: return "Guards the answer until you've thought it through."
         case .nyx: return "Older than the gods, and at home in the quiet of night."
         case .hippocampus: return "Your brain's memory centre is named after this sea-horse."
@@ -170,6 +173,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .selene: return "The night belongs to those who stay."
         case .daphne: return "Keep growing. The laurel waits."
         case .noor: return "One day of bloom. Spend it in the light."
+        case .asteria: return "Follow the light, even when it falls."
         case .sphinx: return "Answer, or remain."
         case .nyx: return "In the deepest quiet, the mind is sharpest."
         case .hippocampus: return "What you repeat, I keep."
@@ -205,6 +209,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .selene: return "Midnight navy and moonlight. Dark, and free."
         case .daphne: return "Sage, forest and laurel green. Free."
         case .noor: return "Hibiscus red, petal pink and morning gold. Free."
+        case .asteria: return "Starlit indigo, violet and celestial gold. Dark, and free."
         case .sphinx: return "Cool marble and slate."
         case .nyx: return "Black and deep violet."
         case .hippocampus: return "Sea-foam and coral."
@@ -239,6 +244,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .selene: return .free
         case .daphne: return .free
         case .noor: return .free
+        case .asteria: return .free
         case .sphinx: return .hours(10)
         case .nyx: return .hours(50)
         case .hippocampus: return .hours(100)
@@ -363,7 +369,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
 
     var isDark: Bool {
         switch self {
-        case .selene, .nyx, .odin, .janus, .chiron, .hecate: return true
+        case .selene, .asteria, .nyx, .odin, .janus, .chiron, .hecate: return true
         default: return false
         }
     }
@@ -388,6 +394,10 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
             return ThemePalette(paper: RGB(0xF7EBEE), card: RGB(0xFFF6F7), ink: RGB(0x4B2632), labels: RGB(0x805764),
                                 primary: RGB(0xA43F5C), onPrimary: RGB(0xFFF8F6), gold: RGB(0xC29B58),
                                 clay: RGB(0xD1808D), success: RGB(0x476856))
+        case .asteria:
+            return ThemePalette(paper: RGB(0x141B30), card: RGB(0x1F2742), ink: RGB(0xECE7E0), labels: RGB(0xBDB3CB),
+                                primary: RGB(0xCCBBD1), onPrimary: RGB(0x1E1A33), gold: RGB(0xD6B384),
+                                clay: RGB(0xA795BA), success: RGB(0xA9C7B8))
         case .sphinx:
             return ThemePalette(paper: RGB(0xEDF0F0), card: RGB(0xF9FAF8), ink: RGB(0x28393D), labels: RGB(0x5D6A6D),
                                 primary: RGB(0x465E66), onPrimary: RGB(0xFCFCF7), gold: RGB(0xAC9A6F),
