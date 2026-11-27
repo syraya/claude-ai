@@ -6,6 +6,7 @@ struct TogetherView: View {
 
     var body: some View {
         @Bindable var together = together
+        @Bindable var moderation = ModerationService.shared
 
         NavigationStack {
             ScrollView {
@@ -31,6 +32,7 @@ struct TogetherView: View {
                     }
                 }
                 .padding()
+                .errorAlert($moderation.errorMessage)
                 // The session arrives from the server, so animate whenever the stage changes
                 // rather than only on the tap that started it.
                 .animation(.spring(duration: 0.6, bounce: 0.12), value: stage)
@@ -86,14 +88,19 @@ struct NewGroupSessionView: View {
         screenTime.isApproved && !(chosenList?.isEmpty ?? true) && !together.isWorking
     }
 
+    /// Invites, minus any from people you've blocked.
+    private var invitations: [GroupSession] {
+        together.invitations.filter { !ModerationService.shared.isBlocked($0.hostUID) }
+    }
+
     var body: some View {
         VStack(spacing: 18) {
             howItWorks
 
-            if !together.invitations.isEmpty {
+            if !invitations.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Invites").font(.omoSerif(.headline))
-                    ForEach(together.invitations) { invite in
+                    ForEach(invitations) { invite in
                         HStack {
                             Avatar(name: invite.hostName, size: 36)
                             VStack(alignment: .leading) {
@@ -244,6 +251,10 @@ struct LobbyView: View {
                             Text("Host").font(.caption.weight(.semibold))
                                 .padding(.horizontal, 8).padding(.vertical, 4)
                                 .background(Color.omoPrimary.opacity(0.2), in: Capsule())
+                        }
+                        if member != together.uid {
+                            ModerationMenu(name: session.name(of: member),
+                                           actions: .live(uid: member, name: session.name(of: member), context: .studyCircle))
                         }
                     }
                 }
@@ -447,6 +458,10 @@ struct ActiveGroupSessionView: View {
                     Text(lock.lockedName + (lock.lockedUID == together.uid ? " (you)" : ""))
                     Spacer()
                     Text(status(of: lock, now: now)).font(.caption).foregroundStyle(.secondary)
+                    if lock.lockedUID != together.uid {
+                        ModerationMenu(name: lock.lockedName,
+                                       actions: .live(uid: lock.lockedUID, name: lock.lockedName, context: .studyCircle))
+                    }
                 }
             }
         }

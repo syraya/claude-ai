@@ -118,7 +118,8 @@ final class AuthService {
         do {
             let code = try await reserveFriendCode(for: uid)
             let trimmed = pendingName?.trimmingCharacters(in: .whitespaces) ?? ""
-            let name = trimmed.isEmpty ? "New friend" : String(trimmed.prefix(30))
+            let candidate = String(trimmed.prefix(30))
+            let name = candidate.isEmpty || !NameFilter.isAllowed(candidate) ? "New friend" : candidate
             try await db.collection("users").document(uid).setData([
                 "displayName": name,
                 "friendCode": code,
@@ -153,6 +154,10 @@ final class AuthService {
         guard let uid else { return }
         let trimmed = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(30))
         guard !trimmed.isEmpty else { return }
+        guard NameFilter.isAllowed(trimmed) else {
+            errorMessage = "That name isn't allowed. Please choose another."
+            return
+        }
         do {
             try await db.collection("users").document(uid).updateData(["displayName": trimmed])
         } catch {
@@ -191,6 +196,7 @@ final class AuthService {
             try await doc.reference.delete()
         }
         try await userRef.collection("private").document("devices").delete()
+        try await userRef.collection("private").document("blocked").delete()
         for doc in try await db.collection("friendships").whereField("members", arrayContains: uid).getDocuments().documents {
             try await doc.reference.delete()
         }

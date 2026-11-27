@@ -89,6 +89,12 @@ struct SettingsView: View {
                         if let code = auth.profile?.friendCode {
                             LabeledContent("Friend code", value: code)
                         }
+                        NavigationLink {
+                            BlockedPeopleView()
+                        } label: {
+                            LabeledContent("Blocked people",
+                                           value: ModerationService.shared.blocked.isEmpty ? "None" : "\(ModerationService.shared.blocked.count)")
+                        }
                         Button("Sign out") { auth.signOut() }
                         Button("Delete account", role: .destructive) { showDeleteAccount = true }
                     } else {
@@ -100,7 +106,7 @@ struct SettingsView: View {
                 Section("Permissions") {
                     LabeledContent("Screen Time", value: screenTime.isApproved ? "Allowed" : "Not allowed")
                     if !screenTime.isApproved {
-                        Button("Allow Screen Time access") { Task { await screenTime.request() } }
+                        Button("Set up Screen Time") { Task { await screenTime.request() } }
                     }
                     Button("Notification settings") {
                         if let url = URL(string: UIApplication.openNotificationSettingsURLString) {

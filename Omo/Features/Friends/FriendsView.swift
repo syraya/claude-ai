@@ -11,6 +11,7 @@ struct FriendsView: View {
 
     var body: some View {
         @Bindable var friends = friends
+        @Bindable var moderation = ModerationService.shared
 
         NavigationStack {
             ScrollView {
@@ -26,6 +27,7 @@ struct FriendsView: View {
                     }
                 }
                 .padding()
+                .errorAlert($moderation.errorMessage)
             }
             .background(OmoBackground())
             .navigationTitle("Friends")
@@ -95,6 +97,8 @@ struct FriendsView: View {
                         .buttonStyle(.bordered)
                     Button("Accept") { Task { await friends.accept(request) } }
                         .buttonStyle(.borderedProminent)
+                    ModerationMenu(name: name,
+                                   actions: .live(uid: request.otherUID(me: auth.uid ?? ""), name: name, context: .request))
                 }
             }
         }
@@ -131,14 +135,18 @@ struct FriendsView: View {
             ForEach(Array(friends.friends.enumerated()), id: \.element.id) { index, friendship in
                 let uid = auth.uid ?? ""
                 let friendUID = friendship.otherUID(me: uid)
-                NavigationLink {
-                    FriendDetailView(friendUID: friendUID, name: friendship.otherName(me: uid), friendship: friendship)
-                } label: {
-                    row(name: friendship.otherName(me: uid),
-                        stats: friends.todayStats[friendUID] ?? DailyStats(day: ""),
-                        rank: index + 1)
+                let friendName = friendship.otherName(me: uid)
+                HStack(spacing: 4) {
+                    NavigationLink {
+                        FriendDetailView(friendUID: friendUID, name: friendName, friendship: friendship)
+                    } label: {
+                        row(name: friendName,
+                            stats: friends.todayStats[friendUID] ?? DailyStats(day: ""),
+                            rank: index + 1)
+                    }
+                    .buttonStyle(.plain)
+                    ModerationMenu(name: friendName, actions: .live(uid: friendUID, name: friendName, context: .friend))
                 }
-                .buttonStyle(.plain)
             }
         }
         .card()
@@ -179,6 +187,8 @@ struct FriendDetailView: View {
 
     @State private var week: [DailyStats] = []
     @State private var confirmRemove = false
+    @State private var showReport = false
+    @State private var confirmBlock = false
 
     private var totalFocus: Int { week.reduce(0) { $0 + $1.focusMinutes } }
     private var totalSessions: Int { week.reduce(0) { $0 + $1.sessionsCompleted + $1.friendSessions } }
@@ -239,8 +249,15 @@ struct FriendDetailView: View {
                 }
                 .card()
 
-                Button("Remove friend", role: .destructive) { confirmRemove = true }
-                    .font(.subheadline)
+                VStack(spacing: 14) {
+                    Button("Remove friend", role: .destructive) { confirmRemove = true }
+                    HStack(spacing: 24) {
+                        Button("Report \(name)", systemImage: "flag") { showReport = true }
+                        Button("Block \(name)", systemImage: "hand.raised", role: .destructive) { confirmBlock = true }
+                    }
+                    .foregroundStyle(Color.omoLabels)
+                }
+                .font(.subheadline)
             }
             .padding()
         }
@@ -248,6 +265,20 @@ struct FriendDetailView: View {
         .navigationTitle(name)
         .navigationBarTitleDisplayMode(.inline)
         .task { week = await friends.recentStats(for: friendUID) }
+        .modifier(ModerationSheets(
+            name: name,
+            actions: ModerationActions(
+                report: { reason, details, alsoBlock in
+                    let sent = await ModerationService.shared.report(friendUID, name: name, reason: reason,
+                                                                     details: details, context: .friend)
+                    if sent, alsoBlock { await ModerationService.shared.block(friendUID, name: name) }
+                    return sent
+                },
+                block: {
+                    await ModerationService.shared.block(friendUID, name: name)
+                    dismiss()
+                }),
+            showReport: $showReport, confirmBlock: $confirmBlock))
         .confirmationDialog("Remove \(name)?", isPresented: $confirmRemove, titleVisibility: .visible) {
             Button("Remove", role: .destructive) {
                 Task {

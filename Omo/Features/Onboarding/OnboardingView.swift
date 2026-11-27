@@ -43,8 +43,8 @@ struct OnboardingView: View {
                 .transition(.opacity)
             case 1:
                 page(icon: "hourglass",
-                     title: "Allow Screen Time access",
-                     text: "OMO uses Apple's Screen Time to block apps. Your app list never leaves your phone; Apple doesn't even show us which apps you pick.")
+                     title: "Screen Time",
+                     text: "OMO uses Apple's Screen Time to block the apps you choose. Next, iOS asks whether to give OMO access. Your app list never leaves your phone; Apple doesn't even show us which apps you pick.")
             case 2:
                 page(icon: "square.stack.3d.up.fill",
                      title: "What distracts you?",
@@ -53,8 +53,8 @@ struct OnboardingView: View {
                         : "\(pickedCount) picked. Nice. You can change these any time in Block Lists.")
             default:
                 page(icon: "bell.badge.fill",
-                     title: "Stay in the loop",
-                     text: "Notifications tell you when a session or break ends, and when a friend unlocks your phone or asks you for a break.")
+                     title: "Notifications",
+                     text: "OMO can tell you when a session or break ends, and when a friend unlocks your phone or asks you for a break. Next, iOS asks whether to allow notifications.")
             }
 
             Spacer()
@@ -65,7 +65,9 @@ struct OnboardingView: View {
                     Button("Begin") { step = 1 }
                         .buttonStyle(PrimaryButtonStyle())
                 case 1:
-                    Button(screenTime.isApproved ? "Access granted ✓" : "Allow Screen Time") {
+                    // Apple asks that the button before a permission prompt say Continue
+                    // or Next, so it explains rather than persuades (guideline 5.1.1(iv)).
+                    Button("Continue") {
                         if screenTime.isApproved {
                             step = 2
                         } else {
@@ -96,7 +98,7 @@ struct OnboardingView: View {
                             .font(.footnote)
                     }
                 default:
-                    Button("Turn on notifications") {
+                    Button("Continue") {
                         Task {
                             _ = try? await UNUserNotificationCenter.current()
                                 .requestAuthorization(options: [.alert, .sound, .badge])
@@ -104,8 +106,6 @@ struct OnboardingView: View {
                         }
                     }
                     .buttonStyle(PrimaryButtonStyle())
-                    Button("Not now") { finish() }
-                        .buttonStyle(SecondaryButtonStyle())
                 }
             }
         }

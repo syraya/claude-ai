@@ -27,6 +27,12 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
     }
 
+    // Whether `owner` has blocked `uid` (users/{owner}/private/blocked lists them).
+    function blocks(owner, uid) {
+      let path = /databases/$(database)/documents/users/$(owner)/private/blocked;
+      return exists(path) && uid in get(path).data.people;
+    }
+
     function acceptedFriendship(pairId) {
       let path = /databases/$(database)/documents/friendships/$(pairId);
       return exists(path) && get(path).data.status == 'accepted';
@@ -97,7 +103,10 @@ service cloud.firestore {
         && request.resource.data.members.size() == 2
         && me() in request.resource.data.members
         && request.resource.data.members[0] < request.resource.data.members[1]
-        && pairId == request.resource.data.members[0] + '_' + request.resource.data.members[1];
+        && pairId == request.resource.data.members[0] + '_' + request.resource.data.members[1]
+        // Someone who blocked you never gets your requests.
+        && !blocks(request.resource.data.members[0], me())
+        && !blocks(request.resource.data.members[1], me());
       allow update: if signedIn()
         && me() in resource.data.members
         && me() != resource.data.requester
@@ -106,6 +115,24 @@ service cloud.firestore {
         && changedOnly(['status', 'acceptedAt', 'names'])
         && request.resource.data.names.diff(resource.data.names).affectedKeys().hasOnly([me()]);
       allow delete: if signedIn() && me() in resource.data.members;
+    }
+
+    // Reports of other people. Anyone signed in can send one; only the developer
+    // reads them, in the Firebase console. Reporters can't read, edit or delete them.
+    match /reports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['reporter', 'reportedUID', 'reportedName', 'reason',
+                                                 'details', 'context', 'createdAt'])
+        && request.resource.data.reporter == me()
+        && request.resource.data.reportedUID is string
+        && request.resource.data.reportedUID != me()
+        && request.resource.data.reportedName is string
+        && request.resource.data.reportedName.size() <= 30
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() <= 60
+        && request.resource.data.details is string
+        && request.resource.data.details.size() <= 500
+        && request.resource.data.context in ['friend', 'request', 'study_circle'];
     }
 
     match /groupSessions/{sessionId} {
@@ -138,9 +165,10 @@ service cloud.firestore {
           && resource.data.status == 'lobby'
           && request.resource.data.status == 'cancelled'
           && changedOnly(['status']))
-        // Anyone joins a lobby, adding only themselves.
+        // Anyone joins a lobby, adding only themselves, unless the host blocked them.
         || (resource.data.status == 'lobby'
           && !(me() in resource.data.members)
+          && !blocks(resource.data.hostUID, me())
           && request.resource.data.members.toSet() == resource.data.members.toSet().union([me()].toSet())
           && request.resource.data.members.size() <= 8
           && request.resource.data.memberNames.diff(resource.data.memberNames).affectedKeys().hasOnly([me()])

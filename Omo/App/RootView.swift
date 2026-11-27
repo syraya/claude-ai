@@ -86,6 +86,7 @@ struct RootView: View {
         let together = together
         let focus = focus
         auth.onUserChanged = { uid, name in
+            ModerationService.shared.start(uid: uid)
             friends.start(uid: uid, name: name)
             together.start(uid: uid, name: name)
             Task { await StatsSyncService.upload() }

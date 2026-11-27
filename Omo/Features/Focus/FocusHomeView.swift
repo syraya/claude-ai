@@ -191,12 +191,12 @@ struct FocusHomeView: View {
 
     private var permissionCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Screen Time access needed", systemImage: "exclamationmark.triangle.fill")
+            Label("Screen Time", systemImage: "hourglass")
                 .font(.headline)
                 .foregroundStyle(Color.omoGold)
-            Text("OMO can't block anything until you allow it.")
+            Text("OMO blocks apps through Screen Time, which you haven't set up for OMO yet. Continue to see iOS's request.")
                 .foregroundStyle(.secondary)
-            Button("Allow access") { Task { await screenTime.request() } }
+            Button("Continue") { Task { await screenTime.request() } }
                 .buttonStyle(SecondaryButtonStyle())
         }
         .card()

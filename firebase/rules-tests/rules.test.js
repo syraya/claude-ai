@@ -119,6 +119,45 @@ describe("friendships and stats", () => {
   });
 });
 
+describe("reporting and blocking", () => {
+  const report = { reporter: "alice", reportedUID: "bob", reportedName: "Bob", reason: "Offensive name", details: "", context: "friend" };
+
+  test("you can report someone, but nobody can read, change or delete reports", async () => {
+    const ref = doc(db("alice"), "reports/r1");
+    await assertSucceeds(setDoc(ref, report));
+    await assertFails(getDoc(ref));
+    await assertFails(getDocs(collection(db("alice"), "reports")));
+    await assertFails(updateDoc(ref, { reason: "Spam or fake account" }));
+    await assertFails(setDoc(doc(db("carol"), "reports/r2"), report));
+    await assertFails(setDoc(doc(db("alice"), "reports/r3"), { ...report, reportedUID: "alice" }));
+    await assertFails(setDoc(doc(db("alice"), "reports/r4"), { ...report, details: "x".repeat(501) }));
+    await assertFails(setDoc(doc(db("alice"), "reports/r5"), { ...report, isAdmin: true }));
+  });
+
+  test("your blocked list is private to you", async () => {
+    await assertSucceeds(setDoc(doc(db("alice"), "users/alice/private/blocked"), { people: { bob: "Bob" } }));
+    await assertFails(getDoc(doc(db("bob"), "users/alice/private/blocked")));
+  });
+
+  test("someone you blocked can't send you a friend request", async () => {
+    await seed("users/alice/private/blocked", { people: { bob: "Bob" } });
+    const request = { members: ["alice", "bob"], names: { alice: "Alice", bob: "Bob" }, requester: "bob", status: "pending" };
+    await assertFails(setDoc(doc(db("bob"), "friendships/alice_bob"), request));
+    await assertSucceeds(setDoc(doc(db("carol"), "friendships/alice_carol"),
+      { members: ["alice", "carol"], names: { alice: "Alice", carol: "Carol" }, requester: "carol", status: "pending" }));
+  });
+
+  test("someone the host blocked can't join their lobby", async () => {
+    await seed("users/alice/private/blocked", { people: { bob: "Bob" } });
+    await seed("groupSessions/s1", {
+      hostUID: "alice", hostName: "Alice", code: "123456", status: "lobby",
+      members: ["alice"], memberNames: { alice: "Alice" }, invited: [],
+    });
+    await assertFails(updateDoc(doc(db("bob"), "groupSessions/s1"), { members: arrayUnion("bob"), "memberNames.bob": "Bob" }));
+    await assertSucceeds(updateDoc(doc(db("carol"), "groupSessions/s1"), { members: arrayUnion("carol"), "memberNames.carol": "Carol" }));
+  });
+});
+
 describe("study sessions", () => {
   const lobby = {
     hostUID: "alice", hostName: "Alice", code: "123456", status: "lobby",

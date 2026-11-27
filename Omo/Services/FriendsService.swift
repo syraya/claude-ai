@@ -18,19 +18,26 @@ final class FriendsService {
 
     private var db: Firestore { Firestore.firestore() }
 
+    /// Friendships with anyone you haven't blocked.
+    private var visible: [Friendship] {
+        guard let uid else { return friendships }
+        let moderation = ModerationService.shared
+        return friendships.filter { !moderation.isBlocked($0.otherUID(me: uid)) }
+    }
+
     var friends: [Friendship] {
-        friendships.filter(\.isAccepted).sorted { a, b in
+        visible.filter(\.isAccepted).sorted { a, b in
             guard let uid else { return false }
             return (todayStats[a.otherUID(me: uid)]?.focusMinutes ?? 0) > (todayStats[b.otherUID(me: uid)]?.focusMinutes ?? 0)
         }
     }
 
     var incomingRequests: [Friendship] {
-        friendships.filter { !$0.isAccepted && $0.requester != uid }
+        visible.filter { !$0.isAccepted && $0.requester != uid }
     }
 
     var outgoingRequests: [Friendship] {
-        friendships.filter { !$0.isAccepted && $0.requester == uid }
+        visible.filter { !$0.isAccepted && $0.requester == uid }
     }
 
     func start(uid newUID: String?, name: String) {

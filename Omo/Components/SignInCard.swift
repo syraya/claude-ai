@@ -5,6 +5,7 @@ import AuthenticationServices
 struct SignInCard: View {
     @Environment(AuthService.self) private var auth
     var reason: String
+    @State private var showDemo = false
 
     var body: some View {
         VStack(spacing: 16) {
@@ -38,7 +39,16 @@ struct SignInCard: View {
                     .foregroundStyle(Color.omoGold)
                     .multilineTextAlignment(.center)
             }
+
+            // Try Friends and Study Circles with example people, no account needed.
+            Button {
+                showDemo = true
+            } label: {
+                Label("Try the demo", systemImage: "sparkles")
+            }
+            .buttonStyle(SecondaryButtonStyle())
         }
         .card()
+        .fullScreenCover(isPresented: $showDemo) { DemoModeView() }
     }
 }
