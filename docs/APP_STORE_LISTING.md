@@ -110,18 +110,20 @@ To make them again after the app changes, in the simulator, launch OMO with `-OM
 
 **Notes** (paste into the Notes box):
 
-> OMO helps students stay off distracting apps while they study. It uses Apple's Screen Time APIs (FamilyControls, ManagedSettings and DeviceActivity) with individual authorization, and we have been granted the Family Controls distribution entitlement.
+> OMO helps students stay off distracting apps while they study. It uses Apple's Screen Time APIs (FamilyControls, ManagedSettings and DeviceActivity) with individual authorization, and the Family Controls (Distribution) entitlement is enabled for the app and its three extensions.
 >
-> To test:
-> 1. Open OMO and allow Screen Time access when asked (Settings > Screen Time must be on for the device).
+> DEMO MODE (no account needed): Friends and Study Circle normally use Sign in with Apple. To see them with pre-populated content, open the Friends tab or the Study Circle tab and tap "Try the demo". It shows example friends and a live example Study Circle: your phone is locked and Maya holds your key, you hold Leo's key and he is asking for a break. You can ask for a break, use the emergency unlock (which is flagged to your keyholder), unlock or answer Leo, and report or block any person with the "…" button next to their name. Reporting and blocking work the same way for real users.
+>
+> To test blocking apps:
+> 1. Allow Screen Time access during setup (Settings > Screen Time must be on for the device).
 > 2. Go to Block Lists, tap +, make a list and choose one or two apps (for example Safari).
 > 3. On the Focus tab, type an intention, pick 15 minutes and tap Start focus.
-> 4. Open a blocked app: OMO's themed block screen appears. Tap Take a break to get a notification that opens OMO to a 15-second breathing pause before the break unlocks.
+> 4. Open a blocked app: OMO's block screen appears. Take a break leads to a 15-second breathing pause before the break unlocks.
 > 5. Schedules (Block Lists > +) block the same way at set times, even with OMO closed.
 >
-> Friends and Study Circle (optional) need Sign in with Apple. In a Study Circle each person's phone stays locked until a friend unlocks it; an emergency unlock is always available after a 60-second pause, so nobody can be locked out indefinitely.
->
-> Screen Time selections stay on the device. Apple gives OMO only opaque tokens and OMO never sees which apps you use. Signed-in users can delete their account in Settings > Delete account.
+> Safety: anyone can report or block a friend, friend request or Study Circle member. Reports go to the OMO team, who review them within 24 hours; blocked people are removed from friends and can no longer send requests or join your Study Circles. Display names are checked against a word filter. Signed-in users can delete their account in Settings > Delete account.
+
+(Keep the developer code line you already have in App Store Connect at the end of the notes. It isn't stored here on purpose.)
 
 ## App Privacy answers
 
