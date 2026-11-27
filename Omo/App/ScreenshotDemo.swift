@@ -1,6 +1,5 @@
 import SwiftUI
 import FamilyControls
-import UserNotifications
 
 #if targetEnvironment(simulator)
 
@@ -21,8 +20,6 @@ enum ScreenshotDemo {
     /// Fills the shared store before any of the app's stores read it.
     static func seedIfRequested() -> Bool {
         guard let screen else { return false }
-        // Quiet notification permission, so no permission alert covers the screenshots.
-        UNUserNotificationCenter.current().requestAuthorization(options: [.provisional]) { _, _ in }
         let now = Date()
         let calendar = Calendar.current
 
