@@ -52,10 +52,10 @@ struct FocusBannerView: View {
                     .foregroundStyle(look.ink)
                     .lineLimit(2)
                 FocusProgress(state: look.state, tint: look.state.isOnBreak ? look.gold : look.primary,
-                              track: look.ink.opacity(0.1))
+                              track: look.ink.opacity(0.12))
                     .padding(.top, 3)
             }
-            Spacer(minLength: 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
             VStack(alignment: .trailing, spacing: 0) {
                 FocusCountdown(state: look.state, finished: look.finished)
                     .font(.system(size: 30, weight: .semibold, design: .serif).monospacedDigit())
