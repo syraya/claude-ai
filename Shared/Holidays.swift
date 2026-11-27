@@ -3,17 +3,21 @@ import Foundation
 /// Holidays with their own OMO. Focus for 25 minutes in one session during the holiday
 /// and that OMO is yours to keep.
 enum OmoHoliday: String, CaseIterable, Codable {
-    case newYear, lunarNewYear, valentines, earthDay, canadaDay, teachersDay, halloween, thanksgiving, christmas
+    case newYear, lunarNewYear, valentines, familyDay, earthDay, canadaDay, truthAndReconciliation, teachersDay,
+         thanksgiving, halloween, remembranceDay, christmas
 
     var name: String {
         switch self {
         case .newYear: return "New Year"
         case .lunarNewYear: return "Lunar New Year"
         case .valentines: return "Valentine's Day"
+        case .familyDay: return "Family Day"
         case .earthDay: return "Earth Day"
         case .canadaDay: return "Canada Day"
+        case .truthAndReconciliation: return "the National Day for Truth and Reconciliation"
         case .teachersDay: return "World Teachers' Day"
         case .halloween: return "Halloween"
+        case .remembranceDay: return "Remembrance Day"
         case .thanksgiving: return "Thanksgiving"
         case .christmas: return "Christmas"
         }
@@ -25,13 +29,32 @@ enum OmoHoliday: String, CaseIterable, Codable {
         case .newYear: return "December 31 and January 1"
         case .lunarNewYear: return "the first three days of the Lunar New Year"
         case .valentines: return "February 14"
+        case .familyDay: return "the third Monday of February"
         case .earthDay: return "April 22"
         case .canadaDay: return "July 1"
+        case .truthAndReconciliation: return "September 30"
         case .teachersDay: return "October 5"
         case .halloween: return "October 31"
+        case .remembranceDay: return "November 11"
         case .thanksgiving: return "Canadian Thanksgiving weekend (the second Monday of October)"
         case .christmas: return "December 24 to 26"
         }
+    }
+
+    /// For small spaces, where the full name won't fit.
+    var shortName: String {
+        switch self {
+        case .truthAndReconciliation: return "Truth & Reconciliation"
+        default:
+            let name = self.name
+            return name.hasPrefix("the ") ? String(name.dropFirst(4)) : name
+        }
+    }
+
+    /// Days of remembrance and mourning rather than celebration, so OMO speaks
+    /// about them quietly.
+    var isSolemn: Bool {
+        self == .truthAndReconciliation || self == .remembranceDay
     }
 
     /// Minutes of focus in one session needed during the holiday.
@@ -49,10 +72,13 @@ enum OmoHoliday: String, CaseIterable, Codable {
         switch self {
         case .newYear: return (month == 12 && day == 31) || (month == 1 && day == 1)
         case .valentines: return month == 2 && day == 14
+        case .familyDay: return month == 2 && c.weekday == 2 && (15...21).contains(day)
         case .earthDay: return month == 4 && day == 22
         case .canadaDay: return month == 7 && day == 1
+        case .truthAndReconciliation: return month == 9 && day == 30
         case .teachersDay: return month == 10 && day == 5
         case .halloween: return month == 10 && day == 31
+        case .remembranceDay: return month == 11 && day == 11
         case .christmas: return month == 12 && (24...26).contains(day)
         case .lunarNewYear:
             guard let first = Self.lunarNewYears[year],

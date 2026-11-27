@@ -138,8 +138,11 @@ struct HolidayCard: View {
             OmoFigure(companion: companion, size: 64, backdrop: true)
                 .hovering(3)
             VStack(alignment: .leading, spacing: 4) {
-                Text("It's \(holiday.name)").font(.omoSerif(.headline))
-                Text("Focus for \(OmoHoliday.requiredMinutes) minutes today and \(companion.name) joins you for good.")
+                Text(holiday.isSolemn ? "Today is \(holiday.name)" : "It's \(holiday.name)")
+                    .font(.omoSerif(.headline))
+                Text(holiday.isSolemn
+                     ? "Take \(OmoHoliday.requiredMinutes) quiet minutes of focus today, and \(companion.name) stays with you."
+                     : "Focus for \(OmoHoliday.requiredMinutes) minutes today and \(companion.name) joins you for good.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }

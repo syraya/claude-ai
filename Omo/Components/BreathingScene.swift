@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// The breathing screen's art and words for each OMO: a faint landscape with the
-/// companion in it, and a credited line from a philosopher.
+/// companion in it, and a credited line from a philosopher (or, for a few holiday
+/// OMOs, a reflection of OMO's own).
 struct BreathingScene {
     struct Quote {
         let text: String
@@ -28,6 +29,9 @@ struct BreathingScene {
         "q08": Quote(text: "Learning without thought is labor lost; thought without learning is perilous.", author: "Confucius", source: "Analects, Book II, section 15, tr. James Legge"),
         "q09": Quote(text: "The process is mutual; for men learn while they teach.", author: "Seneca", source: "Moral Letters to Lucilius, Letter VII, 'On Crowds', section 8, tr. Richard M. Gummere"),
         "q10": Quote(text: "Direct thy attention to what is said.", author: "Marcus Aurelius", source: "Meditations, Book VII, section 30, tr. George Long"),
+        "r01": Quote(text: "Be present with the people who matter.", author: "An OMO reflection", source: "Original OMO reflection"),
+        "r02": Quote(text: "Listen, learn, and carry the stories forward.", author: "An OMO reflection", source: "Original OMO reflection"),
+        "r03": Quote(text: "Take a moment. Remember their stories.", author: "An OMO reflection", source: "Original OMO reflection"),
         "q11": Quote(text: "The cosmos is within us. We are made of star-stuff.", author: "Carl Sagan", source: "Cosmos, episode 1, \u{201C}The Shores of the Cosmic Ocean\u{201D} (1980)"),
     ]
 
@@ -56,11 +60,14 @@ struct BreathingScene {
         .janus: (0x1A1921, "q01"),
         .qilin: (0xFBEDE4, "q06"),
         .psyche: (0xF8EAF4, "q07"),
+        .hestia: (0xF7EDE2, "r01"),
         .gaia: (0xEBF1E5, "q05"),
         .loon: (0xE9F2F9, "q04"),
+        .turtleIsland: (0xFBF1E2, "r02"),
         .chiron: (0x172C2A, "q09"),
         .hecate: (0x211412, "q07"),
         .demeter: (0xF8ECDB, "q05"),
+        .mnemosyne: (0xF3EFE8, "r03"),
         .yuleStag: (0xF1F3EB, "q03"),
     ]
 
@@ -95,6 +102,9 @@ struct BreathingScene {
         .sphinx: 0xEBF1F2,
         .thoth: 0xFCF1E5,
         .yuleStag: 0xF2F4EB,
+        .hestia: 0xE9C3A2,
+        .turtleIsland: 0xF9DAB7,
+        .mnemosyne: 0xF2EEE9,
     ]
 
     init(for companion: OmoCompanion) {

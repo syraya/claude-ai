@@ -50,7 +50,7 @@ enum OmoUnlock: Equatable {
 /// Some are earned with focus hours, some with other milestones, and some only on holidays.
 enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
     // The path (focus hours), then milestones, then holidays in calendar order.
-    case glaux, selene, daphne, noor, asteria, sphinx, nyx, hippocampus, phoenix, pegasus, apollo, athena, huginnMuninn, anansi, koi, thoth, dragon, odin, salmon, simurgh, quetzalcoatl, janus, qilin, psyche, gaia, loon, chiron, hecate, demeter, yuleStag
+    case glaux, selene, daphne, noor, asteria, sphinx, nyx, hippocampus, phoenix, pegasus, apollo, athena, huginnMuninn, anansi, koi, thoth, dragon, odin, salmon, simurgh, quetzalcoatl, janus, qilin, psyche, hestia, gaia, loon, turtleIsland, chiron, hecate, demeter, mnemosyne, yuleStag
 
     enum Kind: String, CaseIterable {
         case path = "The Path"
@@ -86,11 +86,14 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .janus: return "Janus"
         case .qilin: return "Qilin"
         case .psyche: return "Psyche"
+        case .hestia: return "Hestia"
         case .gaia: return "Gaia"
         case .loon: return "The Loon"
+        case .turtleIsland: return "Turtle Island"
         case .chiron: return "Chiron"
         case .hecate: return "Hecate"
         case .demeter: return "Demeter"
+        case .mnemosyne: return "Mnemosyne"
         case .yuleStag: return "Yule Stag"
         }
     }
@@ -121,11 +124,14 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .janus: return "God of beginnings"
         case .qilin: return "Bringer of good fortune"
         case .psyche: return "The soul"
+        case .hestia: return "The hearth"
         case .gaia: return "The Earth"
         case .loon: return "Call of the north"
+        case .turtleIsland: return "Truth and Reconciliation"
         case .chiron: return "Teacher of heroes"
         case .hecate: return "Torchbearer of the crossroads"
         case .demeter: return "Goddess of the harvest"
+        case .mnemosyne: return "Keeper of memory"
         case .yuleStag: return "Winter's crown"
         }
     }
@@ -157,11 +163,14 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .janus: return "The Roman god of doorways looks back at the year behind and ahead to the next."
         case .qilin: return "A gentle creature of Chinese legend that appears in times of wisdom and peace."
         case .psyche: return "Her name means soul, and gives us the word psychology. She carries a lamp and butterfly wings."
+        case .hestia: return "Greek goddess of the hearth and home. Her steady flame stands for care, belonging and time spent together."
         case .gaia: return "The ancient Earth herself, mother of everything that grows."
         case .loon: return "Its call carries across northern lakes, and it's on every Canadian dollar coin."
+        case .turtleIsland: return "Many Indigenous peoples call this land Turtle Island. It honours residential school Survivors, their families, and the children who never came home."
         case .chiron: return "The wise centaur who taught Achilles and Asclepius, later set among the stars."
         case .hecate: return "Greek goddess of the crossroads, who carries two torches through the dark."
         case .demeter: return "Greek goddess of grain and the harvest. What you plant, you reap."
+        case .mnemosyne: return "The Greek Titaness of memory, mother of the Muses. Her poppy honours those who served and those who never returned."
         case .yuleStag: return "An old northern winter spirit with a star caught in its antlers."
         }
     }
@@ -193,11 +202,14 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .janus: return "Look back once. Then begin."
         case .qilin: return "A new year. A new chance."
         case .psyche: return "Care for the mind that does the work."
+        case .hestia: return "A shared moment can warm a lifetime."
         case .gaia: return "Grow slowly. Grow deep."
         case .loon: return "Quiet lakes, clear minds."
+        case .turtleIsland: return "Every child's story matters."
         case .chiron: return "Every hero had a teacher."
         case .hecate: return "Choose a path. I'll light it."
         case .demeter: return "The harvest comes to those who sowed."
+        case .mnemosyne: return "What is remembered is never wholly lost."
         case .yuleStag: return "Rest well. The new year is near."
         }
     }
@@ -229,11 +241,14 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .janus: return "Midnight and champagne gold."
         case .qilin: return "Lantern red and gold."
         case .psyche: return "Plum and butterfly lilac."
+        case .hestia: return "Warm stone, terracotta and hearth gold."
         case .gaia: return "Forest green and sky."
         case .loon: return "Maple red and lake blue."
+        case .turtleIsland: return "Warm orange, cedar green and water blue."
         case .chiron: return "Chalkboard green and chalk."
         case .hecate: return "Midnight and ember orange."
         case .demeter: return "Wheat gold and russet."
+        case .mnemosyne: return "Stone blue, remembrance red and quiet ivory."
         case .yuleStag: return "Evergreen, berry red and gold."
         }
     }
@@ -264,11 +279,14 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .janus: return .holiday(.newYear)
         case .qilin: return .holiday(.lunarNewYear)
         case .psyche: return .holiday(.valentines)
+        case .hestia: return .holiday(.familyDay)
         case .gaia: return .holiday(.earthDay)
         case .loon: return .holiday(.canadaDay)
+        case .turtleIsland: return .holiday(.truthAndReconciliation)
         case .chiron: return .holiday(.teachersDay)
         case .hecate: return .holiday(.halloween)
         case .demeter: return .holiday(.thanksgiving)
+        case .mnemosyne: return .holiday(.remembranceDay)
         case .yuleStag: return .holiday(.christmas)
         }
     }
@@ -329,7 +347,7 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .streak(let days): return "\(days)-day streak"
         case .circles(let count): return "\(count) circles"
         case .longSession(let minutes): return "\(minutes / 60) h session"
-        case .holiday(let holiday): return holiday.name
+        case .holiday(let holiday): return holiday.shortName
         }
     }
 
@@ -346,7 +364,9 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .streak(let days): return "Best streak so far: \(stats.longestStreak) of \(days) days"
         case .circles(let count): return "\(stats.friendSessions) of \(count) Study Circles"
         case .longSession(let minutes): return "Longest so far: \(stats.longestSessionMinutes / 60)h \(stats.longestSessionMinutes % 60)m of \(minutes / 60)h"
-        case .holiday(let holiday): return holiday.isActive() ? "It's \(holiday.name) today. Start a session!" : "Comes back on \(holiday.when)"
+        case .holiday(let holiday):
+            guard holiday.isActive() else { return "Comes back on \(holiday.when)" }
+            return holiday.isSolemn ? "Today is \(holiday.name). Take a quiet session." : "It's \(holiday.name) today. Start a session!"
         }
     }
 
@@ -360,7 +380,8 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         case .streak(let days): return "\(days) days in a row"
         case .circles(let count): return "\(count) Study Circles finished"
         case .longSession(let minutes): return "\(minutes / 60) hours of focus in one sitting"
-        case .holiday(let holiday): return "You focused on \(holiday.name)"
+        case .holiday(let holiday):
+            return holiday.isSolemn ? "You took quiet time on \(holiday.name)" : "You focused on \(holiday.name)"
         }
     }
 
@@ -474,6 +495,10 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
             return ThemePalette(paper: RGB(0xF6EDF3), card: RGB(0xFFF8FD), ink: RGB(0x4C3150), labels: RGB(0x7B6380),
                                 primary: RGB(0x76517E), onPrimary: RGB(0xFFFAFF), gold: RGB(0xB49B67),
                                 clay: RGB(0xB69CC5), success: RGB(0x5D7868))
+        case .hestia:
+            return ThemePalette(paper: RGB(0xF7EDE2), card: RGB(0xFFF8F0), ink: RGB(0x472D22), labels: RGB(0x785E50),
+                                primary: RGB(0x94503A), onPrimary: RGB(0xFFF8F1), gold: RGB(0xB38C4E),
+                                clay: RGB(0xC27A55), success: RGB(0x5F6B48))
         case .gaia:
             return ThemePalette(paper: RGB(0xECF1E5), card: RGB(0xF8FBF2), ink: RGB(0x2E4131), labels: RGB(0x5D705D),
                                 primary: RGB(0x426849), onPrimary: RGB(0xFDFFF5), gold: RGB(0xB39E60),
@@ -482,6 +507,10 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
             return ThemePalette(paper: RGB(0xEDF3F6), card: RGB(0xFBFDFF), ink: RGB(0x283B49), labels: RGB(0x5C7180),
                                 primary: RGB(0x3B607D), onPrimary: RGB(0xFCFFFF), gold: RGB(0xADA177),
                                 clay: RGB(0xB44E45), success: RGB(0x4E7368))
+        case .turtleIsland:
+            return ThemePalette(paper: RGB(0xFBF1E2), card: RGB(0xFFF9F0), ink: RGB(0x3B2A1D), labels: RGB(0x6F5C4A),
+                                primary: RGB(0x9C4A1C), onPrimary: RGB(0xFFF8EE), gold: RGB(0xB48A50),
+                                clay: RGB(0xD9772A), success: RGB(0x56744F))
         case .chiron:
             return ThemePalette(paper: RGB(0x1B2D28), card: RGB(0x283F36), ink: RGB(0xF0F0DF), labels: RGB(0xB7C6B6),
                                 primary: RGB(0xCCD7BE), onPrimary: RGB(0x25382C), gold: RGB(0xBBA571),
@@ -494,6 +523,10 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
             return ThemePalette(paper: RGB(0xF5EEDB), card: RGB(0xFFF9E9), ink: RGB(0x4C3824), labels: RGB(0x7B684A),
                                 primary: RGB(0x8D5D2F), onPrimary: RGB(0xFFFBEE), gold: RGB(0xBE9D52),
                                 clay: RGB(0xAD6942), success: RGB(0x697548))
+        case .mnemosyne:
+            return ThemePalette(paper: RGB(0xF3EFE8), card: RGB(0xFBF9F4), ink: RGB(0x232D3A), labels: RGB(0x59636E),
+                                primary: RGB(0x46607C), onPrimary: RGB(0xFDFBF6), gold: RGB(0xA8874A),
+                                clay: RGB(0xB4483A), success: RGB(0x4C6A5B))
         case .yuleStag:
             return ThemePalette(paper: RGB(0xEFF2E9), card: RGB(0xFAFCF4), ink: RGB(0x2C4035), labels: RGB(0x627064),
                                 primary: RGB(0x315B46), onPrimary: RGB(0xFBFFF4), gold: RGB(0xB29B63),
