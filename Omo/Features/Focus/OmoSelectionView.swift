@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Picking your OMO: swipe through each collection in arched panels, with the whole
-/// sheet taking on the colours of the one you're looking at. Choosing is a separate
+/// Picking your OMO: swipe through each collection, each OMO standing in its own
+/// landscape across the top of the sheet, with the whole sheet taking on the colours
+/// of the one you're looking at. Choosing is a separate
 /// tap, so browsing never changes anything; it closes the gallery and the app's usual
 /// OMO transition plays. "Index" lists every OMO with a search.
 struct OmoCollectionView: View {
@@ -16,6 +17,9 @@ struct OmoCollectionView: View {
     /// Swiping never sets this, so the carousel never moves under your finger.
     @State private var jumpTo: OmoCompanion?
     @Namespace private var tabs
+    /// Height of the header, tabs and counter laid over the scene, so the figure
+    /// always stands clear below them.
+    @State private var overlayHeight: CGFloat = 140
     @Environment(\.dismiss) private var dismiss
 
     /// `previewing` opens on another OMO than yours (used for screenshots).
@@ -35,28 +39,36 @@ struct OmoCollectionView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                header
-                OmoKindTabs(kind: $kind, palette: palette, namespace: tabs)
-                    .padding(.top, 16)
-
-                HStack {
-                    Spacer()
-                    Text(String(format: "%02d / %02d", (members.firstIndex(of: shown) ?? 0) + 1, members.count))
-                        .font(.system(.subheadline, design: .serif).monospacedDigit())
-                        .foregroundStyle(Color(palette.labels))
-                        .contentTransition(.numericText())
+                // The scene runs edge to edge behind the header and fades into the
+                // page; swiping moves the whole landscape.
+                ZStack(alignment: .top) {
+                    carousel
+                        .id(kind)
+                        .transition(.opacity)
+                    VStack(spacing: 0) {
+                        header
+                        OmoKindTabs(kind: $kind, palette: palette, namespace: tabs)
+                            .padding(.top, 16)
+                        HStack {
+                            Spacer()
+                            Text(String(format: "%02d / %02d", (members.firstIndex(of: shown) ?? 0) + 1, members.count))
+                                .font(.system(.subheadline, design: .serif).monospacedDigit())
+                                .foregroundStyle(Color(palette.labels))
+                                .contentTransition(.numericText())
+                        }
+                        .padding(.horizontal, 24)
+                        .padding(.top, 10)
+                    }
+                    .background(GeometryReader { proxy in
+                        Color.clear.preference(key: OverlayHeightKey.self, value: proxy.size.height)
+                    })
                 }
-                .padding(.horizontal, 24)
-                .padding(.top, 10)
+                .onPreferenceChange(OverlayHeightKey.self) { overlayHeight = $0 }
+                .frame(minHeight: 340, maxHeight: 600)
 
-                carousel
-                    .id(kind)
-                    .transition(.opacity)
-
-                // Words and controls keep their size; the panel above takes what's left,
+                // Words and controls keep their size; the scene above takes what's left,
                 // so everything fits however tall the sheet is.
                 details
-                    .padding(.top, 12)
                     .padding(.bottom, 12)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -113,31 +125,24 @@ struct OmoCollectionView: View {
     // MARK: Carousel
 
     private var carousel: some View {
-        GeometryReader { proxy in
-            // Narrower when the sheet is short, so the arch keeps its proportions.
-            let width = min(max(160, proxy.size.width - 112), proxy.size.height * 0.85)
-            ScrollViewReader { reader in
+        ScrollViewReader { reader in
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 14) {
+                LazyHStack(spacing: 0) {
                     ForEach(members) { companion in
-                        OmoArchPanel(companion: companion, locked: companion != selected && !companion.isUnlocked(stats))
-                            .frame(width: width, height: proxy.size.height)
-                            .scrollTransition(.interactive, axis: .horizontal) { content, phase in
-                                content
-                                    .scaleEffect(phase.isIdentity ? 1 : 0.9)
-                                    .opacity(phase.isIdentity ? 1 : 0.55)
-                            }
+                        OmoScenePanel(companion: companion,
+                                      locked: companion != selected && !companion.isUnlocked(stats),
+                                      topInset: overlayHeight)
+                            .containerRelativeFrame(.horizontal)
                             .id(companion)
                     }
                 }
                 .scrollTargetLayout()
             }
-            .contentMargins(.horizontal, (proxy.size.width - width) / 2, for: .scrollContent)
-            // Follows your finger, so you can hold it halfway; letting go settles on the
-            // nearest panel, and a flick moves one at a time.
-            .modifier(OnePanelPerFlick())
+            // Follows your finger, so you can hold it halfway; letting go settles on
+            // the nearest OMO, and a flick moves one at a time.
+            .scrollTargetBehavior(.paging)
             .scrollPosition(id: $focused, anchor: .center)
-            // Opening (or switching collection) lands on the right panel. Swiping only
+            // Opening (or switching collection) lands on the right OMO. Swiping only
             // reports back through `focused`; it's never scrolled for you mid-drag.
             .onAppear { reader.scrollTo(shown, anchor: .center) }
             .onChange(of: jumpTo) { _, companion in
@@ -145,10 +150,7 @@ struct OmoCollectionView: View {
                 withAnimation(.spring(duration: 0.5, bounce: 0.1)) { reader.scrollTo(companion, anchor: .center) }
                 jumpTo = nil
             }
-            }
         }
-        .frame(minHeight: 160, maxHeight: 350)
-        .padding(.top, 6)
     }
 
     private var details: some View {
@@ -232,15 +234,9 @@ struct OmoCollectionView: View {
 
 // MARK: - Pieces
 
-/// Snaps to panels; on iOS 18 and later a hard flick still moves just one.
-private struct OnePanelPerFlick: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(iOS 18.0, *) {
-            content.scrollTargetBehavior(.viewAligned(limitBehavior: .alwaysByOne))
-        } else {
-            content.scrollTargetBehavior(.viewAligned)
-        }
-    }
+private struct OverlayHeightKey: PreferenceKey {
+    static let defaultValue: CGFloat = 140
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
 }
 
 /// The three collections, with a gold rule under the one you're in.
@@ -280,40 +276,40 @@ struct OmoKindTabs: View {
     }
 }
 
-/// An arched panel holding the OMO in its landscape.
-struct OmoArchPanel: View {
+/// One OMO in its landscape, full width. The painting's top fades into its sky and
+/// its foot into the page, and the figure always stands whole below the header.
+struct OmoScenePanel: View {
     var companion: OmoCompanion
     var locked: Bool
+    var topInset: CGFloat
 
     var body: some View {
         GeometryReader { proxy in
-            let radius = proxy.size.width / 2
-            let arch = UnevenRoundedRectangle(topLeadingRadius: radius, topTrailingRadius: radius, style: .circular)
             let scene = BreathingScene(for: companion)
-            ZStack {
-                // The painting's own sky fills the arch above it, and the painting's top
-                // fades into that sky, so there's no line where the art begins.
-                Color(scene.sky)
-                SceneInArch(scene: scene, size: proxy.size)
+            ZStack(alignment: .bottomTrailing) {
+                LinearGradient(colors: [Color(scene.sky), Color(scene.sky), Color(companion.palette.paper)],
+                               startPoint: .top, endPoint: .bottom)
+                SceneArt(scene: scene, size: proxy.size, topInset: topInset)
                     .saturation(locked ? 0.2 : 1)
                     .opacity(locked ? 0.55 : 1)
                 if locked {
                     Image(systemName: "lock.fill")
-                        .font(.title2)
+                        .font(.title3)
                         .foregroundStyle(Color(companion.palette.ink).opacity(0.7))
-                        .padding(14)
+                        .padding(12)
                         .background(Color(companion.palette.paper).opacity(0.85), in: Circle())
+                        .padding(20)
                 }
             }
-            .clipShape(arch)
-            .overlay(arch.stroke(Color(companion.palette.ink).opacity(0.12), lineWidth: 1))
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .clipped()
         }
         .accessibilityElement()
         .accessibilityLabel(locked ? "\(companion.name), locked" : companion.name)
     }
 }
 
-/// A small arched tile in the strip under the carousel.
+/// A small tile in the strip under the scene.
 private struct OmoThumb: View {
     var companion: OmoCompanion
     var locked: Bool
@@ -323,10 +319,10 @@ private struct OmoThumb: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            OmoArchTile(companion: companion, locked: locked)
-                .frame(width: 64, height: 80)
+            OmoTile(companion: companion, locked: locked)
+                .frame(width: 68, height: 68)
                 .overlay(
-                    UnevenRoundedRectangle(topLeadingRadius: 32, topTrailingRadius: 32, style: .circular)
+                    RoundedRectangle(cornerRadius: 68 * 0.26, style: .continuous)
                         .stroke(Color(palette.gold), lineWidth: isFocused ? 2.5 : 0)
                 )
                 .overlay(alignment: .topTrailing) {
@@ -354,65 +350,66 @@ private struct OmoThumb: View {
     }
 }
 
-/// The OMO's painting placed in the arch so its figure is always whole: scaled until
-/// the figure fills a safe box below the curve, centred on the figure, and never
-/// leaving a gap at the sides or bottom. The painting's top fades into the sky.
-private struct SceneInArch: View {
+/// The OMO's painting placed so its figure is always whole: scaled until the figure
+/// fills a box below the header, centred on the figure, and never leaving a gap at
+/// the sides. The painting fades into its sky at the top and the page at the bottom.
+private struct SceneArt: View {
     var scene: BreathingScene
     var size: CGSize
+    var topInset: CGFloat
 
     var body: some View {
         let fade = LinearGradient(stops: [
             .init(color: .clear, location: 0),
             .init(color: .black, location: 0.18),
+            .init(color: .black, location: 0.86),
+            .init(color: .clear, location: 1),
         ], startPoint: .top, endPoint: .bottom)
         if let focus = scene.focus, let art = UIImage(named: scene.imageName), art.size.width > 0 {
-            let layout = Self.layout(art: art.size, focus: focus, in: size)
+            let frame = Self.layout(art: art.size, focus: focus, in: size, topInset: topInset)
             Image(uiImage: art)
                 .resizable()
-                .frame(width: layout.size.width, height: layout.size.height)
+                .frame(width: frame.width, height: frame.height)
                 .mask(fade)
-                .offset(x: layout.origin.x, y: layout.origin.y)
+                .offset(x: frame.minX, y: frame.minY)
                 .frame(width: size.width, height: size.height, alignment: .topLeading)
-                .clipped()
         } else {
             Image(scene.imageName)
                 .resizable()
                 .scaledToFill()
-                .frame(width: size.width, height: size.height * 0.82)
+                .frame(width: size.width, height: size.height)
                 .clipped()
                 .mask(fade)
-                .frame(maxHeight: .infinity, alignment: .bottom)
         }
     }
 
-    /// The painting's frame inside the arch.
-    static func layout(art: CGSize, focus: CGRect, in panel: CGSize) -> CGRect {
+    /// The painting's frame in the panel.
+    static func layout(art: CGSize, focus: CGRect, in panel: CGSize, topInset: CGFloat) -> CGRect {
         let W = panel.width, H = panel.height
-        // The figure fits a box 80% of the arch's width and 60% of its height,
-        // standing 5% above the bottom, below where the arch starts to curve in.
-        let fitWidth = 0.80 * W / max(focus.width * art.width, 1)
-        let fitHeight = 0.60 * H / max(focus.height * art.height, 1)
+        // The figure stands in a box 78% of the width, from just below the header to
+        // 88% of the way down, clear of the fade into the page.
+        let box = CGRect(x: W * 0.11, y: topInset + 8, width: W * 0.78,
+                         height: max(80, H * 0.88 - topInset - 8))
+        let fitWidth = box.width / max(focus.width * art.width, 1)
+        let fitHeight = box.height / max(focus.height * art.height, 1)
         let cover = W / art.width
         let scale = max(min(fitWidth, fitHeight), cover)
         let w = art.width * scale, h = art.height * scale
-        var x = W / 2 - focus.midX * w
+        var x = box.midX - focus.midX * w
         x = min(0, max(W - w, x))
-        var y = 0.95 * H - focus.maxY * h
-        y = max(H - h, y)
+        let y = box.maxY - focus.maxY * h
         return CGRect(x: x, y: y, width: w, height: h)
     }
 }
 
-/// The OMO's figure on its own colour, in an arch. Used in the strip and the index.
-struct OmoArchTile: View {
+/// The OMO's figure on its own colour, in a rounded square. Used in the strip and the index.
+struct OmoTile: View {
     var companion: OmoCompanion
     var locked: Bool
 
     var body: some View {
         GeometryReader { proxy in
-            let radius = proxy.size.width / 2
-            let arch = UnevenRoundedRectangle(topLeadingRadius: radius, topTrailingRadius: radius, style: .circular)
+            let shape = RoundedRectangle(cornerRadius: proxy.size.width * 0.26, style: .continuous)
             Image(companion.imageName)
                 .resizable()
                 .scaledToFit()
@@ -421,7 +418,8 @@ struct OmoArchTile: View {
                 .opacity(locked ? 0.5 : 1)
                 .frame(width: proxy.size.width, height: proxy.size.height)
                 .background(Color(companion.palette.paper))
-                .clipShape(arch)
+                .clipShape(shape)
+                .overlay(shape.stroke(Color.black.opacity(0.06), lineWidth: 1))
         }
     }
 }
@@ -550,8 +548,8 @@ struct OmoIndexView: View {
     private func row(_ companion: OmoCompanion) -> some View {
         let locked = !companion.isUnlocked(stats)
         return HStack(spacing: 14) {
-            OmoArchTile(companion: companion, locked: locked)
-                .frame(width: 54, height: 60)
+            OmoTile(companion: companion, locked: locked)
+                .frame(width: 56, height: 56)
             VStack(alignment: .leading, spacing: 2) {
                 Text(companion.name)
                     .font(.omoSerif(.title3, weight: .semibold))
