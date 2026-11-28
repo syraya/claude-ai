@@ -134,7 +134,7 @@ struct RootView: View {
             return AnyView(LiveActivityPreview(companion: settings.settings.companion))
         case "omos-preview":
             return AnyView(OmoCollectionView(selected: settings.settings.companion, stats: focus.lifetime,
-                                             previewing: .selene) { _ in })
+                                             previewing: OmoCompanion(rawValue: UserDefaults.standard.string(forKey: "OMODemoPreview") ?? "") ?? .selene) { _ in })
         case "omo-index":
             return AnyView(NavigationStack {
                 OmoIndexView(selected: settings.settings.companion, stats: focus.lifetime,
