@@ -59,6 +59,7 @@ struct StartSessionView: View {
             Button("Continue") {
                 Task {
                     _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+                    AppDelegate.registerForPushIfAllowed()
                     begin()
                 }
             }

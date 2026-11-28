@@ -257,7 +257,9 @@ struct ScheduleEditorView: View {
             if isNew && !ScreenshotDemo.isActive {
                 UNUserNotificationCenter.current().getNotificationSettings { current in
                     guard current.authorizationStatus == .notDetermined else { return }
-                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in
+                        AppDelegate.registerForPushIfAllowed()
+                    }
                 }
             }
         }

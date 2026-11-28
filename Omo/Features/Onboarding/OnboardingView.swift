@@ -102,6 +102,7 @@ struct OnboardingView: View {
                         Task {
                             _ = try? await UNUserNotificationCenter.current()
                                 .requestAuthorization(options: [.alert, .sound, .badge])
+                            AppDelegate.registerForPushIfAllowed()
                             finish()
                         }
                     }

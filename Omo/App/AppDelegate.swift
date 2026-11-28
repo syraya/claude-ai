@@ -6,13 +6,27 @@ import FirebaseMessaging
 final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
     static var syncTaskID: String { (Bundle.main.bundleIdentifier ?? "omo") + ".sync" }
 
+    /// Friends' requests arrive as push notifications. Registering is left until you've
+    /// allowed notifications (at your first session or schedule), so OMO never asks
+    /// the moment it opens.
+    static func registerForPushIfAllowed() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .authorized, .provisional, .ephemeral:
+                DispatchQueue.main.async { UIApplication.shared.registerForRemoteNotifications() }
+            default:
+                break
+            }
+        }
+    }
+
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         ShieldManager.queue = DispatchQueue(label: "omo.shields", qos: .userInitiated)
         if FirebaseBootstrap.isConfigured {
             Messaging.messaging().delegate = self
-            application.registerForRemoteNotifications()
+            Self.registerForPushIfAllowed()
         }
         BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.syncTaskID, using: nil) { task in
             Self.handleBackgroundSync(task)
