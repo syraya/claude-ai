@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+        ShieldManager.queue = DispatchQueue(label: "omo.shields", qos: .userInitiated)
         if FirebaseBootstrap.isConfigured {
             Messaging.messaging().delegate = self
             application.registerForRemoteNotifications()
