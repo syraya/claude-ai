@@ -33,7 +33,19 @@ struct OmoCollectionView: View {
     }
 
     private var shown: OmoCompanion { focused ?? selected }
-    private var palette: ThemePalette { shown.palette }
+    /// Where the carousel is, in OMOs (1.5 is halfway from the second to the third),
+    /// read continuously while you swipe.
+    @State private var pageProgress: CGFloat?
+
+    /// The whole sheet's colours, blended between the two OMOs you're swiping between,
+    /// so the page, words and buttons change together with the landscape.
+    private var palette: ThemePalette {
+        guard let progress = pageProgress, members.count > 1 else { return shown.palette }
+        let p = min(max(progress, 0), CGFloat(members.count - 1))
+        let i = Int(p.rounded(.down))
+        let j = min(i + 1, members.count - 1)
+        return ThemePalette.mix(members[i].palette, members[j].palette, Double(p - CGFloat(i)))
+    }
     private var members: [OmoCompanion] { OmoCompanion.allCases.filter { $0.kind == kind } }
 
     var body: some View {
@@ -81,6 +93,7 @@ struct OmoCollectionView: View {
             }
             .background(Color(palette.paper).ignoresSafeArea())
             .animation(.easeInOut(duration: 0.35), value: shown)
+            .onChange(of: kind) { _, _ in pageProgress = nil }
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(isPresented: $showIndex) {
                 OmoIndexView(selected: selected, stats: stats, palette: palette,
@@ -153,6 +166,16 @@ struct OmoCollectionView: View {
                     }
                 }
                 .scrollTargetLayout()
+                .background(GeometryReader { proxy in
+                    Color.clear.preference(key: CarouselFrameKey.self,
+                                           value: proxy.frame(in: .named("omoCarousel")))
+                })
+            }
+            .coordinateSpace(name: "omoCarousel")
+            .onPreferenceChange(CarouselFrameKey.self) { frame in
+                let page = frame.width / CGFloat(max(1, members.count))
+                guard page > 0 else { return }
+                pageProgress = -frame.minX / page
             }
             // Follows your finger, so you can hold it halfway; letting go settles on
             // the nearest OMO, and a flick moves one at a time.
@@ -256,6 +279,11 @@ struct OmoCollectionView: View {
 
 // MARK: - Pieces
 
+private struct CarouselFrameKey: PreferenceKey {
+    static let defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) { value = nextValue() }
+}
+
 private struct OverlayHeightKey: PreferenceKey {
     static let defaultValue: CGFloat = 140
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = nextValue() }
@@ -309,7 +337,7 @@ struct OmoScenePanel: View {
         GeometryReader { proxy in
             let scene = BreathingScene(for: companion)
             ZStack(alignment: .bottomTrailing) {
-                LinearGradient(colors: [Color(scene.sky), Color(scene.sky), Color(companion.palette.paper)],
+                LinearGradient(colors: [Color(scene.sky), Color(scene.sky), Color(scene.sky).opacity(0)],
                                startPoint: .top, endPoint: .bottom)
                 SceneArt(scene: scene, size: proxy.size, topInset: topInset)
                     .saturation(locked ? 0.2 : 1)

@@ -32,6 +32,17 @@ struct ThemePalette: Equatable {
 
     /// Soft background glow: the accent, used faintly.
     var blush: RGB { clay }
+
+    /// Part way from one theme to another (t from 0 to 1), for colours that follow
+    /// your finger as you swipe between OMOs.
+    static func mix(_ a: ThemePalette, _ b: ThemePalette, _ t: Double) -> ThemePalette {
+        let t = min(1, max(0, t))
+        func m(_ x: RGB, _ y: RGB) -> RGB { RGB(x.r + (y.r - x.r) * t, x.g + (y.g - x.g) * t, x.b + (y.b - x.b) * t) }
+        return ThemePalette(paper: m(a.paper, b.paper), card: m(a.card, b.card), ink: m(a.ink, b.ink),
+                            labels: m(a.labels, b.labels), primary: m(a.primary, b.primary),
+                            onPrimary: m(a.onPrimary, b.onPrimary), gold: m(a.gold, b.gold),
+                            clay: m(a.clay, b.clay), success: m(a.success, b.success))
+    }
 }
 
 /// How you earn an OMO.
