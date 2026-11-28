@@ -182,8 +182,8 @@ struct BreathingScene {
                   CGRect(x: 0.2792, y: 0.2102, width: 0.4426, height: 0.7614)),
         .hestia: (CGRect(x: 0.3000, y: 0.3060, width: 0.4000, height: 0.6340),
                   CGRect(x: 0.2779, y: 0.2420, width: 0.4427, height: 0.7615)),
-        .turtleIsland: (CGRect(x: 0.2256, y: 0.1100, width: 0.5488, height: 0.8600),
-                  CGRect(x: 0.2096, y: -0.0835, width: 0.5808, height: 1.2487)),
+        .turtleIsland: (CGRect(x: 0.2256, y: 0.1280, width: 0.5488, height: 0.8420),
+                  CGRect(x: 0.2148, y: -0.0646, width: 0.5705, height: 1.2265)),
         .asteria: (CGRect(x: 0.2977, y: 0.3469, width: 0.4035, height: 0.5923),
                   CGRect(x: 0.2735, y: 0.2514, width: 0.4483, height: 0.7821)),
     ]
