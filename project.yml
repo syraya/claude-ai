@@ -23,7 +23,7 @@ settings:
     APP_BUNDLE_ID: com.hserieh.omo        # must be unique on the App Store
     APP_GROUP_ID: group.com.hserieh.omo   # "group." + something unique
     MARKETING_VERSION: "1.0"           # the version people see; matches App Store Connect
-    CURRENT_PROJECT_VERSION: "7"       # raise by 1 for every upload (builds 1 to 6 are taken)
+    CURRENT_PROJECT_VERSION: "8"       # raise by 1 for every upload (builds 1 to 7 are taken)
     SWIFT_VERSION: "5.0"
     TARGETED_DEVICE_FAMILY: "1"
     CODE_SIGN_STYLE: Automatic
