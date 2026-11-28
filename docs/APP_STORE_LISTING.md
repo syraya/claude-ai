@@ -3,6 +3,26 @@
 Everything to paste into App Store Connect. The screenshots are made from the app itself in
 the simulator; see "Screenshots" at the end.
 
+## Submitting build 7: step by step
+
+Build 7 is uploaded (version 1.0). It has everything since build 4: Asteria, the Lock Screen and Dynamic Island
+countdown, the new Canadian holiday OMOs, the full-width OMO picker, your own Phoenix, Turtle Island, Nyx and
+Asteria artwork, the smoother end of a session, and notifications asked for only when they're needed.
+
+1. Wait for the email "has completed processing" for build 7 (10 to 30 minutes). If asked about encryption,
+   answer "None of the algorithms mentioned above".
+2. Optional but worth it: install build 7 from TestFlight and lock your phone during a session to see the Live
+   Activity.
+3. App Store Connect → Apps → OMO → iOS App 1.0. If build 4, 5 or 6 is attached and the version is "Waiting for
+   Review" or "In Review", click **Remove from Review** first. If 1.0 was already **approved**, stop: this needs a
+   new version (1.1) instead.
+4. **Build**: hover the attached build, click the red ⊖, then **Add Build** → **7** → Done.
+5. **Promotional Text** and **Description**: paste from the sections below (33 OMOs, and the Lock Screen line).
+6. **Screenshots**: delete the old ones and drag in the eight from `OMO App Store/App Store 6.3 inch/` in order.
+7. **App Review Information → Notes**: paste the notes below, then keep your developer code line at the end.
+8. **Save**, then **Add for Review** / **Update Review**, then **Submit**.
+9. Firebase: if you haven't published the Firestore rules yet, do it before review (report and block rely on them).
+
 ## App information
 
 | Field | Value |
@@ -81,26 +101,25 @@ OMO doesn't track users. Answer "No" to tracking. Data collected, all **linked t
 
 Block lists, schedules and the apps people pick never leave the phone.
 
-## Notes for App Review
-
-> OMO blocks apps the user chooses, using the Screen Time API with individual authorization (Family Controls). To try it alone: allow Screen Time access, choose a few apps, start a 15-minute session, then open a blocked app to see the block screen. Tap "Take a break" in OMO to see the reflection countdown before a break. Block Lists › + › New schedule creates a block that turns on at set times.
->
-> Study Circles and Friends need two devices signed in with Apple. In a Study Circle a friend holds your unlock key; anyone can leave with the 60-second emergency exit, which notifies their friend.
->
-> Settings › Developer code unlocks every OMO theme for review: OMO-PX5T-QZN6. The themes are free; normally they unlock with focus time.
-
 ## Screenshots
 
-Six screenshots for the "iPhone with Dynamic Island (medium display)" slot, 1206 × 2622 (6.3-inch), in this order:
+Eight screenshots for the "iPhone 6.9-inch / 6.3-inch display" slot, 1206 × 2622, in this order. They're on the Mac in
+`Claude Code/OMO App Store/App Store 6.3 inch/`, captioned and ready to upload:
 
-1. Think before you scroll (Focus tab, Glaux)
-2. Focus with intention (a session with its intention, Daphne)
-3. Every break starts with a pause (the reflection wait, Nyx)
-4. Blocks that run themselves (schedules, Noor)
-5. Watch your focus grow (lifetime tracker)
-6. Earn mythic companions (the OMO collection, Selene)
+1. `1-focus.png` Think before you scroll
+2. `2-session.png` Focus with intention
+3. `3-breathe.png` Every break starts with a breath
+4. `4-omos.png` Earn mythic companions (33 OMOs)
+5. `5-preview.png` Make it yours
+6. `6-schedules.png` Blocks that run themselves
+7. `7-lifetime.png` Watch your focus grow
+8. `8-ended.png` See what you made of it
 
-To make them again after the app changes, in the simulator, launch OMO with `-OMODemo <screen>` and `-OMODemoOMO <omo>` (screens: focus, session, break, schedules, lifetime, omos). The demo data exists only in simulator builds (`Omo/App/ScreenshotDemo.swift`). Save the captures as `raw/1-focus.png` … `raw/6-omos.png`, then run `swift make-frames.swift` (from `docs/app-store/`) in the folder that holds `raw/` to add the captions.
+To make them again after the app changes: in the simulator, launch OMO with `-OMODemo <screen>` and
+`-OMODemoOMO <omo>` (screens: focus, session, break, omos, omos-preview, schedules, lifetime, ended), save the
+captures to `raw/1-focus.png` … `raw/8-ended.png`, then run `swift make-frames.swift 1206 2622 "App Store 6.3 inch"`
+(from `docs/app-store/`) in the folder that holds `raw/`. If a notification alert covers the screen, restart the
+simulator: it's a leftover system alert, not the app.
 
 ## App Review Information
 
