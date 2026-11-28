@@ -69,11 +69,18 @@ struct ReflectionView: View {
                         }
                     }
                     .animation(.easeInOut(duration: 0.35), value: count)
-                    Text(done ? "Your call" : inhaling ? "Breathe in" : "Breathe out")
-                        .font(.omoSerif(.largeTitle, weight: .bold))
-                        .contentTransition(.opacity)
-                        .animation(.easeInOut(duration: 0.5), value: inhaling)
-                        .animation(.easeInOut(duration: 0.5), value: done)
+                    // The old word fades out before the new one fades in, so the two
+                    // never sit on top of each other.
+                    let phrase = done ? "Your call" : inhaling ? "Breathe in" : "Breathe out"
+                    ZStack {
+                        Text(phrase)
+                            .font(.omoSerif(.largeTitle, weight: .bold))
+                            .id(phrase)
+                            .transition(.asymmetric(
+                                insertion: .opacity.animation(.easeOut(duration: 0.3).delay(0.22)),
+                                removal: .opacity.animation(.easeIn(duration: 0.2))))
+                    }
+                    .animation(.easeInOut(duration: 0.5), value: phrase)
                 }
                 .foregroundStyle(Color.omoInk)
                 .accessibilityElement(children: .combine)

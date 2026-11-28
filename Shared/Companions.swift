@@ -370,6 +370,22 @@ enum OmoCompanion: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// How far along you are, 0 to 1, for OMOs earned by counting something.
+    /// Nil for free and holiday OMOs, and once it's unlocked.
+    func progressFraction(_ stats: LifetimeStats) -> Double? {
+        guard !isUnlocked(stats) else { return nil }
+        func ratio(_ have: Int, _ need: Int) -> Double { need > 0 ? min(1, max(0, Double(have) / Double(need))) : 0 }
+        switch unlock {
+        case .free, .holiday: return nil
+        case .hours(let hours): return ratio(stats.totalFocusMinutes, hours * 60)
+        case .friends(let count): return ratio(stats.maxFriends, count)
+        case .sessions(let count): return ratio(stats.sessionsCompleted, count)
+        case .streak(let days): return ratio(stats.longestStreak, days)
+        case .circles(let count): return ratio(stats.friendSessions, count)
+        case .longSession(let minutes): return ratio(stats.longestSessionMinutes, minutes)
+        }
+    }
+
     /// What you did to earn it, for the celebration.
     var achievement: String {
         switch unlock {

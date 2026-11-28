@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 /// One schedule on the Block Lists tab: its times, its days, and a switch.
 struct ScheduleRow: View {
@@ -246,9 +247,19 @@ struct ScheduleEditorView: View {
         }
         schedule.name = schedule.name.trimmingCharacters(in: .whitespaces)
         let changed = schedule
+        let isNew = isNew
         let commit = {
             blockLists.save(changed)
             dismiss()
+            // A schedule blocks apps on its own, and the block screen's "take a break"
+            // arrives as a notification, so the first schedule is a moment iOS's
+            // question makes sense. It's only ever shown once.
+            if isNew && !ScreenshotDemo.isActive {
+                UNUserNotificationCenter.current().getNotificationSettings { current in
+                    guard current.authorizationStatus == .notDetermined else { return }
+                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+                }
+            }
         }
         // Lifting or swapping a block that's on right now goes through the reflection wait first.
         let liftsBlock = original.isActive()

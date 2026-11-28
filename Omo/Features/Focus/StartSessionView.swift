@@ -1,4 +1,5 @@
 import SwiftUI
+import UserNotifications
 
 struct StartSessionView: View {
     @Environment(FocusController.self) private var focus
@@ -16,6 +17,8 @@ struct StartSessionView: View {
     @FocusState private var typingIntention: Bool
     /// Between tapping Start focus and the session appearing: the setup fades away.
     @State private var starting = false
+    /// The first start explains why OMO sends notifications before iOS asks.
+    @State private var askingNotifications = false
 
     private let presets = [15, 25, 45, 60, 90, 120]
 
@@ -35,7 +38,7 @@ struct StartSessionView: View {
                 .scaleEffect(starting ? 0.98 : 1, anchor: .top)
                 .allowsHitTesting(!starting)
 
-            Button(action: begin) {
+            Button(action: tapStart) {
                 HStack(spacing: 10) {
                     if starting {
                         ProgressView().tint(Color.omoOnPrimary)
@@ -52,6 +55,16 @@ struct StartSessionView: View {
             .opacity(canStart ? (starting ? 0.85 : 1) : 0.5)
         }
         .card()
+        .alert("Know when time's up", isPresented: $askingNotifications) {
+            Button("Continue") {
+                Task {
+                    _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge])
+                    begin()
+                }
+            }
+        } message: {
+            Text("OMO sends a notification when your session or a break ends, so you know when to come back. iOS will ask next.")
+        }
         .sheet(item: $editingList) { list in
             BlockListEditorView(list: list, isNew: true) { saved in
                 selectedListID = saved.id
@@ -68,6 +81,20 @@ struct StartSessionView: View {
             try? await Task.sleep(for: .seconds(2))
             intention = "Finish chapter 4 of biology"
             begin()
+        }
+    }
+
+    /// Notifications are asked for here, the first time they'd matter, rather than
+    /// the moment the app opens.
+    private func tapStart() {
+        guard selectedList != nil, !starting else { return }
+        Task {
+            let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+            if status == .notDetermined && !ScreenshotDemo.isActive {
+                askingNotifications = true
+            } else {
+                begin()
+            }
         }
     }
 

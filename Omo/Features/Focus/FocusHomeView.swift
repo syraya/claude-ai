@@ -34,33 +34,16 @@ struct FocusHomeView: View {
                                   stats: focus.lifetime,
                                   collapse: collapse)
 
-                        // Your total focus is the headline, with today's numbers right under it.
-                        NavigationLink {
-                            LifetimeView()
-                        } label: {
-                            // Ticks up while a session runs, like today's minutes below.
-                            TimelineView(.periodic(from: .now, by: 15)) { context in
-                                LifetimeCard(lifetime: focus.lifetimeIncluding(runningMinutes: focus.runningMinutesToday(at: context.date)))
-                            }
-                        }
-                        .buttonStyle(PressableCardStyle())
-
-                        todayCard
-
-                        if let event = focus.holidayToEarn {
-                            HolidayCard(holiday: event.holiday, companion: event.companion)
+                        if let lock = focus.friendLock {
+                            friendLockCard(lock)
                         }
 
                         if !screenTime.isApproved && !ScreenshotDemo.isActive {
                             permissionCard
                         }
 
-                        if let lock = focus.friendLock {
-                            friendLockCard(lock)
-                        }
-
-                        ScheduleFocusView()
-
+                        // What you open OMO to do comes first: start a session, or the one
+                        // that's running.
                         // The timer settles into a summary, then the start card, rather than
                         // snapping from one to the next.
                         // Stacked, not listed: while one card fades out and the next fades in
@@ -80,6 +63,23 @@ struct FocusHomeView: View {
                         }
                         .id("sessionCard")
                         .animation(.smooth(duration: 0.55), value: sessionPhase)
+
+                        if let event = focus.holidayToEarn {
+                            HolidayCard(holiday: event.holiday, companion: event.companion)
+                        }
+
+                        ScheduleFocusView()
+
+                        // Your numbers, in one quiet row; the full history is a tap away.
+                        NavigationLink {
+                            LifetimeView()
+                        } label: {
+                            TimelineView(.periodic(from: .now, by: 15)) { context in
+                                statsRow(at: context.date)
+                            }
+                        }
+                        .buttonStyle(PressableCardStyle())
+                        .accessibilityHint("Opens your focus history")
                     }
                     .padding()
                 }
@@ -156,20 +156,23 @@ struct FocusHomeView: View {
         return name.map { "\(base), \($0)" } ?? base
     }
 
-    /// Today's numbers in one quiet row.
-    private var todayCard: some View {
-        TimelineView(.periodic(from: .now, by: 15)) { context in
-            todayRow(focusedMinutes: focus.today.focusMinutes + focus.runningMinutesToday(at: context.date))
-        }
-    }
-
-    private func todayRow(focusedMinutes: Int) -> some View {
-        HStack(spacing: 0) {
-            todayStat(Format.minutes(focusedMinutes), "focused today")
+    /// Your total focus and today's numbers in one quiet row.
+    private func statsRow(at date: Date) -> some View {
+        let running = focus.runningMinutesToday(at: date)
+        let total = focus.lifetimeIncluding(runningMinutes: running).totalFocusMinutes
+        return HStack(spacing: 0) {
+            todayStat(LifetimeFormat.hours(total) + "h", "total")
+            Divider().frame(height: 36)
+            todayStat(Format.minutes(focus.today.focusMinutes + running), "today")
             Divider().frame(height: 36)
             todayStat("\(focus.today.sessionsCompleted)", focus.today.sessionsCompleted == 1 ? "session" : "sessions")
             Divider().frame(height: 36)
             todayStat("\(focus.today.breaksTaken)", focus.today.breaksTaken == 1 ? "break" : "breaks")
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color.omoLabels)
+                .padding(.trailing, 14)
+                .accessibilityHidden(true)
         }
         .padding(.vertical, 14)
         .frame(maxWidth: .infinity)

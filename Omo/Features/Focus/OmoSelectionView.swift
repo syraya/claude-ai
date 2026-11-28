@@ -214,10 +214,16 @@ struct OmoCollectionView: View {
                     .allowsHitTesting(false)
                 Text("Changes your app and breathing scene")
             } else if locked {
+                let fraction = shown.progressFraction(stats)
+                if let fraction {
+                    LockedProgress(fraction: fraction, label: shown.progress(stats) ?? "", palette: palette)
+                        .padding(.bottom, 4)
+                }
                 Button {} label: { Label(shown.lockText, systemImage: "lock.fill") }
                     .buttonStyle(SecondaryButtonStyle(color: Color(palette.labels)))
                     .allowsHitTesting(false)
-                Text(shown.progress(stats).map { "So far: \($0)" } ?? "Previewing · \(selected.name) is still selected")
+                Text(fraction == nil ? (shown.progress(stats) ?? "Previewing · \(selected.name) is still selected")
+                                     : "Previewing · \(selected.name) is still selected")
             } else {
                 Button("Choose \(shown.name)") {
                     dismiss()
@@ -306,6 +312,38 @@ struct OmoScenePanel: View {
         }
         .accessibilityElement()
         .accessibilityLabel(locked ? "\(companion.name), locked" : companion.name)
+    }
+}
+
+/// How close you are to a locked OMO: a slim bar in the OMO's gold with the count.
+private struct LockedProgress: View {
+    var fraction: Double
+    var label: String
+    var palette: ThemePalette
+
+    var body: some View {
+        VStack(spacing: 6) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(label)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color(palette.ink))
+                Spacer(minLength: 8)
+                Text(fraction, format: .percent.precision(.fractionLength(0)))
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(Color(palette.labels))
+            }
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color(palette.ink).opacity(0.1))
+                    Capsule().fill(Color(palette.gold))
+                        .frame(width: max(6, proxy.size.width * fraction))
+                }
+            }
+            .frame(height: 6)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(label)
+        .accessibilityValue(Text(fraction, format: .percent.precision(.fractionLength(0))))
     }
 }
 

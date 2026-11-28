@@ -43,7 +43,7 @@ struct FocusBannerView: View {
                     .stroke(look.ink.opacity(0.08), lineWidth: 1))
             VStack(alignment: .leading, spacing: 5) {
                 Text("\(look.attributes.companionName) · \(look.status)".uppercased())
-                    .font(.system(size: 11, weight: .semibold))
+                    .font(.caption.weight(.semibold))
                     .tracking(0.8)
                     .foregroundStyle(look.labels)
                     .lineLimit(1)
@@ -58,7 +58,7 @@ struct FocusBannerView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             VStack(alignment: .trailing, spacing: 0) {
                 FocusCountdown(state: look.state, finished: look.finished)
-                    .font(.system(size: 30, weight: .semibold, design: .serif).monospacedDigit())
+                    .font(.system(.title, design: .serif).weight(.semibold).monospacedDigit())
                     .foregroundStyle(look.ink)
                     .multilineTextAlignment(.trailing)
                     .frame(maxWidth: 110, alignment: .trailing)
@@ -68,6 +68,8 @@ struct FocusBannerView: View {
             }
         }
         .padding(16)
+        // Follows your text size, up to the point where the banner would stop fitting.
+        .dynamicTypeSize(...DynamicTypeSize.xLarge)
     }
 }
 
@@ -81,7 +83,7 @@ struct FocusIslandExpandedView: View {
                 FigureTile(name: look.attributes.figureImage, background: look.paper, size: 48)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("\(look.attributes.companionName) · \(look.status)".uppercased())
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .tracking(0.8)
                         .foregroundStyle(look.gold)
                         .lineLimit(1)
@@ -92,13 +94,14 @@ struct FocusIslandExpandedView: View {
                 }
                 Spacer(minLength: 4)
                 FocusCountdown(state: look.state, finished: look.finished)
-                    .font(.system(size: 26, weight: .semibold, design: .serif).monospacedDigit())
+                    .font(.system(.title2, design: .serif).weight(.semibold).monospacedDigit())
                     .foregroundStyle(.white)
                     .multilineTextAlignment(.trailing)
                     .frame(maxWidth: 96, alignment: .trailing)
             }
             FocusProgress(state: look.state, tint: look.gold, track: .white.opacity(0.18))
         }
+        .dynamicTypeSize(...DynamicTypeSize.large)
     }
 }
 
