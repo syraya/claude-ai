@@ -122,8 +122,8 @@ struct BreathingScene {
     private static let placements: [OmoCompanion: (focus: CGRect, figure: CGRect)] = [
         .glaux: (CGRect(x: 0.3093, y: 0.1583, width: 0.3953, height: 0.7167),
                   CGRect(x: 0.2913, y: 0.1277, width: 0.4328, height: 0.7754)),
-        .selene: (CGRect(x: 0.3686, y: 0.0730, width: 0.2547, height: 0.8069),
-                  CGRect(x: 0.2597, y: 0.0411, width: 0.4725, height: 0.8719)),
+        .selene: (CGRect(x: 0.3687, y: 0.0535, width: 0.2544, height: 0.8276),
+                  CGRect(x: 0.2389, y: 0.0028, width: 0.5140, height: 0.9485)),
         .daphne: (CGRect(x: 0.3012, y: 0.0870, width: 0.4023, height: 0.8379),
                   CGRect(x: 0.2360, y: 0.0535, width: 0.5322, height: 0.9045)),
         .noor: (CGRect(x: 0.3291, y: 0.0741, width: 0.2884, height: 0.8189),
@@ -182,8 +182,8 @@ struct BreathingScene {
                   CGRect(x: 0.2792, y: 0.2102, width: 0.4426, height: 0.7614)),
         .hestia: (CGRect(x: 0.3000, y: 0.3060, width: 0.4000, height: 0.6340),
                   CGRect(x: 0.2779, y: 0.2420, width: 0.4427, height: 0.7615)),
-        .turtleIsland: (CGRect(x: 0.2279, y: 0.3000, width: 0.5430, height: 0.6700),
-                  CGRect(x: 0.2088, y: -0.0364, width: 0.5795, height: 1.2460)),
+        .turtleIsland: (CGRect(x: 0.2256, y: 0.1100, width: 0.5488, height: 0.8600),
+                  CGRect(x: 0.2096, y: -0.0835, width: 0.5808, height: 1.2487)),
         .asteria: (CGRect(x: 0.2977, y: 0.3469, width: 0.4035, height: 0.5923),
                   CGRect(x: 0.2735, y: 0.2514, width: 0.4483, height: 0.7821)),
     ]
