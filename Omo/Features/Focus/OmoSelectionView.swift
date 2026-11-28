@@ -95,6 +95,15 @@ struct OmoCollectionView: View {
                              })
             }
         }
+        .task {
+            // Simulator demo: glide from one OMO to the next, to record the hand-off.
+            guard ScreenshotDemo.screen == "omos-swipe" else { return }
+            for companion in members.dropFirst().prefix(4) {
+                try? await Task.sleep(for: .seconds(1.8))
+                withAnimation(.spring(duration: 0.9, bounce: 0.05)) { focused = companion }
+                jumpTo = companion
+            }
+        }
         .onChange(of: kind) { _, newKind in
             // A new collection starts on your OMO if it's in it, else on its first.
             guard shown.kind != newKind else { return }
@@ -133,6 +142,13 @@ struct OmoCollectionView: View {
                                       locked: companion != selected && !companion.isUnlocked(stats),
                                       topInset: overlayHeight)
                             .containerRelativeFrame(.horizontal)
+                            // As you swipe, the OMO leaving and the one arriving dim and
+                            // settle back a little, so the two never read as one picture.
+                            .scrollTransition(.interactive, axis: .horizontal) { content, phase in
+                                content
+                                    .opacity(1 - 0.45 * min(1, abs(phase.value)))
+                                    .scaleEffect(1 - 0.06 * min(1, abs(phase.value)))
+                            }
                             .id(companion)
                     }
                 }
@@ -309,6 +325,16 @@ struct OmoScenePanel: View {
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
             .clipped()
+            // Each landscape fades into the page at its sides, so a soft band of the
+            // page's colour separates one OMO from the next while you swipe.
+            .mask(
+                LinearGradient(stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: .black, location: 0.07),
+                    .init(color: .black, location: 0.93),
+                    .init(color: .clear, location: 1),
+                ], startPoint: .leading, endPoint: .trailing)
+            )
         }
         .accessibilityElement()
         .accessibilityLabel(locked ? "\(companion.name), locked" : companion.name)
