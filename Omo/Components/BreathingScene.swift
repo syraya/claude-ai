@@ -184,8 +184,8 @@ struct BreathingScene {
                   CGRect(x: 0.2779, y: 0.2420, width: 0.4427, height: 0.7615)),
         .turtleIsland: (CGRect(x: 0.2256, y: 0.1280, width: 0.5488, height: 0.8420),
                   CGRect(x: 0.2148, y: -0.0646, width: 0.5705, height: 1.2265)),
-        .asteria: (CGRect(x: 0.2976, y: 0.0804, width: 0.4037, height: 0.8588),
-                  CGRect(x: 0.2413, y: 0.0592, width: 0.5162, height: 0.9012)),
+        .asteria: (CGRect(x: 0.2999, y: 0.0804, width: 0.3991, height: 0.8588),
+                  CGRect(x: 0.2439, y: 0.0625, width: 0.5117, height: 0.8932)),
     ]
 
     init(for companion: OmoCompanion) {
